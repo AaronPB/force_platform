@@ -1,0 +1,107 @@
+test_options:
+  folder: C:/Users/AaronCite4/Documents/Plataforma/data
+  name: Ensayo de prueba
+  type:
+    limited: false
+    time_limit: 100
+file_config:
+  folder_path: ../data/
+  generate_plots: false
+  save_data: true
+p1_phidget_loadcell_list:
+  load_cell_1:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula vertical 1
+    read_data: true
+    serial: 583229
+  load_cell_2:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 1
+    name: Celula vertical 2
+    read_data: true
+    serial: 583229
+  load_cell_3:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 2
+    name: Celula vertical 3
+    read_data: true
+    serial: 583229
+  load_cell_4:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 3
+    name: Celula vertical 4
+    read_data: true
+    serial: 583229
+  load_cell_5:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal X1
+    read_data: false
+    serial: 583241
+  load_cell_6:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal X2
+    read_data: false
+    serial: 583241
+  load_cell_7:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal X3
+    read_data: false
+    serial: 583241
+  load_cell_8:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal X4
+    read_data: false
+    serial: 583241
+  load_cell_9:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal Y1
+    read_data: false
+    serial: 583241
+  load_cell_10:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal Y2
+    read_data: false
+    serial: 583241
+  load_cell_11:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal Y3
+    read_data: false
+    serial: 583241
+  load_cell_12:
+    calibration_data:
+      b: 9282881
+      m: 400289193
+    channel: 0
+    name: Celula horizontal Y4
+    read_data: false
+    serial: 583241
