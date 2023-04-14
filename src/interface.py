@@ -168,9 +168,11 @@ class MainWindow(QWidget):
         calibrate_sensors_btn.setEnabled(False)
         self.start_btn = QPushButton('Iniciar lectura', self)
         self.start_btn.setEnabled(False)
+        self.start_btn.clicked.connect(self.startTest)
         self.vbox_test_check = QVBoxLayout()
-        stop_btn = QPushButton('Finalizar y guardar', self)
-        stop_btn.setEnabled(False)
+        self.stop_btn = QPushButton('Finalizar y guardar', self)
+        self.stop_btn.setEnabled(False)
+        self.stop_btn.clicked.connect(self.stopTest)
         cerrar_btn = QPushButton('Cerrar programa', self)
         cerrar_btn.clicked.connect(self.close)
 
@@ -178,7 +180,7 @@ class MainWindow(QWidget):
         vbox_layout.addWidget(calibrate_sensors_btn)
         vbox_layout.addWidget(self.start_btn)
         vbox_layout.addLayout(self.vbox_test_check)
-        vbox_layout.addWidget(stop_btn)
+        vbox_layout.addWidget(self.stop_btn)
         vbox_layout.addWidget(cerrar_btn)
         self.hbox_mid.addLayout(vbox_layout)
 
@@ -323,6 +325,16 @@ class MainWindow(QWidget):
 
         self.start_btn.setEnabled(test_available)
 
+    def startTest(self):
+        self.start_btn.setEnabled(False)
+        self.inputReader.readerStart()
+        self.stop_btn.setEnabled(True)
+
+    def stopTest(self):
+        self.stop_btn.setEnabled(False)
+        self.inputReader.readerStop()
+        self.start_btn.setEnabled(True)
+    
     # TODO BOTTOM LAYOUT METHODS
     # def generateExamplePlots(self):
     #     vbox_plot1 = QVBoxLayout()

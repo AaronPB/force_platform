@@ -6,17 +6,20 @@ Date: 13/04/2023
 
 from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageRatioInput import *
-from src.utils import LogHandler
+from src.utils import LogHandler, TestDataFrame
 
 
 class PhidgetLoadCellsHandler:
     def __init__(self):
         self.sensor_list = []
         self.log_handler = LogHandler(str(__class__.__name__))
+        self.sensor_data = None
 
-        def onPhidgetVoltageRatioChange(self, voltageRatio):
-            print("[" + str(self.getDeviceSerialNumber()) + "_" +
-                  str(self.getChannel()) + "]: " + str(voltageRatio))
+        def onPhidgetVoltageRatioChange(self, voltageRatio, log_handler: LogHandler = self.log_handler, sensor_data: TestDataFrame = self.sensor_data):
+            log_handler.logger.debug("[" + str(self.getDeviceSerialNumber()) + "_" +
+                                     str(self.getChannel()) + "]: " + str(voltageRatio))
+            if sensor_data is None:
+                return
         self.onPhidgetVoltageRatioChange = onPhidgetVoltageRatioChange
 
     def addSensor(self, sensor_params: dict):
@@ -48,11 +51,11 @@ class PhidgetLoadCellsHandler:
 
     # Return boolean array with connection status (true == connected)
     def connect(self):
-        check_list = []
+        connected = False
         if not self.sensor_list:
             self.log_handler.logger.info(
                 "No load cells added to try connection.")
-            return check_list
+            return connected
         for sensor in self.sensor_list:
             if not sensor['sensor'].getAttached() and sensor['read_data']:
                 try:
@@ -65,20 +68,21 @@ class PhidgetLoadCellsHandler:
                     # Close communication until start process
                     sensor['status'] = "Active"
                     sensor['sensor'].close()
-                    check_list.append(True)
+                    connected = True
                     # print(loadCell['input'].getSensorType())
                 except (PhidgetException):
                     self.log_handler.logger.warn("Could not connect to serial " + str(
                         sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
                     sensor['status'] = "Disconnected"
-                    check_list.append(False)
-        return check_list
+        return connected
 
     def start(self):
         if not self.sensor_list:
             self.logger.info(
                 "Ignoring Load Cells sensors in test, no one loaded.")
             return
+        # Prepare dataframe
+        # self.sensor_data = TestDataFrame()
         for sensor in self.sensor_list:
             try:
                 sensor['sensor'].open()
@@ -92,7 +96,7 @@ class PhidgetLoadCellsHandler:
             return
         for sensor in self.sensor_list:
             try:
-                sensor.close()
+                sensor['sensor'].close()
             except (PhidgetException):
                 self.logger.error("Could not close serial " + str(
                     sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))

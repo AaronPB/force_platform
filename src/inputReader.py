@@ -89,7 +89,7 @@ class InputReader:
         self.log_handler.logger.info("Connecting to specified sensors")
         self.loadSensors()
         # TODO make connections depending on loaded sensors and their type
-        self.phidgetLoadCellsHandler.connect()
+        self.sensor_connected = self.phidgetLoadCellsHandler.connect()
         self.log_handler.logger.info("Connection process done!")
 
     def getSensorStatus(self):
@@ -100,8 +100,10 @@ class InputReader:
         return [self.config_path, self.test_folder, self.test_name, self.sensor_connected]
 
     # Read process
-    def readerStart():
-        pass
+    def readerStart(self):
+        self.log_handler.logger.info("Starting test...")
+        self.phidgetLoadCellsHandler.start()
 
-    def readerStop():
-        pass
+    def readerStop(self):
+        self.phidgetLoadCellsHandler.stop()
+        self.log_handler.logger.info("Test finished!")
