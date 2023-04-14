@@ -49,13 +49,13 @@ class PhidgetLoadCellsHandler:
         key_list = ['id', 'name', 'read_data', 'status']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
 
-    # Return boolean array with connection status (true == connected)
+    # Returns true if there is at least one sensor connected
     def connect(self):
-        connected = False
+        self.sensors_connected = []
         if not self.sensor_list:
             self.log_handler.logger.info(
                 "No load cells added to try connection.")
-            return connected
+            return bool(self.sensors_connected)
         for sensor in self.sensor_list:
             if not sensor['sensor'].getAttached() and sensor['read_data']:
                 try:
@@ -68,13 +68,13 @@ class PhidgetLoadCellsHandler:
                     # Close communication until start process
                     sensor['status'] = "Active"
                     sensor['sensor'].close()
-                    connected = True
+                    self.sensors_connected.append(sensor['name'])
                     # print(loadCell['input'].getSensorType())
                 except (PhidgetException):
                     self.log_handler.logger.warn("Could not connect to serial " + str(
                         sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
                     sensor['status'] = "Disconnected"
-        return connected
+        return bool(self.sensors_connected)
 
     def start(self):
         if not self.sensor_list:
@@ -82,7 +82,8 @@ class PhidgetLoadCellsHandler:
                 "Ignoring Load Cells sensors in test, no one loaded.")
             return
         # Prepare dataframe
-        # self.sensor_data = TestDataFrame()
+        self.sensor_data = TestDataFrame(
+            ["timestamp"] + self.sensors_connected)
         for sensor in self.sensor_list:
             try:
                 sensor['sensor'].open()
@@ -100,3 +101,6 @@ class PhidgetLoadCellsHandler:
             except (PhidgetException):
                 self.logger.error("Could not close serial " + str(
                     sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+        # TODO save dataframe
+        self.sensor_data.exportToCSV('test.csv')
+        self.sensor_data = None

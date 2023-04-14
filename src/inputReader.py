@@ -36,8 +36,6 @@ class InputReader:
             else:
                 print('Could not find custom config file: ' +
                       self.config_path + '.\nDefault config has been loaded.')
-
-        # Generate values
         self.configLoadParams()
 
     # Config methods
