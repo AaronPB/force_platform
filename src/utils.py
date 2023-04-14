@@ -14,15 +14,18 @@ class TestDataFrame:
         self.log_handler = LogHandler(str(__class__.__name__))
         self.df = pd.DataFrame(columns=columns)
 
-    def add_row(self, values):
+    def addRow(self, values):
         if len(values) != len(self.df.columns):
             raise ValueError(
                 "Number of values doesn't match number of columns")
         self.df = self.df.append(
             pd.Series(values, index=self.df.columns), ignore_index=True)
 
-    def export_to_csv(self, file_path):
+    def exportToCSV(self, file_path):
         self.df.to_csv(file_path, index=False)
+
+    def exportToBinary(self, file_path):
+        self.df.to_pickle(file_path, index=False)
 
 
 class LogHandler:
@@ -33,10 +36,10 @@ class LogHandler:
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.DEBUG)
 
-        self.add_color_formatter(console_handler)
+        self.addColorFormatter(console_handler)
         self.logger.addHandler(console_handler)
 
-    def add_color_formatter(self, handler):
+    def addColorFormatter(self, handler):
         color_formatter = colorlog.ColoredFormatter(
             '%(log_color)s%(asctime)s [%(name)s] [%(levelname)s] - %(message)s%(reset)s (%(codeline_log_color)s%(filename)s:%(lineno)d%(reset)s)',
             datefmt="%Y-%m-%d %H:%M:%S",
