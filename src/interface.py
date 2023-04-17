@@ -10,7 +10,7 @@ import os
 
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QGridLayout, QFileDialog, QLineEdit, QCheckBox, QDesktopWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtGui import QPixmap, QIcon, QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -21,8 +21,8 @@ from src.utils import LogHandler
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
         self.log_handler = LogHandler(str(__class__.__name__))
+        self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Programa de lecturas')
@@ -61,9 +61,12 @@ class MainWindow(QWidget):
         hbox_main.addLayout(self.hbox_bottom)
         self.setLayout(hbox_main)
 
-        # Load reader software and layouts
+        # Load reader software and test timer
         self.inputReader = InputReader()
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.inputReader.readerProcess)
 
+        # Load layouts
         self.loadIconLayout()
         self.hbox_top.addItem(spacer_20)
         self.loadFilesLayout()
@@ -275,6 +278,7 @@ class MainWindow(QWidget):
         loadcell_layout.setHorizontalSpacing(5)
         loadcell_layout.setVerticalSpacing(5)
         loadcell_layout.setAlignment(Qt.AlignLeft)
+        # TODO avoid accessing specific keys here
         for i, sensor in enumerate(self.inputReader.getSensorStatus()):
             checkbox = QCheckBox()
             checkbox.setChecked(sensor['read_data'])
@@ -296,8 +300,9 @@ class MainWindow(QWidget):
 
     def handleSensorCheckbox(self, state):
         sender = self.sender()
+        # TODO avoid accessing specific keys here
         self.inputReader.configEdit(
-            'load_cell_list.' + sender.objectName() + '.read_data', state == 2)
+            'p1_phidget_loadcell_list.' + sender.objectName() + '.read_data', state == 2)
 
     def updateTestChecks(self):
         test_status_text = [
@@ -329,12 +334,14 @@ class MainWindow(QWidget):
         self.start_btn.setEnabled(False)
         self.inputReader.readerStart()
         self.stop_btn.setEnabled(True)
+        self.timer.start(100)
 
     def stopTest(self):
         self.stop_btn.setEnabled(False)
+        self.timer.stop()
         self.inputReader.readerStop()
         self.start_btn.setEnabled(True)
-    
+
     # TODO BOTTOM LAYOUT METHODS
     # def generateExamplePlots(self):
     #     vbox_plot1 = QVBoxLayout()

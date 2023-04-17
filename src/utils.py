@@ -16,10 +16,12 @@ class TestDataFrame:
 
     def addRow(self, values):
         if len(values) != len(self.df.columns):
-            raise ValueError(
-                "Number of values doesn't match number of columns")
-        self.df = self.df.append(
-            pd.Series(values, index=self.df.columns), ignore_index=True)
+            self.log_handler.logger.info(str(self.df.columns))
+            self.log_handler.logger.error(
+                "Number of values doesn't match number of columns! Expected " + str(len(self.df.columns)) + " got " + str(len(values)))
+            return
+        self.df = pd.concat(
+            [self.df, pd.Series(values, index=self.df.columns)], ignore_index=True)
 
     def exportToCSV(self, file_path):
         self.df.to_csv(file_path, index=False)

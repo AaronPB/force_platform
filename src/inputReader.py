@@ -6,9 +6,10 @@ Date: 13/04/2023
 
 import yaml
 import os
+import time
 
 from src.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
-from src.utils import LogHandler
+from src.utils import LogHandler, TestDataFrame
 
 
 class InputReader:
@@ -77,7 +78,7 @@ class InputReader:
             self.phidgetLoadCellsHandler.clearSensors()
             config_list_path = self.config['p1_phidget_loadcell_list']
             for sensor_id in list(config_list_path.keys()):
-                sensor_data = config_list_path[sensor_id]
+                sensor_data = config_list_path[sensor_id].copy()
                 sensor_data['id'] = sensor_id  # Add ID to dict
                 self.phidgetLoadCellsHandler.addSensor(sensor_data)
         # TODO put more sensor types when defined
@@ -100,8 +101,22 @@ class InputReader:
     # Read process
     def readerStart(self):
         self.log_handler.logger.info("Starting test...")
-        self.phidgetLoadCellsHandler.start()
+        # Start all sensors readings and get headers of connected sensors
+        dataframe_headers = ['timestamp']
+        dataframe_headers.extend(self.phidgetLoadCellsHandler.start())
+        self.log_handler.logger.info("Test headers: " + str(dataframe_headers))
+        self.sensor_dataframe = TestDataFrame(dataframe_headers)
+
+    def readerProcess(self):
+        # TODO test cycle (will be called from interface class, with qt5 clock)
+        # Get and acumulate values in dataframe from all sensor classes
+        current_time = int(time.monotonic_ns() / 1000)
+        data = [current_time]
+        data.extend(self.phidgetLoadCellsHandler.getSensorData())
+        self.sensor_dataframe.addRow(data)
+        self.log_handler.logger.debug("Clocking data! - " + str(data))
 
     def readerStop(self):
         self.phidgetLoadCellsHandler.stop()
         self.log_handler.logger.info("Test finished!")
+        self.sensor_dataframe.exportToCSV('test.csv')
