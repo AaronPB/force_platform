@@ -107,14 +107,14 @@ class MainWindow(QWidget):
         # Config file
         config_label = QLabel('Archivo configuración:', self)
         config_btn = QPushButton('Seleccionar config', self)
-        config_btn.clicked.connect(self.select_file)
+        config_btn.clicked.connect(self.selectFile)
         self.config_path = QLineEdit(self)
         self.config_path.setReadOnly(True)
 
         # Test folder
         ubicacion_label = QLabel('Carpeta del ensayo:', self)
         ubicacion_btn = QPushButton('Abrir ubicación', self)
-        ubicacion_btn.clicked.connect(self.select_folder)
+        ubicacion_btn.clicked.connect(self.selectFolder)
         self.ubicacion_path = QLineEdit(self)
         self.ubicacion_path.setReadOnly(True)
 
@@ -122,7 +122,7 @@ class MainWindow(QWidget):
         texto_label = QLabel('Nombre del ensayo:', self)
         self.texto_input = QLineEdit(self)
         aplicar_btn = QPushButton('Aplicar', self)
-        aplicar_btn.clicked.connect(self.apply_text)
+        aplicar_btn.clicked.connect(self.applyText)
 
         vbox_layout.addWidget(config_label, 0, 0)
         vbox_layout.addWidget(self.config_path, 0, 1)
@@ -140,24 +140,36 @@ class MainWindow(QWidget):
         self.ubicacion_path.setText(self.inputReader.test_folder)
         self.texto_input.setText(self.inputReader.test_name)
 
-    def select_file(self):
+    def selectFile(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         file_name, _ = QFileDialog.getOpenFileName(
             self, 'Seleccionar archivo', '', 'Archivo yaml (*.yaml)', options=options)
         if file_name:
             self.config_path.setText(file_name)
+            # TODO change and load config params
 
-    def select_folder(self):
+    def selectFolder(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        folder_name = QFileDialog.getExistingDirectory(
+        folder_path = QFileDialog.getExistingDirectory(
             self, 'Seleccionar carpeta', options=options)
-        if folder_name:
-            self.ubicacion_path.setText(folder_name)
+        if folder_path:
+            self.inputReader.configEdit(
+                'test_options.folder', folder_path)
+            self.inputReader.loadFiles()
+            self.updatePaths()
+            self.log_handler.logger.info("Changed folder path to: " + str(folder_path))
 
-    def apply_text(self):
-        pass
+    def applyText(self):
+        name = self.texto_input.text().strip()
+        if not name:
+            name = "Ensayo de pruebas"
+        self.inputReader.configEdit(
+                'test_options.name', name)
+        self.inputReader.loadFiles()
+        self.updatePaths()
+        self.log_handler.logger.info("Changed test name to: " + str(name))
 
     # MID LAYOUT METHODS
     def loadPanelLayout(self):

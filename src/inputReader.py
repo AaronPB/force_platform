@@ -108,15 +108,15 @@ class InputReader:
         self.sensor_dataframe = TestDataFrame(dataframe_headers)
 
     def readerProcess(self):
-        # TODO test cycle (will be called from interface class, with qt5 clock)
         # Get and acumulate values in dataframe from all sensor classes
         current_time = int(time.monotonic_ns() / 1000)
         data = [current_time]
         data.extend(self.phidgetLoadCellsHandler.getSensorData())
         self.sensor_dataframe.addRow(data)
-        self.log_handler.logger.debug("Clocking data! - " + str(data))
+        # self.log_handler.logger.debug("Clocking data! - " + str(data))
 
     def readerStop(self):
         self.phidgetLoadCellsHandler.stop()
         self.log_handler.logger.info("Test finished!")
-        self.sensor_dataframe.exportToCSV('test.csv')
+        self.sensor_dataframe.exportToCSV(os.path.join(
+            self.test_folder, self.test_name + '.csv'))
