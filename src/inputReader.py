@@ -9,7 +9,7 @@ import os
 import time
 
 from src.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
-from src.utils import LogHandler, TestDataFrame
+from src.utils import LogHandler, TestDataFrame, DataFramePlotter
 
 
 class InputReader:
@@ -109,7 +109,7 @@ class InputReader:
 
     def readerProcess(self):
         # Get and acumulate values in dataframe from all sensor classes
-        current_time = int(time.monotonic_ns() / 1000)
+        current_time = round(time.time()*1000)
         data = [current_time]
         data.extend(self.phidgetLoadCellsHandler.getSensorData())
         self.sensor_dataframe.addRow(data)
@@ -120,3 +120,7 @@ class InputReader:
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
+        # Plot results
+        preview = DataFramePlotter(self.sensor_dataframe.getDataFrame())
+        preview.plot_line('time', [
+                          'Celula vertical 1', 'Celula vertical 2', 'Celula vertical 3', 'Celula vertical 4'])

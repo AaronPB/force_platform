@@ -7,6 +7,7 @@ Date: 13/04/2023
 import logging
 import colorlog
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 class TestDataFrame:
@@ -28,6 +29,32 @@ class TestDataFrame:
     def exportToBinary(self, file_path):
         self.df.to_pickle(file_path, index=False)
         self.log_handler.logger.info("Test file saved in: " + str(file_path))
+
+    def getDataFrame(self):
+        return self.df.copy()
+
+
+class DataFramePlotter:
+    def __init__(self, data_frame: pd.DataFrame):
+        data_frame['timestamp'] = pd.to_datetime(data_frame['timestamp'], unit='ms')
+        relative_time = data_frame['timestamp'] - data_frame['timestamp'].iloc[0]
+        relative_time = relative_time.dt.total_seconds()
+        self.df = pd.DataFrame({'time': relative_time})
+        self.df = pd.concat([self.df, data_frame.iloc[:,1:]], axis=1)
+
+
+    def plot_line(self, x_col, y_cols):
+        fig, ax = plt.subplots()
+        for y_col in y_cols:
+            ax.plot(self.df[x_col], self.df[y_col], label=y_col)
+        ax.legend()
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Force (N)')
+        # ax.set_ylim(0, 40)
+        # ax.set_yticks(range(0, 41, 2))
+        ax.grid(True)
+        ax.minorticks_on()
+        plt.show()
 
 
 class LogHandler:

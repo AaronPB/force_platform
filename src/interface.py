@@ -346,7 +346,7 @@ class MainWindow(QWidget):
         self.start_btn.setEnabled(False)
         self.inputReader.readerStart()
         self.stop_btn.setEnabled(True)
-        self.timer.start(100)
+        self.timer.start(10) #ms
 
     def stopTest(self):
         self.stop_btn.setEnabled(False)
