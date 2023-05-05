@@ -5,7 +5,7 @@ A python script for sensor data management of a force platform.
 
 It supports currently the following sensor types:
 - Phidget-Bridge compatible load sensors. (Requires Phidget dependency)
-- Tao Robotics IMU sensors. (Requires MRPT dependency)
+- Taobotics IMU sensors. (Requires MRPT dependency)
 
 ## Setup
 To use this project, clone it and install the project requirements.

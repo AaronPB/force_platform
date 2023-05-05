@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Author: Aaron Poyatos
-Date: 13/04/2023
+Date: 05/05/2023
 """
 
 import threading
@@ -10,7 +10,7 @@ from src.utils import LogHandler
 mrpt = pymrpt.mrpt
 
 
-class TaoRoboticsIMUsHandler:
+class TaoboticsIMUsHandler:
     def __init__(self):
         self.log_handler = LogHandler(str(__class__.__name__))
         self.sensor_list = []
