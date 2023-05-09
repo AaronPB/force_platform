@@ -33,7 +33,9 @@ class PhidgetLoadCellsHandler:
                 if sensor['serial'] == serial and sensor['channel'] == channel:
                     m = sensor['calibration_data']['m']
                     b = sensor['calibration_data']['b']
+                    name = sensor['name']
                     connected_sensor = True
+                    break
             if not connected_sensor:
                 return
             force = voltageRatio * m + b
@@ -42,7 +44,7 @@ class PhidgetLoadCellsHandler:
             #                          str(channel) + "]: " + str(voltageRatio) + " V (" + str(force) + " N)")
 
             mutex.acquire()
-            sensor_data[(serial, channel)] = force
+            sensor_data[name] = force
             mutex.release()
 
         self.onVoltageRatioChange = onVoltageRatioChange
@@ -67,10 +69,17 @@ class PhidgetLoadCellsHandler:
 
     def clearSensors(self):
         self.sensor_list.clear()
+        self.sensor_data.clear()
 
     def getSensorListDict(self):
         key_list = ['id', 'name', 'read_data', 'status']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
+
+    def getSensorHeaders(self):
+        self.sensor_data_mutex.acquire()
+        keys = list(self.sensor_data.keys())
+        self.sensor_data_mutex.release()
+        return keys
 
     def getSensorData(self):
         self.sensor_data_mutex.acquire()
@@ -106,23 +115,20 @@ class PhidgetLoadCellsHandler:
         return self.sensors_connected
 
     def start(self):
-        sensor_headers = []
         if not self.sensors_connected:
             self.log_handler.logger.info(
                 "Ignoring Load Cells sensors in test, no one connected.")
-            return sensor_headers
+            return
         for sensor in self.sensor_list:
             if not sensor['read_data']:
                 continue
             try:
                 sensor['sensor'].openWaitForAttachment(2000)  # in ms
                 sensor['sensor'].setDataInterval(8)  # in ms
-                sensor_headers.append(sensor['name'])
             except (PhidgetException):
                 self.log_handler.logger.warn("Could not open serial " + str(sensor['sensor'].getDeviceSerialNumber(
                 )) + ", channel " + str(sensor['sensor'].getChannel()))
                 sensor['sensor'].close()
-        return sensor_headers
 
     def stop(self):
         if not self.sensors_connected:

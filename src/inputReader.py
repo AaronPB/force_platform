@@ -101,9 +101,12 @@ class InputReader:
     # Read process
     def readerStart(self):
         self.log_handler.logger.info("Starting test...")
-        # Start all sensors readings and get headers of connected sensors
+        # Start sensors
+        self.phidgetLoadCellsHandler.start()
+        # Get headers of connected sensors
         dataframe_headers = ['timestamp']
-        dataframe_headers.extend(self.phidgetLoadCellsHandler.start())
+        dataframe_headers.extend(
+            self.phidgetLoadCellsHandler.getSensorHeaders())
         self.log_handler.logger.info("Test headers: " + str(dataframe_headers))
         self.sensor_dataframe = TestDataFrame(dataframe_headers)
 
@@ -123,4 +126,4 @@ class InputReader:
         # Plot results
         preview = DataFramePlotter(self.sensor_dataframe.getDataFrame())
         preview.plot_line('time', [
-                          'Celula vertical 1', 'Celula vertical 2', 'Celula vertical 3', 'Celula vertical 4'])
+                          self.phidgetLoadCellsHandler.getSensorHeaders()])
