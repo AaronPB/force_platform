@@ -29,26 +29,57 @@ class TaoboticsIMUsHandler:
         sensor['status'] = "Ignored"  # Default status until connection check
         sensor['sensor'] = mrpt.hwdrivers.CTaoboticsIMU()
         sensor['sensor'].setSerialPort(sensor_params['serial'])
+        sensor['sensor'].setSensorLabel(sensor_params['name'])
+        sensor['sensor'].initialize()
 
         self.sensor_list.append(sensor)
 
     def clearSensors(self):
+        for sensor in self.sensor_list:
+            del(sensor['sensor'])
         self.sensor_list.clear()
+        self.sensor_data.clear()
 
     def getSensorListDict(self):
         key_list = ['id', 'name', 'read_data', 'status']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
 
-    def getSensorData(self):
+    def getSensorHeaders(self):
+        # First iteration to collect sensor names
+        self.getSensorData()
+        # Send keys
         self.sensor_data_mutex.acquire()
+        keys = list(self.sensor_data.keys())
+        self.sensor_data_mutex.release()
+        return keys
+    
+    # Returns a list of dictionaries
+    def getSensorData(self):
         # Get data list
         for sensor in self.sensor_list:
-            if sensor['read_data']:
-                sensor['sensor'].doProcess()
-                obs_list = sensor['sensor'].getObservations()
-                if not obs_list.empty():
-                    # TODO get: 4 quaternions and 3 angular velocities
-                    pass
+            if not sensor['read_data']:
+                continue
+
+            q_x = q_y = q_z = q_w = w_x = w_y = w_z = -1
+            sensor['sensor'].doProcess()
+            obs_list = sensor['sensor'].getObservations()
+            if not obs_list.empty():
+                for t, obs in obs_list:
+                    # Quaternions
+                    q_x = obs.get(mrpt.obs.TIMUDataIndex.IMU_ORI_QUAT_X)
+                    q_y = obs.get(mrpt.obs.TIMUDataIndex.IMU_ORI_QUAT_Y)
+                    q_z = obs.get(mrpt.obs.TIMUDataIndex.IMU_ORI_QUAT_Z)
+                    q_w = obs.get(mrpt.obs.TIMUDataIndex.IMU_ORI_QUAT_W)
+                    # Angular velocities
+                    w_x = obs.get(mrpt.obs.TIMUDataIndex.IMU_WX)
+                    w_y = obs.get(mrpt.obs.TIMUDataIndex.IMU_WY)
+                    w_z = obs.get(mrpt.obs.TIMUDataIndex.IMU_WZ)
+            values = list([q_x, q_y, q_z, q_w, w_x, w_y, w_z])
+            self.sensor_data_mutex.acquire()
+            self.sensor_data[sensor['name']] = values
+            self.sensor_data_mutex.release()
+            
+        self.sensor_data_mutex.acquire()
         data = list(self.sensor_data.values())
         self.sensor_data_mutex.release()
         return data
@@ -92,14 +123,15 @@ class TaoboticsIMUsHandler:
         return sensor_headers
 
     def stop(self):
-        if not self.sensors_connected:
-            return
-        for sensor in self.sensor_list:
-            if not sensor['read_data']:
-                continue
-            try:
-                # sensor['sensor'].close() FIXME add close option??
-                pass
-            except (Exception):
-                self.log_handler.logger.error(
-                    "Could not close IMU " + str(sensor['name']))
+        self.clearSensors()
+        # if not self.sensors_connected:
+        #     return
+        # for sensor in self.sensor_list:
+        #     if not sensor['read_data']:
+        #         continue
+        #     try:
+        #         # sensor['sensor'].close() FIXME add close option??
+        #         pass
+        #     except (Exception):
+        #         self.log_handler.logger.error(
+        #             "Could not close IMU " + str(sensor['name']))

@@ -1,5 +1,5 @@
 test_options:
-  folder: C:/Users/AaronCite4/Documents/Github/force_platform/data
+  folder: /home/aaroncite4/Documents/Github/force_platform/pruebas
   name: Ensayo1
   type:
     limited: false
@@ -31,7 +31,7 @@ p1_phidget_loadcell_list:
       m: 1092233.0
     channel: 2
     name: Celula vertical 3
-    read_data: true
+    read_data: false
     serial: 583229
   load_cell_4:
     calibration_data:
@@ -105,3 +105,12 @@ p1_phidget_loadcell_list:
     name: Celula horizontal Y4
     read_data: false
     serial: 583241
+taobotics_imu_list:
+  imu_1:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: Leg IMU
+    read_data: true
+    serial: '/dev/ttyUSB0'
