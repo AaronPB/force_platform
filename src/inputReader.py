@@ -24,7 +24,8 @@ class InputReader:
         self.sensor_connected = False
 
         # Init sensor handlers
-        self.phidgetLoadCellsHandler = PhidgetLoadCellsHandler()
+        self.phidgetP1LoadCellsHandler = PhidgetLoadCellsHandler()
+        self.phidgetP2LoadCellsHandler = PhidgetLoadCellsHandler()
         self.taoboticsIMUsHandler = TaoboticsIMUsHandler()
 
         # Load config
@@ -75,23 +76,27 @@ class InputReader:
 
     # Filter config sensor lists
     def loadSensors(self):
-        # Phidget Sensors
-        if 'p1_phidget_loadcell_list' in self.config:
-            self.phidgetLoadCellsHandler.clearSensors()
-            config_list_path = self.config['p1_phidget_loadcell_list']
-            for sensor_id in list(config_list_path.keys()):
-                sensor_data = config_list_path[sensor_id].copy()
-                sensor_data['id'] = sensor_id  # Add ID to dict
-                self.phidgetLoadCellsHandler.addSensor(sensor_data)
+        # Phidget Platform Load Cells
+        self.loadSensorType(self.phidgetP1LoadCellsHandler,
+                            'p1_phidget_loadcell_list')
+        self.loadSensorType(self.phidgetP2LoadCellsHandler,
+                            'p2_phidget_loadcell_list')
         # Taobotics IMUs
-        if 'taobotics_imu_list' in self.config:
-            self.taoboticsIMUsHandler.clearSensors()
-            config_list_path = self.config['taobotics_imu_list']
-            for sensor_id in list(config_list_path.keys()):
-                sensor_data = config_list_path[sensor_id].copy()
-                sensor_data['id'] = sensor_id  # Add ID to dict
-                self.taoboticsIMUsHandler.addSensor(sensor_data)
-        # TODO put more sensor types when defined
+        self.loadSensorType(self.taoboticsIMUsHandler, 'taobotics_imu_list')
+        # TODO Phidget Encoders
+        # self.loadSensorType(self.phidgetEncodersHandler, 'phidget_encoder_list')
+
+    def loadSensorType(self, type, config_list):
+        if not config_list in self.config:
+            self.log_handler.logger.warn(
+                "Cannot find " + config_list + "in config! Ignoring list.")
+            return
+        type.clearSensors()
+        config_list_path = self.config[config_list]
+        for sensor_id in list(config_list_path.keys()):
+            sensor_data = config_list_path[sensor_id].copy()
+            sensor_data['id'] = sensor_id  # Add ID to dict
+            type.addSensor(sensor_data)
 
     # Sensors connection
     def connectSensors(self):
@@ -100,13 +105,20 @@ class InputReader:
         self.loadSensors()
         # TODO make connections depending on loaded sensors and their type
         self.sensor_connected = any(
-            [self.phidgetLoadCellsHandler.connect(), self.taoboticsIMUsHandler.connect()])
+            [self.phidgetP1LoadCellsHandler.connect(),
+             self.phidgetP2LoadCellsHandler.connect(),
+             self.taoboticsIMUsHandler.connect()])
         self.log_handler.logger.info("Connection process done!")
 
-    def getSensorStatus(self):
-        sensorStatus = self.phidgetLoadCellsHandler.getSensorListDict()
-        # TODO taobotics imus
-        return sensorStatus
+    def getPlatform1SensorStatus(self):
+        return self.phidgetP1LoadCellsHandler.getSensorListDict()
+
+    def getPlatform2SensorStatus(self):
+        return self.phidgetP2LoadCellsHandler.getSensorListDict()
+
+    def getIMUSensorStatus(self):
+        return self.taoboticsIMUsHandler.getSensorListDict()
+    # TODO encoders
 
     def getReaderChecks(self):
         return [self.config_path, self.test_folder, self.test_name, self.sensor_connected]
@@ -115,12 +127,14 @@ class InputReader:
     def readerStart(self):
         self.log_handler.logger.info("Starting test...")
         # Start sensors
-        self.phidgetLoadCellsHandler.start()
+        self.phidgetP1LoadCellsHandler.start()
         self.taoboticsIMUsHandler.start()
         # Get headers of connected sensors
         dataframe_headers = ['timestamp']
         dataframe_headers.extend(
-            self.phidgetLoadCellsHandler.getSensorHeaders() + self.taoboticsIMUsHandler.getSensorHeaders())
+            self.phidgetP1LoadCellsHandler.getSensorHeaders() +
+            self.phidgetP2LoadCellsHandler.getSensorHeaders() +
+            self.taoboticsIMUsHandler.getSensorHeaders())
         self.log_handler.logger.info("Test headers: " + str(dataframe_headers))
         self.sensor_dataframe = TestDataFrame(dataframe_headers)
 
@@ -128,14 +142,15 @@ class InputReader:
         # Get and acumulate values in dataframe from all sensor classes
         current_time = round(time.time()*1000)
         data = [current_time]
-        data.extend(self.phidgetLoadCellsHandler.getSensorData() +
+        data.extend(self.phidgetP1LoadCellsHandler.getSensorData() +
+                    self.phidgetP2LoadCellsHandler.getSensorData() +
                     self.taoboticsIMUsHandler.getSensorData())
         self.sensor_dataframe.addRow(data)
         # self.log_handler.logger.debug("Clocking data! - " + str(data))
         # print(str(self.taoboticsIMUsHandler.getSensorData()))
 
     def readerStop(self):
-        self.phidgetLoadCellsHandler.stop()
+        self.phidgetP1LoadCellsHandler.stop()
         self.taoboticsIMUsHandler.stop()
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(

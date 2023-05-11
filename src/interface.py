@@ -159,14 +159,15 @@ class MainWindow(QWidget):
                 'test_options.folder', folder_path)
             self.inputReader.loadFiles()
             self.updatePaths()
-            self.log_handler.logger.info("Changed folder path to: " + str(folder_path))
+            self.log_handler.logger.info(
+                "Changed folder path to: " + str(folder_path))
 
     def applyText(self):
         name = self.texto_input.text().strip()
         if not name:
             name = "Ensayo de pruebas"
         self.inputReader.configEdit(
-                'test_options.name', name)
+            'test_options.name', name)
         self.inputReader.loadFiles()
         self.updatePaths()
         self.log_handler.logger.info("Changed test name to: " + str(name))
@@ -210,7 +211,7 @@ class MainWindow(QWidget):
         title.setAlignment(Qt.AlignCenter)
 
         update_sensors_btn = QPushButton(
-            'Conectar sensores seleccionados', self)
+            'Conectar sensores', self)
         update_sensors_btn.setMaximumWidth(200)
         update_sensors_btn.clicked.connect(self.updateSensors)
 
@@ -229,14 +230,19 @@ class MainWindow(QWidget):
         vbox_p2 = QVBoxLayout()
         vbox_p2.addWidget(QLabel("Plataforma 2"))
         vbox_p3 = QVBoxLayout()
-        vbox_p3.addWidget(QLabel("Otros sensores"))
+        vbox_p3.addWidget(QLabel("Sensores externos"))
         grid_layout.addLayout(vbox_p1, 0, 0)
         grid_layout.addLayout(vbox_p2, 0, 1)
         grid_layout.addLayout(vbox_p3, 0, 2)
 
         # Sensor information
-        vbox_p1.addLayout(self.loadPlatformLoadCellsLayout(1))
-        # TODO vbox_p2.addLayout(self.loadPlatformLoadCellsLayout(2))
+        vbox_p1.addLayout(self.loadPlatformLoadCellsLayout(
+            self.inputReader.getPlatform1SensorStatus(), self.handlePlatform1SensorCheckbox))
+        vbox_p2.addLayout(self.loadPlatformLoadCellsLayout(
+            self.inputReader.getPlatform2SensorStatus(), self.handlePlatform2SensorCheckbox))
+        vbox_p3.addLayout(self.loadPlatformLoadCellsLayout(
+            self.inputReader.getIMUSensorStatus(), self.handleIMUCheckbox))
+        # TODO vbox_p3.addLayout ENCODERS
 
         vbox_layout.addLayout(hbox_title_layout)
         vbox_layout.addLayout(grid_layout)
@@ -280,7 +286,7 @@ class MainWindow(QWidget):
         self.loadSensorLayout()
         self.update()
 
-    def loadPlatformLoadCellsLayout(self, platformNumber):
+    def loadPlatformLoadCellsLayout(self, status_list, checkbox_handler):
         loadcell_layout = QGridLayout()
         loadcell_layout.setColumnStretch(0, 0)
         loadcell_layout.setColumnStretch(1, 0)
@@ -291,11 +297,11 @@ class MainWindow(QWidget):
         loadcell_layout.setVerticalSpacing(5)
         loadcell_layout.setAlignment(Qt.AlignLeft)
         # TODO avoid accessing specific keys here
-        for i, sensor in enumerate(self.inputReader.getSensorStatus()):
+        for i, sensor in enumerate(status_list):
             checkbox = QCheckBox()
             checkbox.setChecked(sensor['read_data'])
             checkbox.setObjectName(sensor['id'])
-            checkbox.stateChanged.connect(self.handleSensorCheckbox)
+            checkbox.stateChanged.connect(checkbox_handler)
             loadcell_layout.addWidget(checkbox, i, 0)
 
             label = QLabel()
@@ -310,11 +316,26 @@ class MainWindow(QWidget):
             loadcell_layout.addWidget(label, i, 2)
         return loadcell_layout
 
-    def handleSensorCheckbox(self, state):
+    # TODO avoid accessing specific config keys here!!
+    def handlePlatform1SensorCheckbox(self, state):
         sender = self.sender()
-        # TODO avoid accessing specific keys here
         self.inputReader.configEdit(
             'p1_phidget_loadcell_list.' + sender.objectName() + '.read_data', state == 2)
+
+    def handlePlatform2SensorCheckbox(self, state):
+        sender = self.sender()
+        self.inputReader.configEdit(
+            'p2_phidget_loadcell_list.' + sender.objectName() + '.read_data', state == 2)
+
+    def handleEncoderCheckbox(self, state):
+        sender = self.sender()
+        self.inputReader.configEdit(
+            'phidget_encoder_list.' + sender.objectName() + '.read_data', state == 2)
+
+    def handleIMUCheckbox(self, state):
+        sender = self.sender()
+        self.inputReader.configEdit(
+            'taobotics_imu_list.' + sender.objectName() + '.read_data', state == 2)
 
     def updateTestChecks(self):
         test_status_text = [
@@ -346,7 +367,7 @@ class MainWindow(QWidget):
         self.start_btn.setEnabled(False)
         self.inputReader.readerStart()
         self.stop_btn.setEnabled(True)
-        self.timer.start(10) #ms
+        self.timer.start(10)  # ms
 
     def stopTest(self):
         self.stop_btn.setEnabled(False)
@@ -372,20 +393,28 @@ class MainWindow(QWidget):
     #     title_plot3.setAlignment(Qt.AlignCenter)
 
     #     # Example plots
+    #     # y = np.random.normal(loc=0.5, scale=0.4, size=1000)
+    #     # y = y[(y > -0.3) & (y < 0.3)]
+    #     # y.sort()
+    #     y = np.linspace(0, 0, 100)
+    #     x = np.arange(len(y))
     #     fig1, ax1 = plt.subplots()
     #     canvas1 = FigureCanvas(fig1)
     #     toolbar1 = NavigationToolbar(canvas1, self)
-    #     ax1.plot(np.linspace(0, 10, 100), np.sin(np.linspace(0, 10, 100)))
+    #     ax1.plot(x,y)
+    #     ax1.grid(True)
 
     #     fig2, ax2 = plt.subplots()
     #     canvas2 = FigureCanvas(fig2)
     #     toolbar2 = NavigationToolbar(canvas2, self)
-    #     ax2.plot(np.linspace(0, 10, 100), np.cos(np.linspace(0, 10, 100)))
+    #     ax2.plot(x,y)
+    #     ax2.grid(True)
 
     #     fig3, ax3 = plt.subplots()
     #     canvas3 = FigureCanvas(fig3)
     #     toolbar3 = NavigationToolbar(canvas3, self)
-    #     ax3.plot(np.linspace(0, 10, 100), np.tan(np.linspace(0, 10, 100)))
+    #     ax3.plot(x,y)
+    #     ax3.grid(True)
 
     #     # Layouts
     #     vbox_plot1.addWidget(title_plot1)

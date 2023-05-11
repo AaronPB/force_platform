@@ -14,7 +14,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula vertical 1
+    name: P1_LoadCell_Z_1
     read_data: true
     serial: 583229
   load_cell_2:
@@ -22,7 +22,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 1
-    name: Celula vertical 2
+    name: P1_LoadCell_Z_2
     read_data: true
     serial: 583229
   load_cell_3:
@@ -30,15 +30,15 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 2
-    name: Celula vertical 3
-    read_data: false
+    name: P1_LoadCell_Z_3
+    read_data: true
     serial: 583229
   load_cell_4:
     calibration_data:
       b: -5.5889
       m: 1092233.0
     channel: 3
-    name: Celula vertical 4
+    name: P1_LoadCell_Z_4
     read_data: true
     serial: 583229
   load_cell_5:
@@ -46,7 +46,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal X1
+    name: P1_LoadCell_X_1
     read_data: false
     serial: 583241
   load_cell_6:
@@ -54,7 +54,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal X2
+    name: P1_LoadCell_X_2
     read_data: false
     serial: 583241
   load_cell_7:
@@ -62,7 +62,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal X3
+    name: P1_LoadCell_X_3
     read_data: false
     serial: 583241
   load_cell_8:
@@ -70,7 +70,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal X4
+    name: P1_LoadCell_X_4
     read_data: false
     serial: 583241
   load_cell_9:
@@ -78,7 +78,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal Y1
+    name: P1_LoadCell_Y_1
     read_data: false
     serial: 583241
   load_cell_10:
@@ -86,7 +86,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal Y2
+    name: P1_LoadCell_Y_2
     read_data: false
     serial: 583241
   load_cell_11:
@@ -94,7 +94,7 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal Y3
+    name: P1_LoadCell_Y_3
     read_data: false
     serial: 583241
   load_cell_12:
@@ -102,7 +102,121 @@ p1_phidget_loadcell_list:
       b: -5.5889
       m: 1092233.0
     channel: 0
-    name: Celula horizontal Y4
+    name: P1_LoadCell_Y_4
+    read_data: false
+    serial: 583241
+p2_phidget_loadcell_list:
+  load_cell_1:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_Z_1
+    read_data: false
+    serial: 583241
+  load_cell_2:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 1
+    name: P2_LoadCell_Z_2
+    read_data: false
+    serial: 583241
+  load_cell_3:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 2
+    name: P2_LoadCell_Z_3
+    read_data: false
+    serial: 583241
+  load_cell_4:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 3
+    name: P2_LoadCell_Z_4
+    read_data: false
+    serial: 583241
+  load_cell_5:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_X_1
+    read_data: false
+    serial: 583241
+  load_cell_6:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_X_2
+    read_data: false
+    serial: 583241
+  load_cell_7:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_X_3
+    read_data: false
+    serial: 583241
+  load_cell_8:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_X_4
+    read_data: false
+    serial: 583241
+  load_cell_9:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_Y_1
+    read_data: false
+    serial: 583241
+  load_cell_10:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_Y_2
+    read_data: false
+    serial: 583241
+  load_cell_11:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_Y_3
+    read_data: false
+    serial: 583241
+  load_cell_12:
+    calibration_data:
+      b: -5.5889
+      m: 1092233.0
+    channel: 0
+    name: P2_LoadCell_Y_4
+    read_data: false
+    serial: 583241
+phidget_encoder_list:
+  encoder_1:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: Encoder_Z_1
+    read_data: false
+    serial: 583241
+  encoder_2:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 1
+    name: Encoder_Z_2
     read_data: false
     serial: 583241
 taobotics_imu_list:
@@ -111,6 +225,46 @@ taobotics_imu_list:
       b: 0.0
       m: 0.0
     channel: 0
-    name: Leg IMU
+    name: IMU_Leg_Right
     read_data: true
-    serial: '/dev/ttyUSB0'
+    serial: /dev/ttyUSB0
+  imu_2:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: IMU_Leg_Left
+    read_data: false
+    serial: /dev/ttyUSB1
+  imu_3:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: IMU_Thigh_Right
+    read_data: false
+    serial: /dev/ttyUSB2
+  imu_4:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: IMU_Thigh_Left
+    read_data: false
+    serial: /dev/ttyUSB3
+  imu_5:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: IMU_UpperTrunk_Right
+    read_data: false
+    serial: /dev/ttyUSB4
+  imu_6:
+    calibration_data:
+      b: 0.0
+      m: 0.0
+    channel: 0
+    name: IMU_UpperTrunk_Left
+    read_data: false
+    serial: /dev/ttyUSB5
