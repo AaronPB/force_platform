@@ -25,6 +25,12 @@ class TaoboticsIMUsHandler:
                 "Sensor does not have the required keys!")
             return
 
+        # FIXME avoid sensor if read is false (segmentation fault otherwise)
+        if not sensor_params['read_data']:
+            self.log_handler.logger.warn(
+                "Ignoring IMU sensor with name: " + str(sensor_params['name']))
+            return
+
         sensor = sensor_params.copy()
         sensor['status'] = "Ignored"  # Default status until connection check
         sensor['sensor'] = mrpt.hwdrivers.CTaoboticsIMU()
@@ -36,7 +42,7 @@ class TaoboticsIMUsHandler:
 
     def clearSensors(self):
         for sensor in self.sensor_list:
-            del(sensor['sensor'])
+            del (sensor['sensor'])
         self.sensor_list.clear()
         self.sensor_data.clear()
 
@@ -51,8 +57,13 @@ class TaoboticsIMUsHandler:
         self.sensor_data_mutex.acquire()
         keys = list(self.sensor_data.keys())
         self.sensor_data_mutex.release()
-        return keys
-    
+        new_keys = []
+        data_types = ['qx','qy','qz','qw','wx','wy','wz']
+        for key in keys:
+            for suf in data_types:
+                new_keys.append(key + '_' + suf)
+        return new_keys
+
     # Returns a list of dictionaries
     def getSensorData(self):
         # Get data list
@@ -74,15 +85,15 @@ class TaoboticsIMUsHandler:
                     w_x = obs.get(mrpt.obs.TIMUDataIndex.IMU_WX)
                     w_y = obs.get(mrpt.obs.TIMUDataIndex.IMU_WY)
                     w_z = obs.get(mrpt.obs.TIMUDataIndex.IMU_WZ)
-            values = list([q_x, q_y, q_z, q_w, w_x, w_y, w_z])
+            values = [q_x, q_y, q_z, q_w, w_x, w_y, w_z]
             self.sensor_data_mutex.acquire()
             self.sensor_data[sensor['name']] = values
             self.sensor_data_mutex.release()
-            
+
         self.sensor_data_mutex.acquire()
         data = list(self.sensor_data.values())
         self.sensor_data_mutex.release()
-        return data
+        return sum(data, [])
 
     # Returns true if there is at least one sensor connected
     def connect(self):
