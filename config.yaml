@@ -208,17 +208,19 @@ phidget_encoder_list:
       b: 0.0
       m: 0.0
     channel: 0
+    initial_position: 0
     name: Encoder_Z_1
-    read_data: false
-    serial: 583241
+    read_data: true
+    serial: 641800
   encoder_2:
     calibration_data:
       b: 0.0
       m: 0.0
     channel: 1
+    initial_position: 0
     name: Encoder_Z_2
     read_data: false
-    serial: 583241
+    serial: 641800
 taobotics_imu_list:
   imu_1:
     calibration_data:
@@ -234,7 +236,7 @@ taobotics_imu_list:
       m: 0.0
     channel: 0
     name: IMU_Leg_Left
-    read_data: false
+    read_data: true
     serial: /dev/ttyUSB1
   imu_3:
     calibration_data:
