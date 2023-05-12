@@ -52,7 +52,7 @@ class TaoboticsIMUsHandler:
         keys = list(self.sensor_data.keys())
         self.sensor_data_mutex.release()
         new_keys = []
-        data_types = ['qx','qy','qz','qw','wx','wy','wz']
+        data_types = ['qx', 'qy', 'qz', 'qw', 'wx', 'wy', 'wz']
         for key in keys:
             for suf in data_types:
                 new_keys.append(key + '_' + suf)
@@ -63,6 +63,9 @@ class TaoboticsIMUsHandler:
         # Get data list
         for sensor in self.sensor_list:
             if not sensor['read_data']:
+                continue
+
+            if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
                 continue
 
             q_x = q_y = q_z = q_w = w_x = w_y = w_z = -1
@@ -100,13 +103,20 @@ class TaoboticsIMUsHandler:
             if sensor['read_data']:
                 try:
                     sensor['sensor'].initialize()
-                    sensor['status'] = "Active"
-                    # sensor['sensor'].close() FIXME add close option??
-                    self.sensors_connected = True
-                except (OSError):
+                except (Exception):
+                    self.log_handler.logger.error(
+                        "IMU " + str(sensor['name']) + " throws an exception!")
+                    sensor['status'] = "Disconnected"
+                    continue
+
+                if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
                     self.log_handler.logger.warn(
                         "Could not connect to IMU " + str(sensor['name']))
                     sensor['status'] = "Disconnected"
+                    continue
+
+                sensor['status'] = "Active"
+                self.sensors_connected = True
         return self.sensors_connected
 
     def start(self):
@@ -118,13 +128,17 @@ class TaoboticsIMUsHandler:
         for sensor in self.sensor_list:
             if not sensor['read_data']:
                 continue
-            try:
-                sensor['sensor'].initialize()
-                sensor_headers.append(sensor['name'])
-            except (Exception):
-                self.log_handler.logger.warn(
-                    "Could not connect to IMU " + str(sensor['name']))
-                # sensor['sensor'].close() FIXME add close option??
+            if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
+                try:
+                    sensor['sensor'].initialize()
+                except (Exception):
+                    self.log_handler.logger.error(
+                        "IMU " + str(sensor['name']) + " throws an exception!")
+                if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
+                    self.log_handler.logger.warn(
+                        "Could not connect to IMU " + str(sensor['name']))
+                    continue
+            sensor_headers.append(sensor['name'])
         return sensor_headers
 
     def stop(self):
