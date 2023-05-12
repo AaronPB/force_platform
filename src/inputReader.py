@@ -8,8 +8,8 @@ import yaml
 import os
 import time
 
-from src.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
-from src.taoboticsIMUsHandler import TaoboticsIMUsHandler
+from src.handlers.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
+from src.handlers.taoboticsIMUsHandler import TaoboticsIMUsHandler
 from src.utils import LogHandler, TestDataFrame, DataFramePlotter
 
 
