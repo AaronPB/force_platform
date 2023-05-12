@@ -11,8 +11,11 @@ from src.utils import LogHandler
 
 
 class PhidgetLoadCellsHandler:
-    def __init__(self):
-        self.log_handler = LogHandler(str(__class__.__name__))
+    log_handler = None
+
+    def __init__(self, sensor_set_name):
+        self.log_handler = LogHandler(
+            str(__class__.__name__ + '-' + sensor_set_name))
         self.sensor_list = []
         self.sensor_data = {}
         self.sensor_data_mutex = threading.Lock()

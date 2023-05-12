@@ -24,9 +24,9 @@ class InputReader:
         self.sensor_connected = False
 
         # Init sensor handlers
-        self.phidgetP1LoadCellsHandler = PhidgetLoadCellsHandler()
-        self.phidgetP2LoadCellsHandler = PhidgetLoadCellsHandler()
-        self.taoboticsIMUsHandler = TaoboticsIMUsHandler()
+        self.phidgetP1LoadCellsHandler = PhidgetLoadCellsHandler("Platform1")
+        self.phidgetP2LoadCellsHandler = PhidgetLoadCellsHandler("Platform2")
+        self.taoboticsIMUsHandler = TaoboticsIMUsHandler("BodyIMUs")
 
         # Load config
         self.config_path = os.path.join(

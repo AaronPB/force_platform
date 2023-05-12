@@ -11,8 +11,9 @@ mrpt = pymrpt.mrpt
 
 
 class TaoboticsIMUsHandler:
-    def __init__(self):
-        self.log_handler = LogHandler(str(__class__.__name__))
+    def __init__(self, sensor_set_name):
+        self.log_handler = LogHandler(
+            str(__class__.__name__ + '-' + sensor_set_name))
         self.sensor_list = []
         self.sensor_data = {}
         self.sensor_data_mutex = threading.Lock()
@@ -25,18 +26,11 @@ class TaoboticsIMUsHandler:
                 "Sensor does not have the required keys!")
             return
 
-        # FIXME avoid sensor if read is false (segmentation fault otherwise)
-        if not sensor_params['read_data']:
-            self.log_handler.logger.warn(
-                "Ignoring IMU sensor with name: " + str(sensor_params['name']))
-            return
-
         sensor = sensor_params.copy()
         sensor['status'] = "Ignored"  # Default status until connection check
         sensor['sensor'] = mrpt.hwdrivers.CTaoboticsIMU()
         sensor['sensor'].setSerialPort(sensor_params['serial'])
         sensor['sensor'].setSensorLabel(sensor_params['name'])
-        sensor['sensor'].initialize()
 
         self.sensor_list.append(sensor)
 
@@ -109,7 +103,7 @@ class TaoboticsIMUsHandler:
                     sensor['status'] = "Active"
                     # sensor['sensor'].close() FIXME add close option??
                     self.sensors_connected = True
-                except (Exception):
+                except (OSError):
                     self.log_handler.logger.warn(
                         "Could not connect to IMU " + str(sensor['name']))
                     sensor['status'] = "Disconnected"
