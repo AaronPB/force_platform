@@ -236,13 +236,14 @@ class MainWindow(QWidget):
         grid_layout.addLayout(vbox_p3, 0, 2)
 
         # Sensor information
-        vbox_p1.addLayout(self.loadPlatformLoadCellsLayout(
+        vbox_p1.addLayout(self.loadSensorGridLayout(
             self.inputReader.getPlatform1SensorStatus(), self.handlePlatform1SensorCheckbox))
-        vbox_p2.addLayout(self.loadPlatformLoadCellsLayout(
+        vbox_p2.addLayout(self.loadSensorGridLayout(
             self.inputReader.getPlatform2SensorStatus(), self.handlePlatform2SensorCheckbox))
-        vbox_p3.addLayout(self.loadPlatformLoadCellsLayout(
+        vbox_p3.addLayout(self.loadSensorGridLayout(
+            self.inputReader.getEncoderSensorsStatus(), self.handleEncoderCheckbox))
+        vbox_p3.addLayout(self.loadSensorGridLayout(
             self.inputReader.getIMUSensorStatus(), self.handleIMUCheckbox))
-        # TODO vbox_p3.addLayout ENCODERS
 
         vbox_layout.addLayout(hbox_title_layout)
         vbox_layout.addLayout(grid_layout)
@@ -286,7 +287,7 @@ class MainWindow(QWidget):
         self.loadSensorLayout()
         self.update()
 
-    def loadPlatformLoadCellsLayout(self, status_list, checkbox_handler):
+    def loadSensorGridLayout(self, status_list, checkbox_handler):
         loadcell_layout = QGridLayout()
         loadcell_layout.setColumnStretch(0, 0)
         loadcell_layout.setColumnStretch(1, 0)
