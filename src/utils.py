@@ -6,6 +6,7 @@ Date: 13/04/2023
 
 import logging
 import colorlog
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -24,11 +25,15 @@ class TestDataFrame:
 
     def exportToCSV(self, file_path):
         self.df.to_csv(file_path, index=False)
-        self.log_handler.logger.info("Test file saved in: " + str(file_path))
+        file_size = os.path.getsize(file_path) / (1024 * 1024)
+        self.log_handler.logger.info(
+            "Test file saved in: " + str(file_path) + " (" + str(round(file_size, 2)) + " MB)")
 
     def exportToBinary(self, file_path):
         self.df.to_pickle(file_path, index=False)
-        self.log_handler.logger.info("Test file saved in: " + str(file_path))
+        file_size = os.path.getsize(file_path) / (1024 * 1024)
+        self.log_handler.logger.info(
+            "Test file saved in: " + str(file_path) + " (" + str(round(file_size, 2)) + " MB)")
 
     def getDataFrame(self):
         return self.df.copy()
@@ -36,12 +41,13 @@ class TestDataFrame:
 
 class DataFramePlotter:
     def __init__(self, data_frame: pd.DataFrame):
-        data_frame['timestamp'] = pd.to_datetime(data_frame['timestamp'], unit='ms')
-        relative_time = data_frame['timestamp'] - data_frame['timestamp'].iloc[0]
+        data_frame['timestamp'] = pd.to_datetime(
+            data_frame['timestamp'], unit='ms')
+        relative_time = data_frame['timestamp'] - \
+            data_frame['timestamp'].iloc[0]
         relative_time = relative_time.dt.total_seconds()
         self.df = pd.DataFrame({'time': relative_time})
-        self.df = pd.concat([self.df, data_frame.iloc[:,1:]], axis=1)
-
+        self.df = pd.concat([self.df, data_frame.iloc[:, 1:]], axis=1)
 
     def plot_line(self, x_col, y_cols):
         fig, ax = plt.subplots()

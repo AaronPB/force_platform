@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 """
 Author: Aaron Poyatos
-Date: 13/04/2023
+Date: 12/05/2023
 """
 
 import threading
 from Phidget22.Phidget import *
-from Phidget22.Devices.VoltageRatioInput import *
+from Phidget22.Devices.Encoder import *
 from src.utils import LogHandler
 
 
-class PhidgetLoadCellsHandler:
-    def __init__(self):
-        self.log_handler = LogHandler(str(__class__.__name__))
+class PhidgetEncodersHandler:
+    def __init__(self, sensor_set_name):
+        self.log_handler = LogHandler(
+            str(__class__.__name__ + '-' + sensor_set_name))
         self.sensor_list = []
         self.sensor_data = {}
         self.sensor_data_mutex = threading.Lock()
 
-        def onVoltageRatioChange(self,
-                                 voltageRatio,
-                                 mutex: threading.Lock() = self.sensor_data_mutex,
-                                 sensor_list: list = self.sensor_list,
-                                 sensor_data: dict = self.sensor_data,
-                                 log_handler: LogHandler = self.log_handler,):
+        def onPositionChangeHandler(self,
+                                    positionChange, timeChange, indexTriggered,
+                                    mutex: threading.Lock() = self.sensor_data_mutex,
+                                    sensor_list: list = self.sensor_list,
+                                    sensor_data: dict = self.sensor_data,
+                                    log_handler: LogHandler = self.log_handler,):
             serial = self.getDeviceSerialNumber()
             channel = self.getChannel()
             connected_sensor = False
@@ -33,23 +34,27 @@ class PhidgetLoadCellsHandler:
                 if sensor['serial'] == serial and sensor['channel'] == channel:
                     m = sensor['calibration_data']['m']
                     b = sensor['calibration_data']['b']
+                    name = sensor['name']
                     connected_sensor = True
+                    break
             if not connected_sensor:
                 return
-            force = voltageRatio * m + b
+            distance = positionChange  # * m + b
 
             # log_handler.logger.debug("[" + str(serial) + "_" +
-            #                          str(channel) + "]: " + str(voltageRatio) + " V (" + str(force) + " N)")
+            #                          str(channel) + "]: " + str(positionChange) + " pos " +
+            #                          str(timeChange) + " millis " + str(indexTriggered) + " trigger (" +
+            #                          str(distance) + " N)")
 
             mutex.acquire()
-            sensor_data[(serial, channel)] = force
+            sensor_data[name] = distance
             mutex.release()
 
-        self.onVoltageRatioChange = onVoltageRatioChange
+        self.onPositionChangeHandler = onPositionChangeHandler
 
     def addSensor(self, sensor_params: dict):
         required_keys = ['id', 'name', 'read_data',
-                         'serial', 'channel', 'calibration_data']
+                         'serial', 'channel', 'calibration_data', 'initial_position']
         if not all(key in sensor_params.keys() for key in required_keys):
             self.log_handler.logger.error(
                 "Sensor does not have the required keys!")
@@ -57,20 +62,28 @@ class PhidgetLoadCellsHandler:
 
         sensor = sensor_params.copy()
         sensor['status'] = "Ignored"  # Default status until connection check
-        sensor['sensor'] = VoltageRatioInput()
+        sensor['sensor'] = Encoder()
         sensor['sensor'].setDeviceSerialNumber(sensor_params['serial'])
         sensor['sensor'].setChannel(sensor_params['channel'])
-        sensor['sensor'].setOnVoltageRatioChangeHandler(
-            self.onVoltageRatioChange)
+        # sensor['sensor'].setPosition(sensor_params['initial_position'])
+        sensor['sensor'].setOnPositionChangeHandler(
+            self.onPositionChangeHandler)
 
         self.sensor_list.append(sensor)
 
     def clearSensors(self):
         self.sensor_list.clear()
+        self.sensor_data.clear()
 
     def getSensorListDict(self):
         key_list = ['id', 'name', 'read_data', 'status']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
+
+    def getSensorHeaders(self):
+        self.sensor_data_mutex.acquire()
+        keys = list(self.sensor_data.keys())
+        self.sensor_data_mutex.release()
+        return keys
 
     def getSensorData(self):
         self.sensor_data_mutex.acquire()
@@ -83,7 +96,7 @@ class PhidgetLoadCellsHandler:
         self.sensors_connected = False
         if not self.sensor_list:
             self.log_handler.logger.info(
-                "No load cells added to try connection.")
+                "No encoders added to try connection.")
             return self.sensors_connected
         for sensor in self.sensor_list:
             if not sensor['sensor'].getAttached() and sensor['read_data']:
@@ -106,23 +119,22 @@ class PhidgetLoadCellsHandler:
         return self.sensors_connected
 
     def start(self):
-        sensor_headers = []
         if not self.sensors_connected:
             self.log_handler.logger.info(
-                "Ignoring Load Cells sensors in test, no one connected.")
-            return sensor_headers
+                "Ignoring Encoders sensors in test, no one connected.")
+            return
         for sensor in self.sensor_list:
             if not sensor['read_data']:
                 continue
             try:
                 sensor['sensor'].openWaitForAttachment(2000)  # in ms
                 sensor['sensor'].setDataInterval(8)  # in ms
-                sensor_headers.append(sensor['name'])
             except (PhidgetException):
                 self.log_handler.logger.warn("Could not open serial " + str(sensor['sensor'].getDeviceSerialNumber(
                 )) + ", channel " + str(sensor['sensor'].getChannel()))
                 sensor['sensor'].close()
-        return sensor_headers
+            # WIP Initial value
+            self.sensor_data[sensor['name']] = -1
 
     def stop(self):
         if not self.sensors_connected:
