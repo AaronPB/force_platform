@@ -15,6 +15,7 @@ from PyQt5.QtCore import Qt, QTimer
 # from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from src.inputReader import InputReader
+from src.interfaceCalibration import MainCalibrationMenu
 from src.utils import LogHandler
 
 
@@ -32,16 +33,12 @@ class MainWindow(QWidget):
         self.setGeometry(width//4, height//4, width//2, height//2)
 
         # Main GUI layouts
+        self.interface = QWidget(self)
+        self.interface_box = QHBoxLayout()
         hbox_main = QVBoxLayout()
         self.hbox_top = QHBoxLayout()
         self.hbox_mid = QHBoxLayout()
         self.hbox_bottom = QHBoxLayout()
-
-        # Inner layouts
-        vbox_logo = QVBoxLayout()
-        vbox_files = QVBoxLayout()
-        vbox_panel = QVBoxLayout()
-        vbox_sensors = QVBoxLayout()
 
         # Spacers
         spacer_20 = QSpacerItem(
@@ -59,7 +56,10 @@ class MainWindow(QWidget):
         hbox_main.addLayout(self.hbox_mid)
         hbox_main.addItem(spacer_20)
         hbox_main.addLayout(self.hbox_bottom)
-        self.setLayout(hbox_main)
+
+        self.interface_box.addWidget(self.interface)
+        self.interface.setLayout(hbox_main)
+        self.setLayout(self.interface_box)
 
         # Load reader software and test timer
         self.inputReader = InputReader()
@@ -180,8 +180,9 @@ class MainWindow(QWidget):
         title.setFont(QFont("Arial", 14, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
 
-        calibrate_sensors_btn = QPushButton('Calibrar células', self)
-        calibrate_sensors_btn.setEnabled(False)
+        self.calibrate_sensors_btn = QPushButton('Calibrar células', self)
+        self.calibrate_sensors_btn.setEnabled(False)
+        self.calibrate_sensors_btn.clicked.connect(self.openCalibrationMenu)
         self.start_btn = QPushButton('Iniciar lectura', self)
         self.start_btn.setEnabled(False)
         self.start_btn.clicked.connect(self.startTest)
@@ -193,7 +194,7 @@ class MainWindow(QWidget):
         cerrar_btn.clicked.connect(self.close)
 
         vbox_layout.addWidget(title)
-        vbox_layout.addWidget(calibrate_sensors_btn)
+        vbox_layout.addWidget(self.calibrate_sensors_btn)
         vbox_layout.addWidget(self.start_btn)
         vbox_layout.addLayout(self.vbox_test_check)
         vbox_layout.addWidget(self.stop_btn)
@@ -363,9 +364,11 @@ class MainWindow(QWidget):
             self.vbox_test_check.addWidget(label)
 
         self.start_btn.setEnabled(test_available)
+        self.calibrate_sensors_btn.setEnabled(test_available)
 
     def startTest(self):
         self.start_btn.setEnabled(False)
+        self.calibrate_sensors_btn.setEnabled(False)
         self.inputReader.readerStart()
         self.stop_btn.setEnabled(True)
         self.timer.start(10)  # ms
@@ -375,6 +378,13 @@ class MainWindow(QWidget):
         self.timer.stop()
         self.inputReader.readerStop()
         self.start_btn.setEnabled(True)
+        self.calibrate_sensors_btn.setEnabled(True)
+
+    def openCalibrationMenu(self):
+        self.interface.hide()
+        self.calibrationmenu = MainCalibrationMenu(self, self.inputReader)
+        self.interface_box.addWidget(self.calibrationmenu)
+        self.calibrationmenu.show()
 
     # TODO BOTTOM LAYOUT METHODS
     # def generateExamplePlots(self):

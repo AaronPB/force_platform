@@ -11,6 +11,7 @@ import time
 from src.handlers.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
 from src.handlers.phidgetEncodersHandler import PhidgetEncodersHandler
 from src.handlers.taoboticsIMUsHandler import TaoboticsIMUsHandler
+from src.sensorCalibrator import SensorCalibrator
 from src.utils import LogHandler, TestDataFrame, DataFramePlotter
 
 
@@ -84,7 +85,8 @@ class InputReader:
         self.loadSensorType(self.phidgetP2LoadCellsHandler,
                             'p2_phidget_loadcell_list')
         # Phidget Encoders
-        self.loadSensorType(self.phidgetEncodersHandler, 'phidget_encoder_list')
+        self.loadSensorType(self.phidgetEncodersHandler,
+                            'phidget_encoder_list')
         # Taobotics IMUs
         self.loadSensorType(self.taoboticsIMUsHandler, 'taobotics_imu_list')
 
@@ -118,7 +120,7 @@ class InputReader:
 
     def getPlatform2SensorStatus(self):
         return self.phidgetP2LoadCellsHandler.getSensorListDict()
-    
+
     def getEncoderSensorsStatus(self):
         return self.phidgetEncodersHandler.getSensorListDict()
 
@@ -167,6 +169,78 @@ class InputReader:
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
         # Plot results
-        # preview = DataFramePlotter(self.sensor_dataframe.getDataFrame())
-        # preview.plot_line('time', [
-        #                   self.phidgetLoadCellsHandler.getSensorHeaders()])
+        single_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, :2]
+        preview = DataFramePlotter(single_dataframe)
+        preview.plot_line('time', [single_dataframe.columns[1]])
+
+    # Calibration process
+    def prepareSensorCalibration(self, sensor_name):
+        sensor_config_lists = ['p1_phidget_loadcell_list',
+                               'p2_phidget_loadcell_list', 'phidget_encoder_list', 'taobotics_imu_list']
+        # Search sensor id
+        self.calibration_handler = None
+        self.calibration_sensor_data = {}
+        for config_list_path in sensor_config_lists:
+            config_sensor_list = self.config[config_list_path]
+            for sensor_id in list(config_sensor_list.keys()):
+                if config_sensor_list[sensor_id]['name'] == sensor_name:
+                    self.calibration_sensor_data = config_sensor_list[sensor_id].copy(
+                    )
+                    # Add ID to dict
+                    self.calibration_sensor_data['id'] = sensor_id
+                    print('Found it! Path: ' + str(config_list_path))
+                    break
+            if self.calibration_sensor_data:
+                break
+        if not self.calibration_sensor_data:
+            return False
+        if config_list_path == 'p1_phidget_loadcell_list' or config_list_path == 'p2_phidget_loadcell_list':
+            self.calibration_handler = PhidgetLoadCellsHandler("Calibration")
+        elif config_list_path == 'phidget_encoder_list':
+            self.calibration_handler = PhidgetEncodersHandler("Calibration")
+        elif config_list_path == 'taobotics_imu_list':
+            self.calibration_handler = TaoboticsIMUsHandler("Calibration")
+        else:
+            self.calibration_handler = None
+            return False
+
+        self.calibration_handler.addSensor(self.calibration_sensor_data)
+        self.calibration_handler.connect()
+
+        self.calibrator = SensorCalibrator()
+        return True
+
+    def calibrationNewTest(self, test_value: float):
+        if not self.calibration_handler:
+            self.log_handler.logger.error(
+                "No calibration sensor handler defined!" +
+                "Call prepareSensorCalibration method before testing.")
+            return
+        self.calibrator.newCalibrationTest(test_value)
+        self.calibration_handler.start()
+
+    def calibrateTestProcess(self):
+        if not self.calibration_handler:
+            self.log_handler.logger.error(
+                "No calibration sensor handler defined!" +
+                "Call prepareSensorCalibration method before testing.")
+            return
+        self.calibrator.addTestMeasurement(
+            self.calibration_handler.getSensorData()[0])
+
+    def getCalibrateTestResults(self):
+        if not self.calibration_handler:
+            self.log_handler.logger.error(
+                "No calibration sensor handler defined!" +
+                "Call prepareSensorCalibration method before testing.")
+            return None, None, None
+        self.calibration_handler.stop()
+        return self.calibrator.getTestResults()
+    
+    def getCalibrateRegressionResults(self):
+        if not self.calibration_handler:
+            self.log_handler.logger.error(
+                "No calibration sensor handler defined!" +
+                "Call prepareSensorCalibration method before testing.")
+            return None, None, None
+        return self.calibrator.getCalibrationResults()
