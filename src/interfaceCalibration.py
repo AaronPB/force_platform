@@ -4,11 +4,14 @@ Author: Aaron Poyatos
 Date: 15/05/2023
 """
 
-import time
+import matplotlib.pyplot as plt
 
 from PyQt5 import QtWidgets, QtCore
 from src.inputReader import InputReader
 from src.utils import LogHandler
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 class MainCalibrationMenu(QtWidgets.QWidget):
@@ -44,7 +47,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         #     offset+1, 2, self.inputReader.getIMUSensorStatus())
 
         # Add close button
-        self.close_button = QtWidgets.QPushButton('Cerrar y guardar', self)
+        self.close_button = QtWidgets.QPushButton('Volver al menú principal', self)
         self.close_button.clicked.connect(self.close)
         self.grid_layout.addWidget(self.close_button, 13, 0, 1, 3)
 
@@ -101,6 +104,11 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         calibration_dialog_layout.addWidget(
             QtWidgets.QLabel('Resultados de la regresión lineal'))
         calibration_dialog_layout.addWidget(self.text_calibration_widget)
+        # Plot
+        canvas, toolbar = self.generateDefaultPlot()
+        calibration_dialog_layout.addWidget(toolbar)
+        calibration_dialog_layout.addWidget(canvas)
+
 
         # Calibration input value
         self.test_value_input = QtWidgets.QLineEdit()
@@ -168,12 +176,10 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         if (self.text_list_widget.count() > 3):
             # TODO enable calibrate results button
             pass
-        # self.test_value_input.setPlaceholderText(
-        #     'Introduce el valor de calibración: (ejemplo) 14.67')
 
     def calibrationResults(self):
         # Get results
-        slope, intercept, score = self.inputReader.getCalibrateRegressionResults()
+        slope, intercept, score, features, targets = self.inputReader.getCalibrateRegressionResults()
 
         # Update calibration list widget
         self.text_calibration_widget.clear()
@@ -181,6 +187,24 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.text_calibration_widget.addItem(
             "Intercept (b):\t" + str(intercept))
         self.text_calibration_widget.addItem("Score (r2):\t\t" + str(score))
+
+        self.plotResults(features, targets, slope, intercept)
+    
+    def generateDefaultPlot(self):
+        fig1, self.ax1 = plt.subplots()
+        self.canvas = FigureCanvas(fig1)
+        toolbar = NavigationToolbar(self.canvas, self)
+        self.ax1.plot(0,0)
+        self.ax1.grid(True)
+        return self.canvas, toolbar
+    
+    def plotResults(self, x, y, slope, intercept):
+        self.ax1.clear()
+        y_fit = slope * x + intercept
+        self.ax1.scatter(x, y)
+        self.ax1.plot(x, y_fit, color='red')
+        self.ax1.grid(True)
+        self.canvas.draw()
 
     def close(self):
         self.parent.interface.show()

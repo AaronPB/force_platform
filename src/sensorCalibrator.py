@@ -50,7 +50,7 @@ class SensorCalibrator:
         score = -1  # r2
         if self.sensor_calibration_dataframe.getDataFrame().empty:
             self.log_handler.logger.warn("Calibration data is empty!")
-            return slope, intercept, score
+            return slope, intercept, score, -1, -1
 
         # Linear regression
         features = self.sensor_calibration_dataframe.getDataFrame()[
@@ -66,4 +66,4 @@ class SensorCalibrator:
         # TODO plot results??
         self.log_handler.logger.debug("===== CALIBRATION RESULTS \nSlope: " + str(
             slope) + " Intercept: " + str(intercept) + "r2: " + str(score))
-        return slope, intercept, score
+        return slope, intercept, score, features, targets
