@@ -16,12 +16,14 @@ class PhidgetEncodersHandler:
             str(__class__.__name__ + '-' + sensor_set_name))
         self.sensor_list = []
         self.sensor_data = {}
+        self.sensor_data_raw = {}
         self.sensor_data_mutex = threading.Lock()
 
         def onPositionChangeHandler(self,
                                     positionChange, timeChange, indexTriggered,
                                     mutex: threading.Lock() = self.sensor_data_mutex,
                                     sensor_list: list = self.sensor_list,
+                                    sensor_data_raw: dict = self.sensor_data_raw,
                                     sensor_data: dict = self.sensor_data,
                                     log_handler: LogHandler = self.log_handler,):
             serial = self.getDeviceSerialNumber()
@@ -39,6 +41,8 @@ class PhidgetEncodersHandler:
                     break
             if not connected_sensor:
                 return
+
+            # TODO!
             distance = positionChange  # * m + b
 
             # log_handler.logger.debug("[" + str(serial) + "_" +
@@ -47,6 +51,7 @@ class PhidgetEncodersHandler:
             #                          str(distance) + " N)")
 
             mutex.acquire()
+            sensor_data_raw[name] = positionChange
             sensor_data[name] = distance
             mutex.release()
 
@@ -54,7 +59,8 @@ class PhidgetEncodersHandler:
 
     def addSensor(self, sensor_params: dict):
         required_keys = ['id', 'name', 'read_data',
-                         'serial', 'channel', 'calibration_data', 'initial_position']
+                         'serial', 'channel', 'calibration_data',
+                         'initial_position', 'config_path']
         if not all(key in sensor_params.keys() for key in required_keys):
             self.log_handler.logger.error(
                 "Sensor does not have the required keys!")
@@ -76,7 +82,7 @@ class PhidgetEncodersHandler:
         self.sensor_data.clear()
 
     def getSensorListDict(self):
-        key_list = ['id', 'name', 'read_data', 'status']
+        key_list = ['id', 'name', 'read_data', 'status', 'config_path']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
 
     def getSensorHeaders(self):
@@ -88,6 +94,12 @@ class PhidgetEncodersHandler:
     def getSensorData(self):
         self.sensor_data_mutex.acquire()
         data = list(self.sensor_data.values())
+        self.sensor_data_mutex.release()
+        return data
+
+    def getSensorDataRaw(self):
+        self.sensor_data_mutex.acquire()
+        data = list(self.sensor_data_raw.values())
         self.sensor_data_mutex.release()
         return data
 

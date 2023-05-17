@@ -100,6 +100,7 @@ class InputReader:
         for sensor_id in list(config_list_path.keys()):
             sensor_data = config_list_path[sensor_id].copy()
             sensor_data['id'] = sensor_id  # Add ID to dict
+            sensor_data['config_path'] = str(config_list) + '.' + str(sensor_id)  # Add config path to dict
             type.addSensor(sensor_data)
 
     # Sensors connection
@@ -186,9 +187,10 @@ class InputReader:
                 if config_sensor_list[sensor_id]['name'] == sensor_name:
                     self.calibration_sensor_data = config_sensor_list[sensor_id].copy(
                     )
-                    # Add ID to dict
+                    # Add ID and path to dict
                     self.calibration_sensor_data['id'] = sensor_id
-                    print('Found it! Path: ' + str(config_list_path))
+                    self.calibration_sensor_data['config_path'] = config_list_path + '.' + sensor_id
+                    print('Found it! Path: ' + self.calibration_sensor_data['config_path'])
                     break
             if self.calibration_sensor_data:
                 break
@@ -226,7 +228,7 @@ class InputReader:
                 "Call prepareSensorCalibration method before testing.")
             return
         self.calibrator.addTestMeasurement(
-            self.calibration_handler.getSensorData()[0])
+            self.calibration_handler.getSensorDataRaw()[0])
 
     def getCalibrateTestResults(self):
         if not self.calibration_handler:
