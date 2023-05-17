@@ -41,7 +41,7 @@ class SensorCalibrator:
         self.sensor_calibration_dataframe.addRow(
             [self.test_value, mean, std, measurements])
         self.log_handler.logger.debug("==== Test results for load: " + str(self.test_value) + "\nMean: " + str(
-            mean) + " STD: " + str(std) + "Number of measurements: " + str(measurements))
+            mean) + " STD: " + str(std) + " Number of measurements: " + str(measurements))
         return mean, std, measurements
 
     def getCalibrationResults(self):
@@ -63,7 +63,6 @@ class SensorCalibrator:
         intercept = model.intercept_
         score = model.score(features, targets)
 
-        # TODO plot results??
         self.log_handler.logger.debug("===== CALIBRATION RESULTS \nSlope: " + str(
             slope) + " Intercept: " + str(intercept) + "r2: " + str(score))
         return slope.item(), intercept.item(), score, features, targets

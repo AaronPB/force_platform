@@ -190,7 +190,6 @@ class InputReader:
                     # Add ID and path to dict
                     self.calibration_sensor_data['id'] = sensor_id
                     self.calibration_sensor_data['config_path'] = config_list_path + '.' + sensor_id
-                    print('Found it! Path: ' + self.calibration_sensor_data['config_path'])
                     break
             if self.calibration_sensor_data:
                 break

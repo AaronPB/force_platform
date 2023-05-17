@@ -68,7 +68,6 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
     def calibrationDialog(self, sensor):
         # Unique sensor input
-        print(sensor['config_path'])
         calibration_prepared = self.inputReader.prepareSensorCalibration(
             sensor['name'])
         self.log_handler.logger.info(
