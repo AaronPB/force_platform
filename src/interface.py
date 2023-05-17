@@ -8,9 +8,9 @@ import os
 # import numpy as np
 # import matplotlib.pyplot as plt
 
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QGridLayout, QFileDialog, QLineEdit, QCheckBox, QDesktopWidget, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
-from PyQt5.QtGui import QPixmap, QIcon, QFont
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5 import QtWidgets, QtGui, QtCore
+# from PyQt5.QtGui import QPixmap, QIcon, QFont
+# from PyQt5.QtCore import Qt, QTimer
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -19,7 +19,7 @@ from src.interfaceCalibration import MainCalibrationMenu
 from src.utils import LogHandler
 
 
-class MainWindow(QWidget):
+class MainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.log_handler = LogHandler(str(__class__.__name__))
@@ -27,30 +27,30 @@ class MainWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Programa de lecturas')
-        self.setWindowIcon(QIcon('logo.ico'))
-        screen_resolution = QDesktopWidget().screenGeometry()
+        self.setWindowIcon(QtGui.QIcon('logo.ico'))
+        screen_resolution = QtWidgets. QDesktopWidget().screenGeometry()
         width, height = screen_resolution.width(), screen_resolution.height()
         self.setGeometry(width//4, height//4, width//2, height//2)
 
         # Main GUI layouts
-        self.interface = QWidget(self)
-        self.interface_box = QHBoxLayout()
-        hbox_main = QVBoxLayout()
-        self.hbox_top = QHBoxLayout()
-        self.hbox_mid = QHBoxLayout()
-        self.hbox_bottom = QHBoxLayout()
+        self.interface = QtWidgets.QWidget(self)
+        self.interface_box = QtWidgets.QHBoxLayout()
+        hbox_main = QtWidgets.QVBoxLayout()
+        self.hbox_top = QtWidgets.QHBoxLayout()
+        self.hbox_mid = QtWidgets.QHBoxLayout()
+        self.hbox_bottom = QtWidgets.QHBoxLayout()
 
         # Spacers
-        spacer_20 = QSpacerItem(
-            20, 20, QSizePolicy.Minimum, QSizePolicy.Minimum)
+        spacer_20 = QtWidgets.QSpacerItem(
+            20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         # Inner layouts adjustments
-        self.hbox_top.setAlignment(Qt.AlignTop)
-        self.hbox_mid.setAlignment(Qt.AlignTop)
-        self.hbox_bottom.setAlignment(Qt.AlignBottom)
+        self.hbox_top.setAlignment(QtCore.Qt.AlignTop)
+        self.hbox_mid.setAlignment(QtCore.Qt.AlignTop)
+        self.hbox_bottom.setAlignment(QtCore.Qt.AlignBottom)
 
         # Build
-        hbox_main.setAlignment(Qt.AlignTop)
+        hbox_main.setAlignment(QtCore.Qt.AlignTop)
         hbox_main.addLayout(self.hbox_top)
         hbox_main.addItem(spacer_20)
         hbox_main.addLayout(self.hbox_mid)
@@ -63,7 +63,7 @@ class MainWindow(QWidget):
 
         # Load reader software and test timer
         self.inputReader = InputReader()
-        self.timer = QTimer(self)
+        self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.inputReader.readerProcess)
 
         # Load layouts
@@ -85,43 +85,43 @@ class MainWindow(QWidget):
 
     # TOP LAYOUT METHODS
     def loadIconLayout(self):
-        vbox_layout = QVBoxLayout()
-        vbox_layout.setAlignment(Qt.AlignTop)
+        vbox_layout = QtWidgets.QVBoxLayout()
+        vbox_layout.setAlignment(QtCore.Qt.AlignTop)
 
-        image = QLabel(self)
-        pixmap = QPixmap('logo.ico')
-        image.setPixmap(pixmap.scaled(150, 150, Qt.KeepAspectRatio))
-        image.setAlignment(Qt.AlignCenter)
-        label = QLabel('Plataforma fuerza', self)
-        label.setFont(QFont("Arial", 12, QFont.Bold))
-        label.setAlignment(Qt.AlignCenter)
+        image = QtWidgets.QLabel(self)
+        pixmap = QtGui.QPixmap('logo.ico')
+        image.setPixmap(pixmap.scaled(150, 150, QtCore.Qt.KeepAspectRatio))
+        image.setAlignment(QtCore.Qt.AlignCenter)
+        label = QtWidgets.QLabel('Plataforma fuerza', self)
+        label.setFont(QtGui.QFont("Arial", 12, QtGui.QFont.Bold))
+        label.setAlignment(QtCore.Qt.AlignCenter)
 
         vbox_layout.addWidget(image)
         vbox_layout.addWidget(label)
         self.hbox_top.addLayout(vbox_layout)
 
     def loadFilesLayout(self):
-        vbox_layout = QGridLayout()
-        vbox_layout.setAlignment(Qt.AlignTop)
+        vbox_layout = QtWidgets.QGridLayout()
+        vbox_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # Config file
-        config_label = QLabel('Archivo configuración:', self)
-        config_btn = QPushButton('Seleccionar config', self)
+        config_label = QtWidgets.QLabel('Archivo configuración:', self)
+        config_btn = QtWidgets.QPushButton('Seleccionar config', self)
         config_btn.clicked.connect(self.selectFile)
-        self.config_path = QLineEdit(self)
+        self.config_path = QtWidgets.QLineEdit(self)
         self.config_path.setReadOnly(True)
 
         # Test folder
-        ubicacion_label = QLabel('Carpeta del ensayo:', self)
-        ubicacion_btn = QPushButton('Abrir ubicación', self)
+        ubicacion_label = QtWidgets.QLabel('Carpeta del ensayo:', self)
+        ubicacion_btn = QtWidgets.QPushButton('Abrir ubicación', self)
         ubicacion_btn.clicked.connect(self.selectFolder)
-        self.ubicacion_path = QLineEdit(self)
+        self.ubicacion_path = QtWidgets.QLineEdit(self)
         self.ubicacion_path.setReadOnly(True)
 
         # Test name
-        texto_label = QLabel('Nombre del ensayo:', self)
-        self.texto_input = QLineEdit(self)
-        aplicar_btn = QPushButton('Aplicar', self)
+        texto_label = QtWidgets.QLabel('Nombre del ensayo:', self)
+        self.texto_input = QtWidgets.QLineEdit(self)
+        aplicar_btn = QtWidgets.QPushButton('Aplicar', self)
         aplicar_btn.clicked.connect(self.applyText)
 
         vbox_layout.addWidget(config_label, 0, 0)
@@ -141,18 +141,18 @@ class MainWindow(QWidget):
         self.texto_input.setText(self.inputReader.test_name)
 
     def selectFile(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        file_name, _ = QFileDialog.getOpenFileName(
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Seleccionar archivo', '', 'Archivo yaml (*.yaml)', options=options)
         if file_name:
             self.config_path.setText(file_name)
             # TODO change and load config params
 
     def selectFolder(self):
-        options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        folder_path = QFileDialog.getExistingDirectory(
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(
             self, 'Seleccionar carpeta', options=options)
         if folder_path:
             self.inputReader.configEdit(
@@ -174,23 +174,24 @@ class MainWindow(QWidget):
 
     # MID LAYOUT METHODS
     def loadPanelLayout(self):
-        vbox_layout = QVBoxLayout()
-        vbox_layout.setAlignment(Qt.AlignTop)
-        title = QLabel("Panel")
-        title.setFont(QFont("Arial", 14, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
+        vbox_layout = QtWidgets.QVBoxLayout()
+        vbox_layout.setAlignment(QtCore.Qt.AlignTop)
+        title = QtWidgets.QLabel("Panel")
+        title.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
+        title.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.calibrate_sensors_btn = QPushButton('Calibrar células', self)
+        self.calibrate_sensors_btn = QtWidgets.QPushButton(
+            'Calibrar células', self)
         self.calibrate_sensors_btn.setEnabled(False)
         self.calibrate_sensors_btn.clicked.connect(self.openCalibrationMenu)
-        self.start_btn = QPushButton('Iniciar lectura', self)
+        self.start_btn = QtWidgets.QPushButton('Iniciar lectura', self)
         self.start_btn.setEnabled(False)
         self.start_btn.clicked.connect(self.startTest)
-        self.vbox_test_check = QVBoxLayout()
-        self.stop_btn = QPushButton('Finalizar y guardar', self)
+        self.vbox_test_check = QtWidgets.QVBoxLayout()
+        self.stop_btn = QtWidgets.QPushButton('Finalizar y guardar', self)
         self.stop_btn.setEnabled(False)
         self.stop_btn.clicked.connect(self.stopTest)
-        cerrar_btn = QPushButton('Cerrar programa', self)
+        cerrar_btn = QtWidgets.QPushButton('Cerrar programa', self)
         cerrar_btn.clicked.connect(self.close)
 
         vbox_layout.addWidget(title)
@@ -202,16 +203,16 @@ class MainWindow(QWidget):
         self.hbox_mid.addLayout(vbox_layout)
 
     def loadSensorLayout(self):
-        vbox_layout = QVBoxLayout()
-        vbox_layout.setAlignment(Qt.AlignTop)
+        vbox_layout = QtWidgets.QVBoxLayout()
+        vbox_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # First layout with title and sensor update button
-        hbox_title_layout = QHBoxLayout()
-        title = QLabel("Información sensores")
-        title.setFont(QFont("Arial", 14, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
+        hbox_title_layout = QtWidgets.QHBoxLayout()
+        title = QtWidgets.QLabel("Información sensores")
+        title.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
+        title.setAlignment(QtCore.Qt.AlignCenter)
 
-        update_sensors_btn = QPushButton(
+        update_sensors_btn = QtWidgets.QPushButton(
             'Conectar sensores', self)
         update_sensors_btn.setMaximumWidth(200)
         update_sensors_btn.clicked.connect(self.updateSensors)
@@ -220,18 +221,18 @@ class MainWindow(QWidget):
         hbox_title_layout.addWidget(title)
 
         # Sensor grid
-        grid_layout = QGridLayout()
+        grid_layout = QtWidgets.QGridLayout()
         grid_layout.setColumnStretch(0, 1)
         grid_layout.setColumnStretch(1, 1)
         grid_layout.setColumnStretch(2, 1)
-        grid_layout.setAlignment(Qt.AlignTop)
+        grid_layout.setAlignment(QtCore.Qt.AlignTop)
 
-        vbox_p1 = QVBoxLayout()
-        vbox_p1.addWidget(QLabel("Plataforma 1"))
-        vbox_p2 = QVBoxLayout()
-        vbox_p2.addWidget(QLabel("Plataforma 2"))
-        vbox_p3 = QVBoxLayout()
-        vbox_p3.addWidget(QLabel("Sensores externos"))
+        vbox_p1 = QtWidgets.QVBoxLayout()
+        vbox_p1.addWidget(QtWidgets.QLabel("Plataforma 1"))
+        vbox_p2 = QtWidgets.QVBoxLayout()
+        vbox_p2.addWidget(QtWidgets.QLabel("Plataforma 2"))
+        vbox_p3 = QtWidgets.QVBoxLayout()
+        vbox_p3.addWidget(QtWidgets.QLabel("Sensores externos"))
         grid_layout.addLayout(vbox_p1, 0, 0)
         grid_layout.addLayout(vbox_p2, 0, 1)
         grid_layout.addLayout(vbox_p3, 0, 2)
@@ -270,7 +271,7 @@ class MainWindow(QWidget):
                         element = grid_vbox_layout.takeAt(0)
                         if element.widget() is not None:
                             element.widget().deleteLater()
-                        elif element.layout() is not None and isinstance(element, QGridLayout):
+                        elif element.layout() is not None and isinstance(element, QtWidgets.QGridLayout):
                             for i in range(element.rowCount()):
                                 for j in range(element.columnCount()):
                                     widget = element.itemAtPosition(
@@ -289,7 +290,7 @@ class MainWindow(QWidget):
         self.update()
 
     def loadSensorGridLayout(self, status_list, checkbox_handler):
-        loadcell_layout = QGridLayout()
+        loadcell_layout = QtWidgets.QGridLayout()
         loadcell_layout.setColumnStretch(0, 0)
         loadcell_layout.setColumnStretch(1, 0)
         loadcell_layout.setColumnStretch(2, 1)
@@ -297,16 +298,16 @@ class MainWindow(QWidget):
         loadcell_layout.setColumnMinimumWidth(1, 20)
         loadcell_layout.setHorizontalSpacing(5)
         loadcell_layout.setVerticalSpacing(5)
-        loadcell_layout.setAlignment(Qt.AlignLeft)
+        loadcell_layout.setAlignment(QtCore.Qt.AlignLeft)
         # TODO avoid accessing specific keys here
         for i, sensor in enumerate(status_list):
-            checkbox = QCheckBox()
+            checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(sensor['read_data'])
             checkbox.setObjectName(sensor['id'])
             checkbox.stateChanged.connect(checkbox_handler)
             loadcell_layout.addWidget(checkbox, i, 0)
 
-            label = QLabel()
+            label = QtWidgets.QLabel()
             label.setStyleSheet('background-color: grey')
             if sensor['status'] == 'Disconnected':
                 label.setStyleSheet('background-color: red')
@@ -314,7 +315,7 @@ class MainWindow(QWidget):
                 label.setStyleSheet('background-color: green')
             loadcell_layout.addWidget(label, i, 1)
 
-            label = QLabel(sensor['name'])
+            label = QtWidgets.QLabel(sensor['name'])
             loadcell_layout.addWidget(label, i, 2)
         return loadcell_layout
 
@@ -355,7 +356,7 @@ class MainWindow(QWidget):
         test_available = True
         for i, ok in enumerate(test_status):
             output = test_status_text[i][0] if ok else test_status_text[i][1]
-            label = QLabel(output)
+            label = QtWidgets.QLabel(output)
             label.setMinimumSize(20, 20)
             label.setStyleSheet("color: green;")
             if not ok:
