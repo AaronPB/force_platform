@@ -59,11 +59,11 @@ class SensorCalibrator:
             'test_value'].values.reshape(-1,1)
         model = LinearRegression().fit(features, targets)
 
-        slope = model.coef_[0]
+        slope = np.array(model.coef_[0])
         intercept = model.intercept_
         score = model.score(features, targets)
 
         # TODO plot results??
         self.log_handler.logger.debug("===== CALIBRATION RESULTS \nSlope: " + str(
             slope) + " Intercept: " + str(intercept) + "r2: " + str(score))
-        return slope, intercept, score, features, targets
+        return slope.item(), intercept.item(), score, features, targets

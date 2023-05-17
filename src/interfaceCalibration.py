@@ -47,7 +47,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         #     offset+1, 2, self.inputReader.getIMUSensorStatus())
 
         # Add close button
-        self.close_button = QtWidgets.QPushButton('Volver al menú principal', self)
+        self.close_button = QtWidgets.QPushButton(
+            'Volver al menú principal', self)
         self.close_button.clicked.connect(self.close)
         self.grid_layout.addWidget(self.close_button, 13, 0, 1, 3)
 
@@ -67,6 +68,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
     def calibrationDialog(self, sensor):
         # Unique sensor input
+        print(sensor['config_path'])
         calibration_prepared = self.inputReader.prepareSensorCalibration(
             sensor['name'])
         self.log_handler.logger.info(
@@ -77,7 +79,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         calibration_dialog = QtWidgets.QDialog()
         calibration_dialog.setWindowTitle(
             'Calibración del sensor ' + str(sensor['name']))
-        calibration_dialog.resize(800, 400)
+        calibration_dialog.resize(900, 800)
         calibration_dialog_layout = QtWidgets.QVBoxLayout(calibration_dialog)
         calibration_dialog_layout.setAlignment(QtCore.Qt.AlignTop)
 
@@ -90,7 +92,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.text_list_widget = QtWidgets.QListWidget(self)
         self.text_values_list = []
         self.text_list_widget.addItem(
-            "Value \t\tSensor mean \tSensor STD \t Num. of measurements")
+            "Value \t\tSensor mean \t\tSensor STD \t\tNum. of measurements")
         calibration_dialog_layout.addWidget(
             QtWidgets.QLabel('Mediciones realizadas'))
         calibration_dialog_layout.addWidget(self.text_list_widget)
@@ -109,7 +111,6 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         calibration_dialog_layout.addWidget(toolbar)
         calibration_dialog_layout.addWidget(canvas)
 
-
         # Calibration input value
         self.test_value_input = QtWidgets.QLineEdit()
         self.test_value_input.setPlaceholderText(
@@ -122,9 +123,10 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.measure_button.clicked.connect(self.executeTest)
         self.calibrate_button = QtWidgets.QPushButton('Calibrar')
         self.calibrate_button.clicked.connect(self.calibrationResults)
-        self.save_button = QtWidgets.QPushButton('Finalizar')
+        self.save_button = QtWidgets.QPushButton('Guardar y cerrar')
+        self.save_button.setEnabled(False)
         self.save_button.clicked.connect(
-            lambda: self.toMainMenu(calibration_dialog))
+            lambda: self.saveCalibration(calibration_dialog, sensor['config_path']))
         cancel_button = QtWidgets.QPushButton('Cancelar')
         cancel_button.clicked.connect(calibration_dialog.reject)
         button_box.addWidget(self.measure_button)
@@ -135,8 +137,12 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
         calibration_dialog.exec_()
 
-    def toMainMenu(self, sensor_dialog):
-        # Cerrar el diálogo de calibración y volver al menú principal
+    def saveCalibration(self, sensor_dialog, config_path):
+        slope, intercept, _, _, _ = self.inputReader.getCalibrateRegressionResults()
+        self.log_handler.logger.debug(
+            "Data to save:\nslope(m): " + str(slope) + " Intercept: " + str(intercept))
+        self.inputReader.configEdit(config_path + '.calibration_data.b', intercept)
+        self.inputReader.configEdit(config_path + '.calibration_data.m', slope)
         sensor_dialog.accept()
 
     def executeTest(self):
@@ -189,15 +195,20 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.text_calibration_widget.addItem("Score (r2):\t\t" + str(score))
 
         self.plotResults(features, targets, slope, intercept)
-    
+
+        if not self.save_button.isEnabled():
+            self.save_button.setEnabled(True)
+
     def generateDefaultPlot(self):
         fig1, self.ax1 = plt.subplots()
         self.canvas = FigureCanvas(fig1)
         toolbar = NavigationToolbar(self.canvas, self)
-        self.ax1.plot(0,0)
+        self.ax1.plot(0, 0)
         self.ax1.grid(True)
+        self.ax1.set_xlabel('Sensor values')
+        self.ax1.set_ylabel('Test values')
         return self.canvas, toolbar
-    
+
     def plotResults(self, x, y, slope, intercept):
         self.ax1.clear()
         y_fit = slope * x + intercept
