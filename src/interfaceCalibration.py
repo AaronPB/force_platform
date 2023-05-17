@@ -18,7 +18,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.log_handler = LogHandler(str(__class__.__name__))
         self.inputReader = inputReader
         self.calibration_timer = QtCore.QTimer(self)
-        self.calibration_timer.timeout.connect(self.inputReader.calibrateTestProcess)
+        self.calibration_timer.timeout.connect(
+            self.inputReader.calibrateTestProcess)
         self.initUI()
 
     def initUI(self):
@@ -69,11 +70,11 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             'Calibration status: ' + str(calibration_prepared))
         if not calibration_prepared:
             return
-        
+
         calibration_dialog = QtWidgets.QDialog()
         calibration_dialog.setWindowTitle(
             'Calibración del sensor ' + str(sensor['name']))
-        calibration_dialog.resize(800,400)
+        calibration_dialog.resize(800, 400)
         calibration_dialog_layout = QtWidgets.QVBoxLayout(calibration_dialog)
         calibration_dialog_layout.setAlignment(QtCore.Qt.AlignTop)
 
@@ -85,8 +86,21 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         # Calibration test values
         self.text_list_widget = QtWidgets.QListWidget(self)
         self.text_values_list = []
-        self.text_list_widget.addItem("Load (N) \t\tMean \t\t STD \t\t Values")
+        self.text_list_widget.addItem(
+            "Value \t\tSensor mean \tSensor STD \t Num. of measurements")
+        calibration_dialog_layout.addWidget(
+            QtWidgets.QLabel('Mediciones realizadas'))
         calibration_dialog_layout.addWidget(self.text_list_widget)
+
+        # Calibration results
+        self.text_calibration_widget = QtWidgets.QListWidget(self)
+        self.text_calibration_list = []
+        self.text_calibration_widget.addItem("Scope (m):\t\t-")
+        self.text_calibration_widget.addItem("Intercept (b):\t-")
+        self.text_calibration_widget.addItem("Score (r2):\t\t-")
+        calibration_dialog_layout.addWidget(
+            QtWidgets.QLabel('Resultados de la regresión lineal'))
+        calibration_dialog_layout.addWidget(self.text_calibration_widget)
 
         # Calibration input value
         self.test_value_input = QtWidgets.QLineEdit()
@@ -96,19 +110,18 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
         # Dialog buttons
         button_box = QtWidgets.QHBoxLayout()
-        measure_button = QtWidgets.QPushButton('Medir')
-        measure_button.clicked.connect(self.executeTest)
-        calibrate_button = QtWidgets.QPushButton('Calibrar')
-        calibrate_button.clicked.connect(
-            lambda: self.toMainMenu(calibration_dialog))
-        save_button = QtWidgets.QPushButton('Finalizar')
-        save_button.clicked.connect(
+        self.measure_button = QtWidgets.QPushButton('Medir')
+        self.measure_button.clicked.connect(self.executeTest)
+        self.calibrate_button = QtWidgets.QPushButton('Calibrar')
+        self.calibrate_button.clicked.connect(self.calibrationResults)
+        self.save_button = QtWidgets.QPushButton('Finalizar')
+        self.save_button.clicked.connect(
             lambda: self.toMainMenu(calibration_dialog))
         cancel_button = QtWidgets.QPushButton('Cancelar')
         cancel_button.clicked.connect(calibration_dialog.reject)
-        button_box.addWidget(measure_button)
-        button_box.addWidget(calibrate_button)
-        button_box.addWidget(save_button)
+        button_box.addWidget(self.measure_button)
+        button_box.addWidget(self.calibrate_button)
+        button_box.addWidget(self.save_button)
         button_box.addWidget(cancel_button)
         calibration_dialog_layout.addLayout(button_box)
 
@@ -117,7 +130,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
     def toMainMenu(self, sensor_dialog):
         # Cerrar el diálogo de calibración y volver al menú principal
         sensor_dialog.accept()
-    
+
     def executeTest(self):
         # Get input value
         text = self.test_value_input.text()
@@ -125,36 +138,49 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         try:
             value = float(text)
         except ValueError:
-            QtWidgets.QMessageBox.warning(self, 'Error', 'Debe ingresar un número decimal.')
+            QtWidgets.QMessageBox.warning(
+                self, 'Error', 'Debe ingresar un número decimal.')
             return
-        
+
         # Execute calibration test
         self.inputReader.calibrationNewTest(value)
+        self.measure_button.setEnabled(False)
+        self.calibrate_button.setEnabled(False)
         self.calibration_timer.start(10)
         QtCore.QTimer.singleShot(2000, self.calibration_timer.stop)
 
         while self.calibration_timer.isActive():
             QtCore.QCoreApplication.processEvents()
-        
+
+        self.measure_button.setEnabled(True)
+        self.calibrate_button.setEnabled(True)
+
         mean, std, measurements = self.inputReader.getCalibrateTestResults()
 
         if not mean:
             return
 
-        # Agregar el texto a la lista y actualizar la lista de widgets
-        test_results = str(value) + "\t\t" + str(mean) + "\t" + str(std) + "\t" + str(measurements)
+        # Update text list widget
+        test_results = str(value) + "\t\t" + str(mean) + \
+            "\t" + str(std) + "\t" + str(measurements)
         self.text_list_widget.addItem(test_results)
         self.test_value_input.clear()
-        if(self.text_list_widget.count() > 3):
+        if (self.text_list_widget.count() > 3):
             # TODO enable calibrate results button
             pass
         # self.test_value_input.setPlaceholderText(
         #     'Introduce el valor de calibración: (ejemplo) 14.67')
-    
+
     def calibrationResults(self):
         # Get results
         slope, intercept, score = self.inputReader.getCalibrateRegressionResults()
 
+        # Update calibration list widget
+        self.text_calibration_widget.clear()
+        self.text_calibration_widget.addItem("Scope (m):\t\t" + str(slope))
+        self.text_calibration_widget.addItem(
+            "Intercept (b):\t" + str(intercept))
+        self.text_calibration_widget.addItem("Score (r2):\t\t" + str(score))
 
     def close(self):
         self.parent.interface.show()

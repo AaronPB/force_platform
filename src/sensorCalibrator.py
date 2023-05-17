@@ -54,9 +54,9 @@ class SensorCalibrator:
 
         # Linear regression
         features = self.sensor_calibration_dataframe.getDataFrame()[
-            'mean'].values
+            'mean'].values.reshape(-1,1)
         targets = self.sensor_calibration_dataframe.getDataFrame()[
-            'test_value'].values
+            'test_value'].values.reshape(-1,1)
         model = LinearRegression().fit(features, targets)
 
         slope = model.coef_[0]
