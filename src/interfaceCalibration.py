@@ -6,7 +6,7 @@ Date: 15/05/2023
 
 import matplotlib.pyplot as plt
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from src.inputReader import InputReader
 from src.utils import LogHandler
 
@@ -27,8 +27,13 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
     def initUI(self):
         self.main_vbox_layout = QtWidgets.QVBoxLayout()
+        # Set title and grid layout
+        title = QtWidgets.QLabel("Panel de Calibración")
+        title.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
+        title.setAlignment(QtCore.Qt.AlignCenter)
         self.setLayout(self.main_vbox_layout)
         self.grid_layout = QtWidgets.QGridLayout()
+        self.main_vbox_layout.addWidget(title)
         self.main_vbox_layout.addLayout(self.grid_layout)
 
         # Column labels
@@ -140,7 +145,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         slope, intercept, _, _, _ = self.inputReader.getCalibrateRegressionResults()
         self.log_handler.logger.debug(
             "Data to save:\nslope(m): " + str(slope) + " Intercept: " + str(intercept))
-        self.inputReader.configEdit(config_path + '.calibration_data.b', intercept)
+        self.inputReader.configEdit(
+            config_path + '.calibration_data.b', intercept)
         self.inputReader.configEdit(config_path + '.calibration_data.m', slope)
         sensor_dialog.accept()
 
@@ -160,7 +166,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.measure_button.setEnabled(False)
         self.calibrate_button.setEnabled(False)
         self.calibration_timer.start(10)
-        QtCore.QTimer.singleShot(2000, self.calibration_timer.stop)
+        QtCore.QTimer.singleShot(10000, self.calibration_timer.stop)
 
         while self.calibration_timer.isActive():
             QtCore.QCoreApplication.processEvents()
@@ -170,7 +176,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
         mean, std, measurements = self.inputReader.getCalibrateTestResults()
 
-        if not mean:
+        if mean is None:
             return
 
         # Update text list widget
@@ -199,23 +205,27 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             self.save_button.setEnabled(True)
 
     def generateDefaultPlot(self):
-        fig1, self.ax1 = plt.subplots()
-        self.canvas = FigureCanvas(fig1)
+        self.fig, self.ax = plt.subplots()
+        self.canvas = FigureCanvas(self.fig)
         toolbar = NavigationToolbar(self.canvas, self)
-        self.ax1.plot(0, 0)
-        self.ax1.grid(True)
-        self.ax1.set_xlabel('Sensor values')
-        self.ax1.set_ylabel('Test values')
+        self.ax.plot(0, 0)
+        self.ax.grid(True)
+        self.ax.set_xlabel('Sensor values')
+        self.ax.set_ylabel('Test values')
+        self.plot_visible = True
         return self.canvas, toolbar
 
     def plotResults(self, x, y, slope, intercept):
-        self.ax1.clear()
+        self.ax.clear()
         y_fit = slope * x + intercept
-        self.ax1.scatter(x, y)
-        self.ax1.plot(x, y_fit, color='red')
-        self.ax1.grid(True)
+        self.ax.scatter(x, y)
+        self.ax.plot(x, y_fit, color='red')
+        self.ax.grid(True)
         self.canvas.draw()
 
     def close(self):
         self.parent.interface.show()
         self.hide()
+        if self.plot_visible:
+            plt.close(self.fig)
+            self.plot_visible = False

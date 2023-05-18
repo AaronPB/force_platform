@@ -28,19 +28,18 @@ class SensorCalibrator:
         # self.log_handler.logger.debug(str(sensor_value) + "\n" + str(self.test_sensor_data) + "\n SIZE: " + str(self.test_sensor_data.size))
 
     def getTestResults(self):
-        mean = std = -1
         measurements = self.test_sensor_data.size
         self.log_handler.logger.debug(
             "SIZE: " + str(self.test_sensor_data.size))
         if measurements == 0:
             self.log_handler.logger.error(
                 "There is no measurements to get results from!!")
-            return mean, std, measurements
+            return None, None, measurements
         mean = np.mean(self.test_sensor_data)
         std = np.std(self.test_sensor_data)
         self.sensor_calibration_dataframe.addRow(
             [self.test_value, mean, std, measurements])
-        self.log_handler.logger.debug("==== Test results for load: " + str(self.test_value) + "\nMean: " + str(
+        self.log_handler.logger.debug("==== Test results for test value: " + str(self.test_value) + "\nMean: " + str(
             mean) + " STD: " + str(std) + " Number of measurements: " + str(measurements))
         return mean, std, measurements
 
