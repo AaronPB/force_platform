@@ -6,6 +6,7 @@ Date: 13/04/2023
 
 import logging
 import colorlog
+import numpy as np
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -37,6 +38,13 @@ class TestDataFrame:
 
     def getDataFrame(self):
         return self.df.copy()
+
+    def getIntervalMeanData(self, timestamp_init, timestamp_end):
+        copy_df = self.getDataFrame()
+        filtered_df = copy_df[(copy_df['timestamp'] >= timestamp_init) & (
+            copy_df['timestamp'] <= timestamp_end)]
+        mean_values =  np.mean(filtered_df.drop('timestamp', axis=1), axis=0)
+        return mean_values.to_dict()
 
 
 class DataFramePlotter:

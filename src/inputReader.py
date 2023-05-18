@@ -100,7 +100,8 @@ class InputReader:
         for sensor_id in list(config_list_path.keys()):
             sensor_data = config_list_path[sensor_id].copy()
             sensor_data['id'] = sensor_id  # Add ID to dict
-            sensor_data['config_path'] = str(config_list) + '.' + str(sensor_id)  # Add config path to dict
+            sensor_data['config_path'] = str(
+                config_list) + '.' + str(sensor_id)  # Add config path to dict
             type.addSensor(sensor_data)
 
     # Sensors connection
@@ -131,7 +132,7 @@ class InputReader:
     def getReaderChecks(self):
         return [self.config_path, self.test_folder, self.test_name, self.sensor_connected]
 
-    # Read process
+    # == READ PROCESS
     def readerStart(self):
         self.log_handler.logger.info("Starting test...")
         # Start sensors
@@ -169,15 +170,28 @@ class InputReader:
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
-        # Plot results
+        # WIP Plot results
         single_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, :2]
         preview = DataFramePlotter(single_dataframe)
         preview.plot_line('time', [single_dataframe.columns[1]])
 
-    # Calibration process
+    # == TARE PROCESS
+    def tareApply(self, timestamp_init, timestamp_end):
+        # Set new offset to all sensors and safe new intercept values in config
+        mean_values_dict = self.sensor_dataframe.getIntervalMeanData(
+            timestamp_init, timestamp_end)
+        self.log_handler.logger.debug(
+            "Mean values list: \n" + str(mean_values_dict))
+        self.phidgetP1LoadCellsHandler.tareSensors(mean_values_dict)
+        self.phidgetP2LoadCellsHandler.tareSensors(mean_values_dict)
+        self.phidgetEncodersHandler.tareSensors(mean_values_dict)
+
+    # == CALIBRATION PROCESS
     def prepareSensorCalibration(self, sensor_name):
         sensor_config_lists = ['p1_phidget_loadcell_list',
-                               'p2_phidget_loadcell_list', 'phidget_encoder_list', 'taobotics_imu_list']
+                               'p2_phidget_loadcell_list',
+                               'phidget_encoder_list',
+                               'taobotics_imu_list']
         # Search sensor id
         self.calibration_handler = None
         self.calibration_sensor_data = {}
@@ -189,7 +203,8 @@ class InputReader:
                     )
                     # Add ID and path to dict
                     self.calibration_sensor_data['id'] = sensor_id
-                    self.calibration_sensor_data['config_path'] = config_list_path + '.' + sensor_id
+                    self.calibration_sensor_data['config_path'] = config_list_path + \
+                        '.' + sensor_id
                     break
             if self.calibration_sensor_data:
                 break
@@ -237,7 +252,7 @@ class InputReader:
             return None, None, None
         self.calibration_handler.stop()
         return self.calibrator.getTestResults()
-    
+
     def getCalibrateRegressionResults(self):
         if not self.calibration_handler:
             self.log_handler.logger.error(

@@ -4,7 +4,7 @@ Author: Aaron Poyatos
 Date: 13/04/2023
 """
 
-import os
+import time
 # import numpy as np
 # import matplotlib.pyplot as plt
 
@@ -59,10 +59,11 @@ class MainWindow(QtWidgets.QWidget):
         self.interface.setLayout(hbox_main)
         self.setLayout(self.interface_box)
 
-        # Load reader software and test timer
+        # Load reader software and timers
         self.inputReader = InputReader()
-        self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(self.inputReader.readerProcess)
+        self.test_timer = QtCore.QTimer(self)
+        self.test_timer.timeout.connect(self.inputReader.readerProcess)
+        self.tare_timer = QtCore.QTimer(self)
 
         # Load layouts
         self.loadIconLayout()
@@ -190,6 +191,9 @@ class MainWindow(QtWidgets.QWidget):
         self.start_btn = QtWidgets.QPushButton('Iniciar lectura', self)
         self.start_btn.setEnabled(False)
         self.start_btn.clicked.connect(self.startTest)
+        self.tare_btn = QtWidgets.QPushButton('Tarar sensores', self)
+        self.tare_btn.setEnabled(False)
+        self.tare_btn.clicked.connect(self.tareSensors)
         self.vbox_test_check = QtWidgets.QVBoxLayout()
         self.stop_btn = QtWidgets.QPushButton('Finalizar y guardar', self)
         self.stop_btn.setEnabled(False)
@@ -200,6 +204,7 @@ class MainWindow(QtWidgets.QWidget):
         vbox_layout.addWidget(title)
         vbox_layout.addWidget(self.calibrate_sensors_btn)
         vbox_layout.addWidget(self.start_btn)
+        vbox_layout.addWidget(self.tare_btn)
         vbox_layout.addLayout(self.vbox_test_check)
         vbox_layout.addWidget(self.stop_btn)
         vbox_layout.addWidget(cerrar_btn)
@@ -358,15 +363,34 @@ class MainWindow(QtWidgets.QWidget):
         self.start_btn.setEnabled(False)
         self.calibrate_sensors_btn.setEnabled(False)
         self.inputReader.readerStart()
+        self.tare_btn.setEnabled(True)
         self.stop_btn.setEnabled(True)
-        self.timer.start(10)  # ms
+        # Start reader process with the specified rate in ms
+        self.test_timer.start(10)
 
     def stopTest(self):
+        self.tare_btn.setEnabled(False)
         self.stop_btn.setEnabled(False)
-        self.timer.stop()
+        self.test_timer.stop()
         self.inputReader.readerStop()
         self.start_btn.setEnabled(True)
         self.calibrate_sensors_btn.setEnabled(True)
+
+    def tareSensors(self):
+        self.stop_btn.setEnabled(False)
+        self.tare_btn.setEnabled(False)
+        start_time = round(time.time()*1000)
+        self.tare_timer.start()
+        # Tare with 3 seconds of current data
+        QtCore.QTimer.singleShot(3000, self.tare_timer.stop)
+
+        while self.tare_timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        end_time = round(time.time()*1000)
+        self.inputReader.tareApply(start_time, end_time)
+        self.tare_btn.setEnabled(True)
+        self.stop_btn.setEnabled(True)
 
     def openCalibrationMenu(self):
         self.interface.hide()

@@ -78,6 +78,14 @@ class PhidgetLoadCellsHandler:
         self.sensor_list.clear()
         self.sensor_data.clear()
 
+    def tareSensors(self, tare_dict: dict):
+        for sensor in self.sensor_list:
+            if sensor['name'] in tare_dict:
+                prev_value = sensor['calibration_data']['b']
+                sensor['calibration_data']['b'] -= tare_dict[sensor['name']]
+                self.log_handler.logger.debug(
+                    "TARED " + sensor['name'] + " with value: " + str(prev_value) + " to value: " + str(sensor['calibration_data']['b']))
+
     def getSensorListDict(self):
         key_list = ['id', 'name', 'read_data', 'status', 'config_path']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
@@ -110,7 +118,7 @@ class PhidgetLoadCellsHandler:
         for sensor in self.sensor_list:
             if not sensor['sensor'].getAttached() and sensor['read_data']:
                 try:
-                    sensor['sensor'].openWaitForAttachment(2000)  # in ms
+                    sensor['sensor'].openWaitForAttachment(1000)  # in ms
                     sensor['sensor'].setDataInterval(8)  # in ms
                     # FIXME Identifica también los otros canales aunque no haya sensor conectado!
                     # if loadCell['input'].getSensorType() != Bridge.PHIDGET_BRIDGE_SENSOR_TYPE_NONE:

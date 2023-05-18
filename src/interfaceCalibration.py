@@ -23,6 +23,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.calibration_timer = QtCore.QTimer(self)
         self.calibration_timer.timeout.connect(
             self.inputReader.calibrateTestProcess)
+        self.plot_visible = False
         self.initUI()
 
     def initUI(self):
@@ -166,6 +167,9 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             config_path + '.calibration_data.b', intercept)
         self.inputReader.configEdit(config_path + '.calibration_data.m', slope)
         sensor_dialog.accept()
+        if self.plot_visible:
+            plt.close(self.fig)
+            self.plot_visible = False
 
     def executeTest(self):
         # Get input value
@@ -182,7 +186,9 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.inputReader.calibrationNewTest(value)
         self.measure_button.setEnabled(False)
         self.calibrate_button.setEnabled(False)
+        # Start calibration process with the specified rate in ms
         self.calibration_timer.start(10)
+        # During specified time in ms
         QtCore.QTimer.singleShot(10000, self.calibration_timer.stop)
 
         while self.calibration_timer.isActive():
