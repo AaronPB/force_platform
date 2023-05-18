@@ -76,6 +76,11 @@ class MainWindow(QtWidgets.QWidget):
         self.updatePaths()
         self.updateTestChecks()
 
+        # Load calibration menu and hide it
+        self.calibration_menu = MainCalibrationMenu(self, self.inputReader)
+        self.interface_box.addWidget(self.calibration_menu)
+        self.calibration_menu.hide()
+
         # Load default plots
         # self.generateExamplePlots()
 
@@ -365,9 +370,8 @@ class MainWindow(QtWidgets.QWidget):
 
     def openCalibrationMenu(self):
         self.interface.hide()
-        self.calibrationmenu = MainCalibrationMenu(self, self.inputReader)
-        self.interface_box.addWidget(self.calibrationmenu)
-        self.calibrationmenu.show()
+        self.calibration_menu.updateGridLayout()
+        self.calibration_menu.show()
 
     # TODO BOTTOM LAYOUT METHODS
     # def generateExamplePlots(self):

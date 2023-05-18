@@ -36,6 +36,24 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.main_vbox_layout.addWidget(title)
         self.main_vbox_layout.addLayout(self.grid_layout)
 
+        self.loadGridLayout()
+
+        self.show()
+
+    def updateGridLayout(self):
+        self.clearGridLayout()
+        self.loadGridLayout()
+
+    def clearGridLayout(self):
+        while self.grid_layout.count():
+            item = self.grid_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+            else:
+                self.clearGridLayout(item.layout())
+
+    def loadGridLayout(self):
         # Column labels
         self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 1"), 0, 0)
         self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 2"), 0, 1)
@@ -56,8 +74,6 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             'Volver al menú principal', self)
         self.close_button.clicked.connect(self.close)
         self.grid_layout.addWidget(self.close_button, 13, 0, 1, 3)
-
-        self.show()
 
     def loadSensorButtons(self, row_offset: int, column_number: int, sensor_list: list):
         # Sensor list
@@ -126,6 +142,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.measure_button = QtWidgets.QPushButton('Medir')
         self.measure_button.clicked.connect(self.executeTest)
         self.calibrate_button = QtWidgets.QPushButton('Calibrar')
+        self.calibrate_button.setEnabled(False)
         self.calibrate_button.clicked.connect(self.calibrationResults)
         self.save_button = QtWidgets.QPushButton('Guardar y cerrar')
         self.save_button.setEnabled(False)
@@ -172,7 +189,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             QtCore.QCoreApplication.processEvents()
 
         self.measure_button.setEnabled(True)
-        self.calibrate_button.setEnabled(True)
+        if (self.text_list_widget.count() > 3):
+            self.calibrate_button.setEnabled(True)
 
         mean, std, measurements = self.inputReader.getCalibrateTestResults()
 
@@ -184,9 +202,6 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             "\t" + str(std) + "\t" + str(measurements)
         self.text_list_widget.addItem(test_results)
         self.test_value_input.clear()
-        if (self.text_list_widget.count() > 3):
-            # TODO enable calibrate results button
-            pass
 
     def calibrationResults(self):
         # Get results
