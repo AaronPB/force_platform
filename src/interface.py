@@ -9,8 +9,6 @@ import os
 # import matplotlib.pyplot as plt
 
 from PyQt5 import QtWidgets, QtGui, QtCore
-# from PyQt5.QtGui import QPixmap, QIcon, QFont
-# from PyQt5.QtCore import Qt, QTimer
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 # from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -239,13 +237,13 @@ class MainWindow(QtWidgets.QWidget):
 
         # Sensor information
         vbox_p1.addLayout(self.loadSensorGridLayout(
-            self.inputReader.getPlatform1SensorStatus(), self.handlePlatform1SensorCheckbox))
+            self.inputReader.getPlatform1SensorStatus()))
         vbox_p2.addLayout(self.loadSensorGridLayout(
-            self.inputReader.getPlatform2SensorStatus(), self.handlePlatform2SensorCheckbox))
+            self.inputReader.getPlatform2SensorStatus()))
         vbox_p3.addLayout(self.loadSensorGridLayout(
-            self.inputReader.getEncoderSensorsStatus(), self.handleEncoderCheckbox))
+            self.inputReader.getEncoderSensorsStatus()))
         vbox_p3.addLayout(self.loadSensorGridLayout(
-            self.inputReader.getIMUSensorStatus(), self.handleIMUCheckbox))
+            self.inputReader.getIMUSensorStatus()))
 
         vbox_layout.addLayout(hbox_title_layout)
         vbox_layout.addLayout(grid_layout)
@@ -289,7 +287,7 @@ class MainWindow(QtWidgets.QWidget):
         self.loadSensorLayout()
         self.update()
 
-    def loadSensorGridLayout(self, status_list, checkbox_handler):
+    def loadSensorGridLayout(self, status_list):
         loadcell_layout = QtWidgets.QGridLayout()
         loadcell_layout.setColumnStretch(0, 0)
         loadcell_layout.setColumnStretch(1, 0)
@@ -299,12 +297,12 @@ class MainWindow(QtWidgets.QWidget):
         loadcell_layout.setHorizontalSpacing(5)
         loadcell_layout.setVerticalSpacing(5)
         loadcell_layout.setAlignment(QtCore.Qt.AlignLeft)
-        # TODO avoid accessing specific keys here
+
         for i, sensor in enumerate(status_list):
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(sensor['read_data'])
-            checkbox.setObjectName(sensor['id'])
-            checkbox.stateChanged.connect(checkbox_handler)
+            checkbox.setObjectName(sensor['config_path'])
+            checkbox.stateChanged.connect(self.handleSensorCheckbox)
             loadcell_layout.addWidget(checkbox, i, 0)
 
             label = QtWidgets.QLabel()
@@ -319,26 +317,10 @@ class MainWindow(QtWidgets.QWidget):
             loadcell_layout.addWidget(label, i, 2)
         return loadcell_layout
 
-    # TODO avoid accessing specific config keys here!!
-    def handlePlatform1SensorCheckbox(self, state):
+    def handleSensorCheckbox(self, state):
         sender = self.sender()
         self.inputReader.configEdit(
-            'p1_phidget_loadcell_list.' + sender.objectName() + '.read_data', state == 2)
-
-    def handlePlatform2SensorCheckbox(self, state):
-        sender = self.sender()
-        self.inputReader.configEdit(
-            'p2_phidget_loadcell_list.' + sender.objectName() + '.read_data', state == 2)
-
-    def handleEncoderCheckbox(self, state):
-        sender = self.sender()
-        self.inputReader.configEdit(
-            'phidget_encoder_list.' + sender.objectName() + '.read_data', state == 2)
-
-    def handleIMUCheckbox(self, state):
-        sender = self.sender()
-        self.inputReader.configEdit(
-            'taobotics_imu_list.' + sender.objectName() + '.read_data', state == 2)
+            sender.objectName() + '.read_data', state == 2)
 
     def updateTestChecks(self):
         test_status_text = [
