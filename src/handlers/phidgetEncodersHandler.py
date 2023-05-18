@@ -37,13 +37,11 @@ class PhidgetEncodersHandler:
                     m = sensor['calibration_data']['m']
                     b = sensor['calibration_data']['b']
                     name = sensor['name']
+                    init_pose = sensor['initial_position']
                     connected_sensor = True
                     break
             if not connected_sensor:
                 return
-
-            # TODO!
-            distance = positionChange  # * m + b
 
             # log_handler.logger.debug("[" + str(serial) + "_" +
             #                          str(channel) + "]: " + str(positionChange) + " pos " +
@@ -51,8 +49,9 @@ class PhidgetEncodersHandler:
             #                          str(distance) + " N)")
 
             mutex.acquire()
-            sensor_data_raw[name] = positionChange
-            sensor_data[name] = distance
+            sensor_data_raw[name] = sensor_data_raw.get(
+                name, init_pose) + positionChange
+            sensor_data[name] = sensor_data_raw[name] * m + b
             mutex.release()
 
         self.onPositionChangeHandler = onPositionChangeHandler
