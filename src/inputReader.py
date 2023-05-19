@@ -241,8 +241,10 @@ class InputReader:
                 "No calibration sensor handler defined!" +
                 "Call prepareSensorCalibration method before testing.")
             return
-        self.calibrator.addTestMeasurement(
-            self.calibration_handler.getSensorDataRaw()[0])
+        sensor_data_raw = self.calibration_handler.getSensorDataRaw()
+        if not sensor_data_raw:
+            return
+        self.calibrator.addTestMeasurement(sensor_data_raw[0])
 
     def getCalibrateTestResults(self):
         if not self.calibration_handler:
