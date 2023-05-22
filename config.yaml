@@ -16,7 +16,7 @@ p1_phidget_loadcell_list:
     channel: 0
     name: P1_LoadCell_Z_1
     read_data: true
-    serial: 583229
+    serial: 583477
   load_cell_2:
     calibration_data:
       b: -5.5889
@@ -24,7 +24,7 @@ p1_phidget_loadcell_list:
     channel: 1
     name: P1_LoadCell_Z_2
     read_data: true
-    serial: 583229
+    serial: 583477
   load_cell_3:
     calibration_data:
       b: -5.5889
@@ -32,7 +32,7 @@ p1_phidget_loadcell_list:
     channel: 2
     name: P1_LoadCell_Z_3
     read_data: true
-    serial: 583229
+    serial: 583477
   load_cell_4:
     calibration_data:
       b: -5.5889
@@ -40,7 +40,7 @@ p1_phidget_loadcell_list:
     channel: 3
     name: P1_LoadCell_Z_4
     read_data: true
-    serial: 583229
+    serial: 583477
   load_cell_5:
     calibration_data:
       b: -5.5889
@@ -48,31 +48,31 @@ p1_phidget_loadcell_list:
     channel: 0
     name: P1_LoadCell_X_1
     read_data: false
-    serial: 583241
+    serial: 583467
   load_cell_6:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 1
     name: P1_LoadCell_X_2
     read_data: false
-    serial: 583241
+    serial: 583467
   load_cell_7:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 2
     name: P1_LoadCell_X_3
     read_data: false
-    serial: 583241
+    serial: 583467
   load_cell_8:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 3
     name: P1_LoadCell_X_4
     read_data: false
-    serial: 583241
+    serial: 583467
   load_cell_9:
     calibration_data:
       b: -5.5889
@@ -80,31 +80,31 @@ p1_phidget_loadcell_list:
     channel: 0
     name: P1_LoadCell_Y_1
     read_data: false
-    serial: 583241
+    serial: 588715
   load_cell_10:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 1
     name: P1_LoadCell_Y_2
     read_data: false
-    serial: 583241
+    serial: 588715
   load_cell_11:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 2
     name: P1_LoadCell_Y_3
     read_data: false
-    serial: 583241
+    serial: 588715
   load_cell_12:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 3
     name: P1_LoadCell_Y_4
     read_data: false
-    serial: 583241
+    serial: 588715
 p2_phidget_loadcell_list:
   load_cell_1:
     calibration_data:
@@ -113,7 +113,7 @@ p2_phidget_loadcell_list:
     channel: 0
     name: P2_LoadCell_Z_1
     read_data: false
-    serial: 583241
+    serial: 588569
   load_cell_2:
     calibration_data:
       b: -5.5889
@@ -121,7 +121,7 @@ p2_phidget_loadcell_list:
     channel: 1
     name: P2_LoadCell_Z_2
     read_data: false
-    serial: 583241
+    serial: 588569
   load_cell_3:
     calibration_data:
       b: -5.5889
@@ -129,7 +129,7 @@ p2_phidget_loadcell_list:
     channel: 2
     name: P2_LoadCell_Z_3
     read_data: false
-    serial: 583241
+    serial: 588569
   load_cell_4:
     calibration_data:
       b: -5.5889
@@ -137,7 +137,7 @@ p2_phidget_loadcell_list:
     channel: 3
     name: P2_LoadCell_Z_4
     read_data: false
-    serial: 583241
+    serial: 588569
   load_cell_5:
     calibration_data:
       b: -5.5889
@@ -145,31 +145,31 @@ p2_phidget_loadcell_list:
     channel: 0
     name: P2_LoadCell_X_1
     read_data: false
-    serial: 583241
+    serial: 588718
   load_cell_6:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 1
     name: P2_LoadCell_X_2
     read_data: false
-    serial: 583241
+    serial: 588718
   load_cell_7:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 2
     name: P2_LoadCell_X_3
     read_data: false
-    serial: 583241
+    serial: 588718
   load_cell_8:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 3
     name: P2_LoadCell_X_4
     read_data: false
-    serial: 583241
+    serial: 588718
   load_cell_9:
     calibration_data:
       b: -5.5889
@@ -177,36 +177,36 @@ p2_phidget_loadcell_list:
     channel: 0
     name: P2_LoadCell_Y_1
     read_data: false
-    serial: 583241
+    serial: 582535
   load_cell_10:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 1
     name: P2_LoadCell_Y_2
     read_data: false
-    serial: 583241
+    serial: 582535
   load_cell_11:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 2
     name: P2_LoadCell_Y_3
     read_data: false
-    serial: 583241
+    serial: 582535
   load_cell_12:
     calibration_data:
       b: -5.5889
       m: 1092233.0
-    channel: 0
+    channel: 3
     name: P2_LoadCell_Y_4
     read_data: false
-    serial: 583241
+    serial: 582535
 phidget_encoder_list:
   encoder_1:
     calibration_data:
       b: 0.0
-      m: 0.0
+      m: 0.01875
     channel: 0
     initial_position: 0
     name: Encoder_Z_1
@@ -215,7 +215,7 @@ phidget_encoder_list:
   encoder_2:
     calibration_data:
       b: 0.0
-      m: 0.0
+      m: 0.01875
     channel: 1
     initial_position: 0
     name: Encoder_Z_2
