@@ -150,7 +150,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.save_button.clicked.connect(
             lambda: self.saveCalibration(calibration_dialog, sensor['config_path']))
         cancel_button = QtWidgets.QPushButton('Cancelar')
-        cancel_button.clicked.connect(calibration_dialog.reject)
+        cancel_button.clicked.connect(
+            lambda: self.closeCalibrationDialog(calibration_dialog))
         button_box.addWidget(self.measure_button)
         button_box.addWidget(self.calibrate_button)
         button_box.addWidget(self.save_button)
@@ -159,7 +160,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
         calibration_dialog.exec_()
 
-    def saveCalibration(self, sensor_dialog, config_path):
+    def saveCalibration(self, sensor_dialog: QtWidgets.QDialog, config_path):
+        self.inputReader.calibrateTestStop()
         slope, intercept, _, _, _ = self.inputReader.getCalibrateRegressionResults()
         self.log_handler.logger.debug(
             "Data to save:\nslope(m): " + str(slope) + " Intercept: " + str(intercept))
@@ -167,6 +169,13 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             config_path + '.calibration_data.b', intercept)
         self.inputReader.configEdit(config_path + '.calibration_data.m', slope)
         sensor_dialog.accept()
+        if self.plot_visible:
+            plt.close(self.fig)
+            self.plot_visible = False
+
+    def closeCalibrationDialog(self, sensor_dialog: QtWidgets.QDialog):
+        self.inputReader.calibrateTestStop()
+        sensor_dialog.reject()
         if self.plot_visible:
             plt.close(self.fig)
             self.plot_visible = False
@@ -189,7 +198,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         # Start calibration process with the specified rate in ms
         self.calibration_timer.start(10)
         # During specified time in ms
-        QtCore.QTimer.singleShot(10000, self.calibration_timer.stop)
+        QtCore.QTimer.singleShot(3000, self.calibration_timer.stop)
 
         while self.calibration_timer.isActive():
             QtCore.QCoreApplication.processEvents()

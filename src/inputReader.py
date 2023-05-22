@@ -221,44 +221,28 @@ class InputReader:
             return False
 
         self.calibration_handler.addSensor(self.calibration_sensor_data)
-        self.calibration_handler.connect()
+        if not self.calibration_handler.connect():
+            return False
 
+        # Init calibration class and start sensor reading
         self.calibrator = SensorCalibrator()
+        self.calibration_handler.start()
         return True
 
     def calibrationNewTest(self, test_value: float):
-        if not self.calibration_handler:
-            self.log_handler.logger.error(
-                "No calibration sensor handler defined!" +
-                "Call prepareSensorCalibration method before testing.")
-            return
         self.calibrator.newCalibrationTest(test_value)
-        self.calibration_handler.start()
 
     def calibrateTestProcess(self):
-        if not self.calibration_handler:
-            self.log_handler.logger.error(
-                "No calibration sensor handler defined!" +
-                "Call prepareSensorCalibration method before testing.")
-            return
         sensor_data_raw = self.calibration_handler.getSensorDataRaw()
         if not sensor_data_raw:
             return
         self.calibrator.addTestMeasurement(sensor_data_raw[0])
 
     def getCalibrateTestResults(self):
-        if not self.calibration_handler:
-            self.log_handler.logger.error(
-                "No calibration sensor handler defined!" +
-                "Call prepareSensorCalibration method before testing.")
-            return None, None, None
-        self.calibration_handler.stop()
         return self.calibrator.getTestResults()
 
     def getCalibrateRegressionResults(self):
-        if not self.calibration_handler:
-            self.log_handler.logger.error(
-                "No calibration sensor handler defined!" +
-                "Call prepareSensorCalibration method before testing.")
-            return None, None, None
         return self.calibrator.getCalibrationResults()
+
+    def calibrateTestStop(self):
+        self.calibration_handler.stop()
