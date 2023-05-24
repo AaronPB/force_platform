@@ -80,6 +80,8 @@ class LogHandler:
         console_handler.setLevel(logging.DEBUG)
 
         self.addColorFormatter(console_handler)
+        if(self.logger.hasHandlers()):
+            self.logger.handlers.clear()
         self.logger.addHandler(console_handler)
 
     def addColorFormatter(self, handler):
