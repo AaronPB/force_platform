@@ -142,9 +142,16 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         calibration_dialog_layout.addWidget(self.test_value_input)
 
         # Dialog buttons
-        button_box = QtWidgets.QHBoxLayout()
-        self.measure_button = QtWidgets.QPushButton('Medir')
-        self.measure_button.clicked.connect(self.executeTest)
+        upper_button_box = QtWidgets.QHBoxLayout()
+        lower_button_box = QtWidgets.QHBoxLayout()
+        self.measure_button = QtWidgets.QPushButton('Medir con valor')
+        self.measure_button.clicked.connect(lambda: self.executeTest(False))
+        self.measure_reference_button = QtWidgets.QPushButton(
+            'Medir con sensor')
+        self.measure_reference_button.setEnabled(
+            self.inputReader.isCalibrationReferenceConnected())
+        self.measure_reference_button.clicked.connect(
+            lambda: self.executeTest(True))
         self.calibrate_button = QtWidgets.QPushButton('Calibrar')
         self.calibrate_button.setEnabled(False)
         self.calibrate_button.clicked.connect(self.calibrationResults)
@@ -155,11 +162,13 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         cancel_button = QtWidgets.QPushButton('Cancelar')
         cancel_button.clicked.connect(
             lambda: self.closeCalibrationDialog(calibration_dialog))
-        button_box.addWidget(self.measure_button)
-        button_box.addWidget(self.calibrate_button)
-        button_box.addWidget(self.save_button)
-        button_box.addWidget(cancel_button)
-        calibration_dialog_layout.addLayout(button_box)
+        upper_button_box.addWidget(self.measure_button)
+        upper_button_box.addWidget(self.measure_reference_button)
+        upper_button_box.addWidget(self.calibrate_button)
+        lower_button_box.addWidget(self.save_button)
+        lower_button_box.addWidget(cancel_button)
+        calibration_dialog_layout.addLayout(upper_button_box)
+        calibration_dialog_layout.addLayout(lower_button_box)
 
         calibration_dialog.exec_()
 
@@ -183,20 +192,23 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             plt.close(self.fig)
             self.plot_visible = False
 
-    def executeTest(self):
-        # Get input value
-        text = self.test_value_input.text()
-        value = -1
-        try:
-            value = float(text)
-        except ValueError:
-            QtWidgets.QMessageBox.warning(
-                self, 'Error', 'Debe ingresar un número decimal.')
-            return
+    def executeTest(self, reference_sensor):
+        value = None
+        if not reference_sensor:
+            # Get input value
+            text = self.test_value_input.text()
+            value = -1
+            try:
+                value = float(text)
+            except ValueError:
+                QtWidgets.QMessageBox.warning(
+                    self, 'Error', 'Debe ingresar un número decimal.')
+                return
 
         # Execute calibration test
         self.inputReader.calibrationNewTest(value)
         self.measure_button.setEnabled(False)
+        self.measure_reference_button.setEnabled(False)
         self.calibrate_button.setEnabled(False)
         # Start calibration process with the specified rate in ms
         self.calibration_timer.start(10)
@@ -207,8 +219,10 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             QtCore.QCoreApplication.processEvents()
 
         self.measure_button.setEnabled(True)
+        self.measure_reference_button.setEnabled(
+            self.inputReader.isCalibrationReferenceConnected())
 
-        mean, std, measurements = self.inputReader.getCalibrateTestResults()
+        value, mean, std, measurements = self.inputReader.getCalibrateTestResults()
 
         if mean is None:
             return

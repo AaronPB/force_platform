@@ -194,6 +194,8 @@ class InputReader:
                                'taobotics_imu_list']
         # Search sensor id
         self.calibration_handler = None
+        self.reference_calibration_handler = None
+        self.reference_calibration_available = False
         self.calibration_sensor_data = {}
         for config_list_path in sensor_config_lists:
             config_sensor_list = self.config[config_list_path]
@@ -212,31 +214,53 @@ class InputReader:
             return False
         if config_list_path == 'p1_phidget_loadcell_list' or config_list_path == 'p2_phidget_loadcell_list':
             self.calibration_handler = PhidgetLoadCellsHandler("Calibration")
+            self.reference_calibration_handler = PhidgetLoadCellsHandler(
+                "Reference Calibration")
         elif config_list_path == 'phidget_encoder_list':
             self.calibration_handler = PhidgetEncodersHandler("Calibration")
+            self.reference_calibration_handler = PhidgetEncodersHandler(
+                "Reference Calibration")
         elif config_list_path == 'taobotics_imu_list':
             self.calibration_handler = TaoboticsIMUsHandler("Calibration")
+            self.reference_calibration_handler = TaoboticsIMUsHandler(
+                "Reference Calibration")
         else:
-            self.calibration_handler = None
             return False
 
+        # Add sensor that is beaing calibrated and the reference if it is defined in config
         self.calibration_handler.addSensor(self.calibration_sensor_data)
+        if 'calibration_sensor' in self.config:
+            reference_sensor_data = self.config['calibration_sensor'].copy()
+            reference_sensor_data['id'] = 'calibration_sensor'
+            reference_sensor_data['config_path'] = 'calibration_sensor'
+            self.reference_calibration_handler.addSensor(reference_sensor_data)
+            self.reference_calibration_available = self.reference_calibration_handler.connect()
         if not self.calibration_handler.connect():
             return False
 
         # Init calibration class and start sensor reading
         self.calibrator = SensorCalibrator()
         self.calibration_handler.start()
+        if self.reference_calibration_available:
+            self.reference_calibration_handler.start()
         return True
 
-    def calibrationNewTest(self, test_value: float):
+    def calibrationNewTest(self, test_value: float = None):
         self.calibrator.newCalibrationTest(test_value)
 
     def calibrateTestProcess(self):
         sensor_data_raw = self.calibration_handler.getSensorDataRaw()
         if not sensor_data_raw:
             return
-        self.calibrator.addTestMeasurement(sensor_data_raw[0])
+        reference_sensor_data = None
+        if self.reference_calibration_available:
+            reference_sensor_data = self.reference_calibration_handler.getSensorDataRaw()[
+                0]
+        self.calibrator.addTestMeasurement(
+            sensor_data_raw[0], reference_sensor_data)
+
+    def isCalibrationReferenceConnected(self):
+        return self.reference_calibration_available
 
     def getCalibrateTestResults(self):
         return self.calibrator.getTestResults()

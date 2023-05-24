@@ -19,29 +19,45 @@ class SensorCalibrator:
         self.sensor_calibration_dataframe = TestDataFrame(
             ['test_value', 'mean', 'std', 'measurements'])
 
-    def newCalibrationTest(self, test_value: float):
+    def newCalibrationTest(self, test_value: float = None):
         self.test_value = test_value
         self.test_sensor_data = np.array([])
+        self.test_reference_sensor_data = np.array([])
 
-    def addTestMeasurement(self, sensor_value: float):
+    def addTestMeasurement(self, sensor_value: float, reference_sensor_value: float = None):
         self.test_sensor_data = np.append(self.test_sensor_data, sensor_value)
+        if self.test_value is None and reference_sensor_value is not None:
+            self.test_reference_sensor_data = np.append(
+                self.test_reference_sensor_data, reference_sensor_value)
         # self.log_handler.logger.debug(str(sensor_value) + "\n" + str(self.test_sensor_data) + "\n SIZE: " + str(self.test_sensor_data.size))
 
     def getTestResults(self):
-        measurements = self.test_sensor_data.size
+        value = mean = std = sensor_measurements = None
+        # Check first if reference sensor values has been recorded
+        reference_sensor_measurements = self.test_reference_sensor_data.size
+        if self.test_value is None and reference_sensor_measurements == 0:
+            self.log_handler.logger.error(
+                "There is no reference measurements to get results from!!")
+            return value, mean, std, sensor_measurements
+        value = self.test_value
+        if value is None:
+            value = np.mean(self.test_reference_sensor_data)
+        # Check then sensor test measurements
+        sensor_measurements = self.test_sensor_data.size
         self.log_handler.logger.debug(
             "SIZE: " + str(self.test_sensor_data.size))
-        if measurements == 0:
+        if sensor_measurements == 0:
             self.log_handler.logger.error(
                 "There is no measurements to get results from!!")
-            return None, None, measurements
+            return value, mean, std, sensor_measurements
+        # Get all test results
         mean = np.mean(self.test_sensor_data)
         std = np.std(self.test_sensor_data)
         self.sensor_calibration_dataframe.addRow(
-            [self.test_value, mean, std, measurements])
-        self.log_handler.logger.debug("==== Test results for test value: " + str(self.test_value) + "\nMean: " + str(
-            mean) + " STD: " + str(std) + " Number of measurements: " + str(measurements))
-        return mean, std, measurements
+            [value, mean, std, sensor_measurements])
+        self.log_handler.logger.debug("==== Test results for test value: " + str(value) + "\nMean: " + str(
+            mean) + " STD: " + str(std) + " Number of measurements: " + str(sensor_measurements))
+        return value, mean, std, sensor_measurements
 
     def getCalibrationResults(self):
         slope = -1  # Parameter m
@@ -53,9 +69,9 @@ class SensorCalibrator:
 
         # Linear regression
         features = self.sensor_calibration_dataframe.getDataFrame()[
-            'mean'].values.reshape(-1,1)
+            'mean'].values.reshape(-1, 1)
         targets = self.sensor_calibration_dataframe.getDataFrame()[
-            'test_value'].values.reshape(-1,1)
+            'test_value'].values.reshape(-1, 1)
         model = LinearRegression().fit(features, targets)
 
         slope = np.array(model.coef_[0])
