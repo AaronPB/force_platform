@@ -110,13 +110,16 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         calibration_dialog_layout.addWidget(sensor_name_label)
 
         # Calibration test values
-        self.text_list_widget = QtWidgets.QListWidget(self)
-        self.text_values_list = []
-        self.text_list_widget.addItem(
-            "Value \t\tSensor mean \t\tSensor STD \t\tNum. of measurements")
+        self.test_tree_widget = QtWidgets.QTreeWidget(self)
+        self.test_tree_widget.setHeaderLabels(
+            ["Test value", "Sensor mean", "Sensor STD", "Num. of measurements"])
+        header = self.test_tree_widget.header()
+        for column in range(self.test_tree_widget.columnCount()):
+            self.test_tree_widget.headerItem().setTextAlignment(column, QtCore.Qt.AlignCenter)
+        self.test_tree_widget.expandAll()
         calibration_dialog_layout.addWidget(
             QtWidgets.QLabel('Mediciones realizadas'))
-        calibration_dialog_layout.addWidget(self.text_list_widget)
+        calibration_dialog_layout.addWidget(self.test_tree_widget)
 
         # Calibration results
         self.text_calibration_widget = QtWidgets.QListWidget(self)
@@ -204,8 +207,6 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             QtCore.QCoreApplication.processEvents()
 
         self.measure_button.setEnabled(True)
-        if (self.text_list_widget.count() > 3):
-            self.calibrate_button.setEnabled(True)
 
         mean, std, measurements = self.inputReader.getCalibrateTestResults()
 
@@ -213,10 +214,13 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             return
 
         # Update text list widget
-        test_results = str(value) + "\t\t" + str(mean) + \
-            "\t" + str(std) + "\t" + str(measurements)
-        self.text_list_widget.addItem(test_results)
+        QtWidgets.QTreeWidgetItem(self.test_tree_widget, [str(
+            value), str(mean), str(std), str(measurements)])
         self.test_value_input.clear()
+
+        # When number of measurements is greater, enable calibration button
+        if (self.test_tree_widget.topLevelItemCount() > 1):
+            self.calibrate_button.setEnabled(True)
 
     def calibrationResults(self):
         # Get results
