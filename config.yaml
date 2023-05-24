@@ -210,7 +210,7 @@ phidget_encoder_list:
     channel: 0
     initial_position: 0
     name: Encoder_Z_1
-    read_data: true
+    read_data: false
     serial: 641800
   encoder_2:
     calibration_data:
@@ -228,7 +228,7 @@ taobotics_imu_list:
       m: 0.0
     channel: 0
     name: IMU_Leg_Right
-    read_data: true
+    read_data: false
     serial: /dev/ttyUSB0
   imu_2:
     calibration_data:
@@ -236,7 +236,7 @@ taobotics_imu_list:
       m: 0.0
     channel: 0
     name: IMU_Leg_Left
-    read_data: true
+    read_data: false
     serial: /dev/ttyUSB1
   imu_3:
     calibration_data:
@@ -270,3 +270,11 @@ taobotics_imu_list:
     name: IMU_UpperTrunk_Left
     read_data: false
     serial: /dev/ttyUSB5
+calibration_sensor:
+  calibration_data:
+    b: -4184.1
+    m: 22234050.0
+  channel: 0
+  name: S-Type Phidget Load Cell
+  read_data: true
+  serial: 583229
