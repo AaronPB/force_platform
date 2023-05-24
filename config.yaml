@@ -272,8 +272,8 @@ taobotics_imu_list:
     serial: /dev/ttyUSB5
 calibration_sensor:
   calibration_data:
-    b: -4184.1
-    m: 22234050.0
+    b: 6.4245
+    m: 183526.0
   channel: 0
   name: S-Type Phidget Load Cell
   read_data: true

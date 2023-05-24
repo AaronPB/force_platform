@@ -254,7 +254,7 @@ class InputReader:
             return
         reference_sensor_data = None
         if self.reference_calibration_available:
-            reference_sensor_data = self.reference_calibration_handler.getSensorDataRaw()[
+            reference_sensor_data = self.reference_calibration_handler.getSensorData()[
                 0]
         self.calibrator.addTestMeasurement(
             sensor_data_raw[0], reference_sensor_data)
@@ -270,3 +270,4 @@ class InputReader:
 
     def calibrateTestStop(self):
         self.calibration_handler.stop()
+        self.reference_calibration_handler.stop()
