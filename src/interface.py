@@ -4,6 +4,7 @@ Author: Aaron Poyatos
 Date: 13/04/2023
 """
 
+import os
 import time
 # import numpy as np
 # import matplotlib.pyplot as plt
@@ -21,11 +22,14 @@ class MainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.log_handler = LogHandler(str(__class__.__name__))
+        self.dir_images = os.path.join(
+            os.path.dirname(__file__), '..', 'images')
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Programa de lecturas')
-        self.setWindowIcon(QtGui.QIcon('logo.ico'))
+        self.setWindowIcon(QtGui.QIcon(
+            os.path.join(self.dir_images, 'logo.ico')))
         screen_resolution = QtWidgets. QDesktopWidget().screenGeometry()
         width, height = screen_resolution.width(), screen_resolution.height()
         self.setGeometry(width//4, height//4, width//2, height//2)
@@ -93,7 +97,7 @@ class MainWindow(QtWidgets.QWidget):
         vbox_layout.setAlignment(QtCore.Qt.AlignTop)
 
         image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap('logo.ico')
+        pixmap = QtGui.QPixmap(os.path.join(self.dir_images, 'logo.ico'))
         image.setPixmap(pixmap.scaled(150, 150, QtCore.Qt.KeepAspectRatio))
         image.setAlignment(QtCore.Qt.AlignCenter)
         label = QtWidgets.QLabel('Plataforma fuerza', self)

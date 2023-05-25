@@ -4,6 +4,7 @@ Author: Aaron Poyatos
 Date: 15/05/2023
 """
 
+import os
 import matplotlib.pyplot as plt
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -19,6 +20,8 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         super().__init__(parent)
         self.parent = parent
         self.log_handler = LogHandler(str(__class__.__name__))
+        self.dir_images = os.path.join(
+            os.path.dirname(__file__), '..', 'images')
         self.inputReader = inputReader
         self.calibration_timer = QtCore.QTimer(self)
         self.calibration_timer.timeout.connect(
@@ -55,18 +58,21 @@ class MainCalibrationMenu(QtWidgets.QWidget):
                 self.clearGridLayout(item.layout())
 
     def loadGridLayout(self):
-        # Column labels
+        # Column labels and images
         self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 1"), 0, 0)
         self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 2"), 0, 1)
         self.grid_layout.addWidget(QtWidgets.QLabel("Otros sensores"), 0, 2)
+        self.grid_layout.addWidget(self.imageWidget('platform1.png',350), 1, 0)
+        self.grid_layout.addWidget(self.imageWidget('platform2.png',350), 1, 1)
+        self.grid_layout.addWidget(self.imageWidget('platform_empty.png',350), 1, 2)
 
         # Load sensor grid
         self.loadSensorButtons(
-            1, 0, self.inputReader.getPlatform1SensorStatus())
+            2, 0, self.inputReader.getPlatform1SensorStatus())
         self.loadSensorButtons(
-            1, 1, self.inputReader.getPlatform2SensorStatus())
+            2, 1, self.inputReader.getPlatform2SensorStatus())
         offset = self.loadSensorButtons(
-            1, 2, self.inputReader.getEncoderSensorsStatus())
+            2, 2, self.inputReader.getEncoderSensorsStatus())
         # self.loadSensorButtons(
         #     offset+1, 2, self.inputReader.getIMUSensorStatus())
 
@@ -75,6 +81,14 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             'Volver al menú principal', self)
         self.close_button.clicked.connect(self.close)
         self.grid_layout.addWidget(self.close_button, 13, 0, 1, 3)
+
+    def imageWidget(self, image, size: int):
+        image_widget = QtWidgets.QLabel(self)
+        pixmap = QtGui.QPixmap(os.path.join(self.dir_images, image))
+        image_widget.setPixmap(pixmap.scaled(
+            size, size, QtCore.Qt.KeepAspectRatio))
+        image_widget.setAlignment(QtCore.Qt.AlignCenter)
+        return image_widget
 
     def loadSensorButtons(self, row_offset: int, column_number: int, sensor_list: list):
         # Sensor list
