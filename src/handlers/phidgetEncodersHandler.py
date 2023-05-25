@@ -44,9 +44,8 @@ class PhidgetEncodersHandler:
                 return
 
             # log_handler.logger.debug("[" + str(serial) + "_" +
-            #                          str(channel) + "]: " + str(positionChange) + " pos " +
-            #                          str(timeChange) + " millis " + str(indexTriggered) + " trigger (" +
-            #                          str(distance) + " N)")
+            #                          str(channel) + "]: " + "Incr pulse: " + str(positionChange) + " Incr dist:" +
+            #                          str(positionChange * m) + " mm")
 
             mutex.acquire()
             sensor_data_raw[name] = sensor_data_raw.get(
