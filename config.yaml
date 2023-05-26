@@ -59,7 +59,7 @@ p1_phidget_loadcell_list:
     serial: 583467
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805051
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -70,7 +70,7 @@ p1_phidget_loadcell_list:
     serial: 583467
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805067
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -81,7 +81,7 @@ p1_phidget_loadcell_list:
     serial: 583467
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805061
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -92,7 +92,7 @@ p1_phidget_loadcell_list:
     serial: 583467
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805082
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -103,7 +103,7 @@ p1_phidget_loadcell_list:
     serial: 588715
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805088
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -114,7 +114,7 @@ p1_phidget_loadcell_list:
     serial: 588715
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805064
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -125,7 +125,7 @@ p1_phidget_loadcell_list:
     serial: 588715
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TC755992
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -136,7 +136,7 @@ p1_phidget_loadcell_list:
     serial: 588715
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805053
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -148,7 +148,7 @@ p2_phidget_loadcell_list:
     serial: 588569
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: W019737
       max_weight: 150kg
     calibration_data:
       m: 1092233.0
@@ -159,7 +159,7 @@ p2_phidget_loadcell_list:
     serial: 588569
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: Z1162733
       max_weight: 150kg
     calibration_data:
       m: 1092233.0
@@ -170,7 +170,7 @@ p2_phidget_loadcell_list:
     serial: 588569
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: Z1162736
       max_weight: 150kg
     calibration_data:
       m: 1092233.0
@@ -181,7 +181,7 @@ p2_phidget_loadcell_list:
     serial: 588569
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: Z1162741
       max_weight: 150kg
     calibration_data:
       m: 1092233.0
@@ -192,7 +192,7 @@ p2_phidget_loadcell_list:
     serial: 588718
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805080
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -203,7 +203,7 @@ p2_phidget_loadcell_list:
     serial: 588718
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805058
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -214,7 +214,7 @@ p2_phidget_loadcell_list:
     serial: 588718
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805066
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -225,7 +225,7 @@ p2_phidget_loadcell_list:
     serial: 588718
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805068
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -236,7 +236,7 @@ p2_phidget_loadcell_list:
     serial: 582535
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805059
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -247,7 +247,7 @@ p2_phidget_loadcell_list:
     serial: 582535
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805079
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -258,7 +258,7 @@ p2_phidget_loadcell_list:
     serial: 582535
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805056
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -269,7 +269,7 @@ p2_phidget_loadcell_list:
     serial: 582535
     read_data: false
     properties:
-      serial_number: AAAA
+      serial_number: TT805063
       max_weight: 110kg
     calibration_data:
       m: 1092233.0
@@ -283,7 +283,7 @@ phidget_encoder_list:
     initial_position: 0
     properties:
       serial_number: AAAA
-      max_length: 2500m
+      max_length: 2500mm
     calibration_data:
       m: 0.01875
       b: 0.0
@@ -295,7 +295,7 @@ phidget_encoder_list:
     initial_position: 0
     properties:
       serial_number: AAAA
-      max_length: 2500m
+      max_length: 2500mm
     calibration_data:
       m: 0.01875
       b: 0.0
