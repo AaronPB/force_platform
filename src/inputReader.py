@@ -171,9 +171,11 @@ class InputReader:
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
         # WIP Plot results
-        single_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, :2]
-        preview = DataFramePlotter(single_dataframe)
-        preview.plot_line('time', [single_dataframe.columns[1]])
+        plot_columns = [0,1,2,3,4]
+        plot_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, plot_columns].copy()
+        print(plot_dataframe)
+        preview = DataFramePlotter(plot_dataframe)
+        preview.plot_line('time', plot_dataframe.columns[1:])
 
     # == TARE PROCESS
     def tareApply(self, timestamp_init, timestamp_end):
