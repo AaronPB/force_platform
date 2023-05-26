@@ -62,9 +62,12 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 1"), 0, 0)
         self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 2"), 0, 1)
         self.grid_layout.addWidget(QtWidgets.QLabel("Otros sensores"), 0, 2)
-        self.grid_layout.addWidget(self.imageWidget('platform1.png',350), 1, 0)
-        self.grid_layout.addWidget(self.imageWidget('platform2.png',350), 1, 1)
-        self.grid_layout.addWidget(self.imageWidget('platform_empty.png',350), 1, 2)
+        self.grid_layout.addWidget(
+            self.imageWidget('platform1.png', 350), 1, 0)
+        self.grid_layout.addWidget(
+            self.imageWidget('platform2.png', 350), 1, 1)
+        self.grid_layout.addWidget(
+            self.imageWidget('other_sensors.png', 350), 1, 2)
 
         # Load sensor grid
         self.loadSensorButtons(
@@ -94,7 +97,11 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         # Sensor list
         for i, sensor in enumerate(sensor_list):
             row = i + row_offset
-            sensor_button = QtWidgets.QPushButton(sensor['name'], self)
+            button_title = sensor['name']
+            for sensor_property in sensor['properties']:
+                button_title = button_title + " | " + \
+                    sensor['properties'][sensor_property]
+            sensor_button = QtWidgets.QPushButton(button_title, self)
             sensor_button.clicked.connect(
                 lambda state, s=sensor: self.calibrationDialog(s))
             if not sensor['read_data'] or sensor['status'] != 'Active':
@@ -119,7 +126,11 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         calibration_dialog_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # Sensor name
-        sensor_name_label = QtWidgets.QLabel(sensor['name'])
+        label_title = sensor['name']
+        for sensor_property in sensor['properties']:
+            label_title = label_title + " | " + \
+                sensor['properties'][sensor_property]
+        sensor_name_label = QtWidgets.QLabel(label_title)
         sensor_name_label.setAlignment(QtCore.Qt.AlignHCenter)
         calibration_dialog_layout.addWidget(sensor_name_label)
 

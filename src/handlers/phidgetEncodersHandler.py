@@ -56,8 +56,8 @@ class PhidgetEncodersHandler:
         self.onPositionChangeHandler = onPositionChangeHandler
 
     def addSensor(self, sensor_params: dict):
-        required_keys = ['id', 'name', 'read_data',
-                         'serial', 'channel', 'calibration_data',
+        required_keys = ['id', 'name', 'read_data', 'serial',
+                         'channel', 'calibration_data', 'properties',
                          'initial_position', 'config_path']
         if not all(key in sensor_params.keys() for key in required_keys):
             self.log_handler.logger.error(
@@ -88,7 +88,8 @@ class PhidgetEncodersHandler:
                     "TARED " + sensor['name'] + " with value: " + str(prev_value) + " to value: " + str(sensor['calibration_data']['b']))
 
     def getSensorListDict(self):
-        key_list = ['id', 'name', 'read_data', 'status', 'config_path']
+        key_list = ['id', 'name', 'read_data',
+                    'status', 'properties', 'config_path']
         return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
 
     def getSensorHeaders(self):
