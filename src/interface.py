@@ -6,12 +6,12 @@ Date: 13/04/2023
 
 import os
 import time
-# import numpy as np
-# import matplotlib.pyplot as plt
+
+import matplotlib.pyplot as plt
 
 from PyQt5 import QtWidgets, QtGui, QtCore
-# from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-# from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from src.inputReader import InputReader
 from src.interfaceCalibration import MainCalibrationMenu
@@ -87,7 +87,7 @@ class MainWindow(QtWidgets.QWidget):
         self.calibration_menu.hide()
 
         # Load default plots
-        # self.generateExamplePlots()
+        self.generatePlots()
 
         self.show()
 
@@ -401,58 +401,59 @@ class MainWindow(QtWidgets.QWidget):
         self.calibration_menu.updateGridLayout()
         self.calibration_menu.show()
 
-    # TODO BOTTOM LAYOUT METHODS
-    # def generateExamplePlots(self):
-    #     vbox_plot1 = QVBoxLayout()
-    #     vbox_plot2 = QVBoxLayout()
-    #     vbox_plot3 = QVBoxLayout()
+    # BOTTOM LAYOUT METHODS
+    def generatePlots(self):
+        vbox_plot1 = QtWidgets.QVBoxLayout()
+        vbox_plot2 = QtWidgets.QVBoxLayout()
+        vbox_plot3 = QtWidgets.QVBoxLayout()
 
-    #     # Plot titles
-    #     title_plot1 = QLabel("Plot 1")
-    #     title_plot1.setFont(QFont("Arial", 14, QFont.Bold))
-    #     title_plot1.setAlignment(Qt.AlignCenter)
-    #     title_plot2 = QLabel("Plot 2")
-    #     title_plot2.setFont(QFont("Arial", 14, QFont.Bold))
-    #     title_plot2.setAlignment(Qt.AlignCenter)
-    #     title_plot3 = QLabel("Plot 3")
-    #     title_plot3.setFont(QFont("Arial", 14, QFont.Bold))
-    #     title_plot3.setAlignment(Qt.AlignCenter)
+        # Plot titles
+        title_plot1 = QtWidgets.QLabel("Platform 1 COP")
+        title_plot1.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
+        title_plot1.setAlignment(QtCore.Qt.AlignCenter)
+        title_plot2 = QtWidgets.QLabel("Platform 2 COP")
+        title_plot2.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
+        title_plot2.setAlignment(QtCore.Qt.AlignCenter)
+        title_plot3 = QtWidgets.QLabel("IMU values")
+        title_plot3.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
+        title_plot3.setAlignment(QtCore.Qt.AlignCenter)
 
-    #     # Example plots
-    #     # y = np.random.normal(loc=0.5, scale=0.4, size=1000)
-    #     # y = y[(y > -0.3) & (y < 0.3)]
-    #     # y.sort()
-    #     y = np.linspace(0, 0, 100)
-    #     x = np.arange(len(y))
-    #     fig1, ax1 = plt.subplots()
-    #     canvas1 = FigureCanvas(fig1)
-    #     toolbar1 = NavigationToolbar(canvas1, self)
-    #     ax1.plot(x,y)
-    #     ax1.grid(True)
+        # Generate empty plots
+        self.fig1, self.ax1 = plt.subplots()
+        self.canvas1 = FigureCanvas(self.fig1)
+        self.ax1.set_xlabel('Medio-Lateral Motion (mm)')
+        self.ax1.set_ylabel('Anterior-Posterior Motion (mm)')
+        toolbar1 = NavigationToolbar(self.canvas1, self)
+        self.ax1.plot(0, 0)
+        self.ax1.grid(True)
 
-    #     fig2, ax2 = plt.subplots()
-    #     canvas2 = FigureCanvas(fig2)
-    #     toolbar2 = NavigationToolbar(canvas2, self)
-    #     ax2.plot(x,y)
-    #     ax2.grid(True)
+        self.fig2, self.ax2 = plt.subplots()
+        self.canvas2 = FigureCanvas(self.fig2)
+        toolbar2 = NavigationToolbar(self.canvas2, self)
+        self.ax2.set_xlabel('Medio-Lateral Motion (mm)')
+        self.ax2.set_ylabel('Anterior-Posterior Motion (mm)')
+        self.ax2.plot(0, 0)
+        self.ax2.grid(True)
 
-    #     fig3, ax3 = plt.subplots()
-    #     canvas3 = FigureCanvas(fig3)
-    #     toolbar3 = NavigationToolbar(canvas3, self)
-    #     ax3.plot(x,y)
-    #     ax3.grid(True)
+        self.fig3, self.ax3 = plt.subplots()
+        self.canvas3 = FigureCanvas(self.fig3)
+        toolbar3 = NavigationToolbar(self.canvas3, self)
+        self.ax3.set_xlabel('Time (s)')
+        self.ax3.set_ylabel('Absolute reference angle (rad)')
+        self.ax3.plot(0, 0)
+        self.ax3.grid(True)
 
-    #     # Layouts
-    #     vbox_plot1.addWidget(title_plot1)
-    #     vbox_plot1.addWidget(toolbar1)
-    #     vbox_plot1.addWidget(canvas1)
-    #     vbox_plot2.addWidget(title_plot2)
-    #     vbox_plot2.addWidget(toolbar2)
-    #     vbox_plot2.addWidget(canvas2)
-    #     vbox_plot3.addWidget(title_plot3)
-    #     vbox_plot3.addWidget(toolbar3)
-    #     vbox_plot3.addWidget(canvas3)
+        # Layouts
+        vbox_plot1.addWidget(title_plot1)
+        vbox_plot1.addWidget(toolbar1)
+        vbox_plot1.addWidget(self.canvas1)
+        vbox_plot2.addWidget(title_plot2)
+        vbox_plot2.addWidget(toolbar2)
+        vbox_plot2.addWidget(self.canvas2)
+        vbox_plot3.addWidget(title_plot3)
+        vbox_plot3.addWidget(toolbar3)
+        vbox_plot3.addWidget(self.canvas3)
 
-    #     self.hbox_bottom.addLayout(vbox_plot1)
-    #     self.hbox_bottom.addLayout(vbox_plot2)
-    #     self.hbox_bottom.addLayout(vbox_plot3)
+        self.hbox_bottom.addLayout(vbox_plot1)
+        self.hbox_bottom.addLayout(vbox_plot2)
+        self.hbox_bottom.addLayout(vbox_plot3)
