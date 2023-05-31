@@ -11,6 +11,7 @@ import time
 from src.handlers.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
 from src.handlers.phidgetEncodersHandler import PhidgetEncodersHandler
 from src.handlers.taoboticsIMUsHandler import TaoboticsIMUsHandler
+from src.sensorCalibrator import SensorCalibrator
 from src.utils import LogHandler, TestDataFrame, DataFramePlotter
 
 
@@ -84,7 +85,8 @@ class InputReader:
         self.loadSensorType(self.phidgetP2LoadCellsHandler,
                             'p2_phidget_loadcell_list')
         # Phidget Encoders
-        self.loadSensorType(self.phidgetEncodersHandler, 'phidget_encoder_list')
+        self.loadSensorType(self.phidgetEncodersHandler,
+                            'phidget_encoder_list')
         # Taobotics IMUs
         self.loadSensorType(self.taoboticsIMUsHandler, 'taobotics_imu_list')
 
@@ -98,6 +100,8 @@ class InputReader:
         for sensor_id in list(config_list_path.keys()):
             sensor_data = config_list_path[sensor_id].copy()
             sensor_data['id'] = sensor_id  # Add ID to dict
+            sensor_data['config_path'] = str(
+                config_list) + '.' + str(sensor_id)  # Add config path to dict
             type.addSensor(sensor_data)
 
     # Sensors connection
@@ -118,7 +122,7 @@ class InputReader:
 
     def getPlatform2SensorStatus(self):
         return self.phidgetP2LoadCellsHandler.getSensorListDict()
-    
+
     def getEncoderSensorsStatus(self):
         return self.phidgetEncodersHandler.getSensorListDict()
 
@@ -128,7 +132,7 @@ class InputReader:
     def getReaderChecks(self):
         return [self.config_path, self.test_folder, self.test_name, self.sensor_connected]
 
-    # Read process
+    # == READ PROCESS
     def readerStart(self):
         self.log_handler.logger.info("Starting test...")
         # Start sensors
@@ -166,7 +170,106 @@ class InputReader:
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
-        # Plot results
-        # preview = DataFramePlotter(self.sensor_dataframe.getDataFrame())
-        # preview.plot_line('time', [
-        #                   self.phidgetLoadCellsHandler.getSensorHeaders()])
+        # WIP Plot results
+        plot_columns = [0,1,2,3,4]
+        plot_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, plot_columns].copy()
+        print(plot_dataframe)
+        preview = DataFramePlotter(plot_dataframe)
+        preview.plot_line('time', plot_dataframe.columns[1:])
+
+    # == TARE PROCESS
+    def tareApply(self, timestamp_init, timestamp_end):
+        # Set new offset to all sensors and safe new intercept values in config
+        mean_values_dict = self.sensor_dataframe.getIntervalMeanData(
+            timestamp_init, timestamp_end)
+        self.log_handler.logger.debug(
+            "Mean values list: \n" + str(mean_values_dict))
+        self.phidgetP1LoadCellsHandler.tareSensors(mean_values_dict)
+        self.phidgetP2LoadCellsHandler.tareSensors(mean_values_dict)
+        self.phidgetEncodersHandler.tareSensors(mean_values_dict)
+
+    # == CALIBRATION PROCESS
+    def prepareSensorCalibration(self, sensor_name):
+        sensor_config_lists = ['p1_phidget_loadcell_list',
+                               'p2_phidget_loadcell_list',
+                               'phidget_encoder_list',
+                               'taobotics_imu_list']
+        # Search sensor id
+        self.calibration_handler = None
+        self.reference_calibration_handler = None
+        self.reference_calibration_available = False
+        self.calibration_sensor_data = {}
+        for config_list_path in sensor_config_lists:
+            config_sensor_list = self.config[config_list_path]
+            for sensor_id in list(config_sensor_list.keys()):
+                if config_sensor_list[sensor_id]['name'] == sensor_name:
+                    self.calibration_sensor_data = config_sensor_list[sensor_id].copy(
+                    )
+                    # Add ID and path to dict
+                    self.calibration_sensor_data['id'] = sensor_id
+                    self.calibration_sensor_data['config_path'] = config_list_path + \
+                        '.' + sensor_id
+                    break
+            if self.calibration_sensor_data:
+                break
+        if not self.calibration_sensor_data:
+            return False
+        if config_list_path == 'p1_phidget_loadcell_list' or config_list_path == 'p2_phidget_loadcell_list':
+            self.calibration_handler = PhidgetLoadCellsHandler("Calibration")
+            self.reference_calibration_handler = PhidgetLoadCellsHandler(
+                "Reference Calibration")
+        elif config_list_path == 'phidget_encoder_list':
+            self.calibration_handler = PhidgetEncodersHandler("Calibration")
+            self.reference_calibration_handler = PhidgetEncodersHandler(
+                "Reference Calibration")
+        elif config_list_path == 'taobotics_imu_list':
+            self.calibration_handler = TaoboticsIMUsHandler("Calibration")
+            self.reference_calibration_handler = TaoboticsIMUsHandler(
+                "Reference Calibration")
+        else:
+            return False
+
+        # Add sensor that is beaing calibrated and the reference if it is defined in config
+        self.calibration_handler.addSensor(self.calibration_sensor_data)
+        if 'calibration_sensor' in self.config:
+            reference_sensor_data = self.config['calibration_sensor'].copy()
+            reference_sensor_data['id'] = 'calibration_sensor'
+            reference_sensor_data['config_path'] = 'calibration_sensor'
+            self.reference_calibration_handler.addSensor(reference_sensor_data)
+            self.reference_calibration_available = self.reference_calibration_handler.connect()
+        if not self.calibration_handler.connect():
+            return False
+
+        # Init calibration class and start sensor reading
+        self.calibrator = SensorCalibrator()
+        self.calibration_handler.start()
+        if self.reference_calibration_available:
+            self.reference_calibration_handler.start()
+        return True
+
+    def calibrationNewTest(self, test_value: float = None):
+        self.calibrator.newCalibrationTest(test_value)
+
+    def calibrateTestProcess(self):
+        sensor_data_raw = self.calibration_handler.getSensorDataRaw()
+        if not sensor_data_raw:
+            return
+        reference_sensor_data = None
+        if self.reference_calibration_available:
+            reference_sensor_data = self.reference_calibration_handler.getSensorData()[
+                0]
+        self.calibrator.addTestMeasurement(
+            sensor_data_raw[0], reference_sensor_data)
+
+    def isCalibrationReferenceConnected(self):
+        return self.reference_calibration_available
+
+    def getCalibrateTestResults(self):
+        return self.calibrator.getTestResults()
+
+    def getCalibrateRegressionResults(self):
+        return self.calibrator.getCalibrationResults()
+
+    def calibrateTestStop(self):
+        self.calibration_handler.stop()
+        self.reference_calibration_handler.stop()
