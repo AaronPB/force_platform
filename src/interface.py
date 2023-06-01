@@ -32,7 +32,8 @@ class MainWindow(QtWidgets.QWidget):
             os.path.join(self.dir_images, 'logo.ico')))
         screen_resolution = QtWidgets. QDesktopWidget().screenGeometry()
         width, height = screen_resolution.width(), screen_resolution.height()
-        self.setGeometry(width//4, height//4, width//2, height//2)
+        self.setGeometry(width//4, height//4,
+                         int(width//1.5), int(height//1.12))
 
         # Main GUI layouts
         self.interface = QtWidgets.QWidget(self)
@@ -379,6 +380,7 @@ class MainWindow(QtWidgets.QWidget):
         self.inputReader.readerStop()
         self.start_btn.setEnabled(True)
         self.calibrate_sensors_btn.setEnabled(True)
+        self.updatePlots()
 
     def tareSensors(self):
         self.stop_btn.setEnabled(False)
@@ -457,3 +459,17 @@ class MainWindow(QtWidgets.QWidget):
         self.hbox_bottom.addLayout(vbox_plot1)
         self.hbox_bottom.addLayout(vbox_plot2)
         self.hbox_bottom.addLayout(vbox_plot3)
+
+    def updatePlots(self):
+        x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2 = self.inputReader.getPlotterData()
+        # Update relative COP Platform 1
+        self.ax1.clear()
+        self.ax1.plot(x_cop_p1, y_cop_p1, color='red')
+        self.ax1.grid(True)
+        self.canvas1.draw()
+        # Update relative COP Platform 2
+        self.ax2.clear()
+        self.ax2.plot(x_cop_p1, y_cop_p1, color='red')
+        self.ax2.grid(True)
+        self.canvas2.draw()
+        # TODO Update IMU

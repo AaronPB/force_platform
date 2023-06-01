@@ -12,7 +12,7 @@ from src.handlers.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
 from src.handlers.phidgetEncodersHandler import PhidgetEncodersHandler
 from src.handlers.taoboticsIMUsHandler import TaoboticsIMUsHandler
 from src.sensorCalibrator import SensorCalibrator
-from src.utils import LogHandler, TestDataFrame, DataFramePlotter
+from src.utils import LogHandler, TestDataFrame, DataFramePlotter, StabilogramPlotter
 
 
 class InputReader:
@@ -171,11 +171,46 @@ class InputReader:
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
         # WIP Plot results
-        plot_columns = [0,1,2,3,4]
-        plot_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, plot_columns].copy()
+        plot_columns = [0, 1, 2, 3, 4]
+        plot_dataframe = self.sensor_dataframe.getDataFrame(
+        ).iloc[:, plot_columns].copy()
         print(plot_dataframe)
         preview = DataFramePlotter(plot_dataframe)
         preview.plot_line('time', plot_dataframe.columns[1:])
+
+    # Return fixed format of:
+    # - Relative COP of Platform 1
+    # - Relative COP of Platform 2
+    # - TODO IMU values
+    def getPlotterData(self):
+        x_cop_p1 = y_cop_p1 = x_cop_p2 = y_cop_p2 = 0
+        sensor_dataframe = self.sensor_dataframe.getDataFrame()
+        dataframe_size = sensor_dataframe.shape[1]
+        if dataframe_size < 13:
+            self.log_handler.logger.warn(
+                "Ignoring relative COP values because the sensor dataframe has "
+                + str(dataframe_size) + " instead of minimum 13.")
+            return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2]
+
+        # Get relative COPs for both platforms
+        if len(self.phidgetP1LoadCellsHandler.getSensorHeaders()) == 12:
+            sensor_cols = self.phidgetP1LoadCellsHandler.getSensorHeaders()
+            sensor_cols.insert(0, 'timestamp')
+            stabilogram_p1 = StabilogramPlotter(
+                sensor_dataframe[sensor_cols].copy())
+            x_cop_p1, y_cop_p1 = stabilogram_p1.getPlotValues()
+        if len(self.phidgetP2LoadCellsHandler.getSensorHeaders()) == 12:
+            sensor_cols = self.phidgetP2LoadCellsHandler.getSensorHeaders()
+            sensor_cols.insert(0, 'timestamp')
+            stabilogram_p2 = StabilogramPlotter(
+                sensor_dataframe[sensor_cols].copy())
+            x_cop_p2, y_cop_p2 = stabilogram_p2.getPlotValues()
+        # Get IMU values
+        if len(self.taoboticsIMUsHandler.getSensorHeaders()) > 0:
+            # TODO process
+            pass
+
+        return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2]
 
     # == TARE PROCESS
     def tareApply(self, timestamp_init, timestamp_end):
