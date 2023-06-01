@@ -8,6 +8,7 @@ import os
 import time
 
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 from PyQt5 import QtWidgets, QtGui, QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -420,22 +421,32 @@ class MainWindow(QtWidgets.QWidget):
         title_plot3.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
         title_plot3.setAlignment(QtCore.Qt.AlignCenter)
 
+        # Rectangle side lenghts
+        x_length = 600  # mm
+        y_length = 400  # mm
+        rect1 = patches.Rectangle(
+            (0, 0), x_length, y_length, edgecolor='blue', facecolor='none')
+        rect2 = patches.Rectangle(
+            (0, 0), x_length, y_length, edgecolor='blue', facecolor='none')
+
         # Generate empty plots
         self.fig1, self.ax1 = plt.subplots()
         self.canvas1 = FigureCanvas(self.fig1)
         self.ax1.set_xlabel('Medio-Lateral Motion (mm)')
         self.ax1.set_ylabel('Anterior-Posterior Motion (mm)')
         toolbar1 = NavigationToolbar(self.canvas1, self)
-        self.ax1.plot(0, 0)
+        self.line1, = self.ax1.plot(0, 0)
         self.ax1.grid(True)
+        self.ax1.add_patch(rect1)
 
         self.fig2, self.ax2 = plt.subplots()
         self.canvas2 = FigureCanvas(self.fig2)
         toolbar2 = NavigationToolbar(self.canvas2, self)
         self.ax2.set_xlabel('Medio-Lateral Motion (mm)')
         self.ax2.set_ylabel('Anterior-Posterior Motion (mm)')
-        self.ax2.plot(0, 0)
+        self.line2, = self.ax2.plot(0, 0)
         self.ax2.grid(True)
+        self.ax2.add_patch(rect2)
 
         self.fig3, self.ax3 = plt.subplots()
         self.canvas3 = FigureCanvas(self.fig3)
@@ -463,13 +474,9 @@ class MainWindow(QtWidgets.QWidget):
     def updatePlots(self):
         x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2 = self.inputReader.getPlotterData()
         # Update relative COP Platform 1
-        self.ax1.clear()
-        self.ax1.plot(x_cop_p1, y_cop_p1, color='red')
-        self.ax1.grid(True)
+        self.line1.set_data(x_cop_p1, y_cop_p1)
         self.canvas1.draw()
         # Update relative COP Platform 2
-        self.ax2.clear()
-        self.ax2.plot(x_cop_p1, y_cop_p1, color='red')
-        self.ax2.grid(True)
+        self.line2.set_data(x_cop_p1, y_cop_p1)
         self.canvas2.draw()
         # TODO Update IMU
