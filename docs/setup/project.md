@@ -10,7 +10,7 @@ The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 12.04 L
 
 ## Dependencies
 
-- **Python version `3.10` or `3.11`**. In case you want to use recent versions, check the [requirements](../requirements.txt) for potential conflicts with the required python modules.
+- **Python version `3.10` or `3.11`**. In case you want to use recent versions, check the [requirements](../../requirements.txt) for potential conflicts with the required python modules.
 - **Phidget22**. For Phidget load cells and encoders.
 - **MRPT**. To use the `pymrpt` library for the Taobotics IMUs.
 
