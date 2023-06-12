@@ -149,16 +149,23 @@ class InputReader:
             self.taoboticsIMUsHandler.getSensorHeaders())
         self.log_handler.logger.info("Test headers: " + str(dataframe_headers))
         self.sensor_dataframe = TestDataFrame(dataframe_headers)
+        self.sensor_dataframe_raw = TestDataFrame(dataframe_headers)
 
     def readerProcess(self):
         # Get and acumulate values in dataframe from all sensor classes
         current_time = round(time.time()*1000)
         data = [current_time]
+        data_raw = data
         data.extend(self.phidgetP1LoadCellsHandler.getSensorData() +
                     self.phidgetP2LoadCellsHandler.getSensorData() +
                     self.phidgetEncodersHandler.getSensorData() +
                     self.taoboticsIMUsHandler.getSensorData())
+        data_raw.extend(self.phidgetP1LoadCellsHandler.getSensorDataRaw() +
+                        self.phidgetP2LoadCellsHandler.getSensorDataRaw() +
+                        self.phidgetEncodersHandler.getSensorDataRaw() +
+                        self.taoboticsIMUsHandler.getSensorData())
         self.sensor_dataframe.addRow(data)
+        self.sensor_dataframe_raw.addRow(data_raw)
         # self.log_handler.logger.debug("Clocking data! - " + str(data))
         # print(str(self.taoboticsIMUsHandler.getSensorData()))
 
@@ -170,8 +177,10 @@ class InputReader:
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
+        self.sensor_dataframe_raw.exportToCSV(os.path.join(
+            self.test_folder, self.test_name + '_RAW' + '.csv'))
         # WIP Plot results
-        plot_columns = [0, 1, 2, 3, 4]
+        plot_columns = [0, 7, 14, 21]
         plot_dataframe = self.sensor_dataframe.getDataFrame(
         ).iloc[:, plot_columns].copy()
         print(plot_dataframe)
