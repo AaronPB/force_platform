@@ -155,7 +155,7 @@ class InputReader:
         # Get and acumulate values in dataframe from all sensor classes
         current_time = round(time.time()*1000)
         data = [current_time]
-        data_raw = data
+        data_raw = [current_time]
         data.extend(self.phidgetP1LoadCellsHandler.getSensorData() +
                     self.phidgetP2LoadCellsHandler.getSensorData() +
                     self.phidgetEncodersHandler.getSensorData() +
