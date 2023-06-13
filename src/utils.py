@@ -20,12 +20,17 @@ class TestDataFrame:
     def addRow(self, values):
         if len(values) != len(self.df.columns):
             self.log_handler.logger.error(
-                "Number of values doesn't match number of columns! Expected " + str(len(self.df.columns)) + " got " + str(len(values)))
+                "Number of values doesn't match number of columns! Expected "
+                + str(len(self.df.columns)) + " got " + str(len(values)))
             return
         self.df.loc[len(self.df)] = values
 
     def exportToCSV(self, file_path):
-        self.df.to_csv(file_path, index=False)
+        # Format all data values to: 0.000000e+00
+        formatted_df = self.df.copy()
+        formatted_df.iloc[:, 1:] = formatted_df.iloc[:, 1:].applymap(
+            lambda x: "{:.6e}".format(x))
+        formatted_df.to_csv(file_path, index=False)
         file_size = os.path.getsize(file_path) / (1024 * 1024)
         self.log_handler.logger.info(
             "Test file saved in: " + str(file_path) + " (" + str(round(file_size, 2)) + " MB)")
