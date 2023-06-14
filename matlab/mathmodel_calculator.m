@@ -1,4 +1,4 @@
-%% PLOTTER DE DATOS CALIBRADOS
+%% FORCES AND MOMENTUM VALUES CALCULATOR
 % Autor: Aaron Raul Poyatos Bakker
 % Fecha: 13/06/2023
 % With the angle information, obtain all the forces and momentums
@@ -166,6 +166,7 @@ end
 figure;
 subplot(2, 1, 1);
 plot(timeIncrements, [rad2deg(absangle_A),rad2deg(absangle_B),rad2deg(absangle_C)], 'LineWidth', 1.5);
+grid on;
 xlabel('Time (s)');
 ylabel('Angle (º)');
 title('Absolute angles');
@@ -173,6 +174,7 @@ legend('Absolute angle A Z', 'Absolute angle B Z', 'Absolute angle C Y');
 
 subplot(2, 1, 2);
 plot(timeIncrements, [m1,m2,m3], 'LineWidth', 1.5);
+grid on;
 xlabel('Time (s)');
 ylabel('Momentum (Nm)');
 title('Momentums');
