@@ -1,7 +1,7 @@
 %% FORCES AND MOMENTUM VALUES CALCULATOR
-% Autor: Aaron Raul Poyatos Bakker
-% Fecha: 13/06/2023
-% With the angle information, obtain all the forces and momentums
+% Author: Aaron Raul Poyatos Bakker
+% Date: 13/06/2023
+% With the angle information, obtain all forces and momentums
 
 %% IMPORT DATA
 % Change path to desired csv file
@@ -29,6 +29,23 @@ imu_3_eul = quat2eul(imu_3_q, 'XYZ');
 absangle_A = imu_1_eul(:, 3); % Leg Z angle
 absangle_B = imu_2_eul(:, 3); % Thigh Z angle
 absangle_C = imu_3_eul(:, 2); % Trunk Y angle
+
+size(absangle_A)
+
+%% EXAMPLES WITH VIRTUAL ANGLES
+% Comment/delete this section if you want to use imported data from csv
+timeIncrements = 0:0.01:4;
+% absangle_A = transpose(linspace(pi/2, pi/4, numel(timeIncrements)));
+% absangle_B = transpose(linspace(pi/2, pi/1.2, numel(timeIncrements)));
+% absangle_C = transpose(linspace(pi/2, pi/5, numel(timeIncrements)));
+pos_i = pi/2;
+pos_f_A = pi/4;
+pos_f_B = pi/1.2;
+pos_f_C = pi/5;
+reps = 2;
+
+% [absangle_A,absangle_B,absangle_C] = test_angle_trajectories_linear(timeIncrements,pos_i,pos_f_A,pos_f_B,pos_f_C,reps);
+[absangle_A,absangle_B,absangle_C] = test_angle_trajectories_parabolic(timeIncrements,pos_i,pos_f_A,pos_f_B,pos_f_C,reps);
 
 %% MODEL PARAMETERS
 % General values
@@ -149,9 +166,9 @@ size(x_cell)
 
 %% PLOT RESULTS
 % Get momentum vectors (ankle, knee and hip)
-m1 = zeros(7636, 1);
-m2 = zeros(7636, 1);
-m3 = zeros(7636, 1);
+m1 = zeros(length(timeIncrements), 1);
+m2 = zeros(length(timeIncrements), 1);
+m3 = zeros(length(timeIncrements), 1);
 for k = 1:iter
     current_cell = x_cell{k};
     current_m1 = current_cell(9,1);
@@ -164,7 +181,7 @@ end
 
 % Plot absolute angles and momentums
 figure;
-subplot(2, 1, 1);
+subplot(3, 1, 1);
 plot(timeIncrements, [rad2deg(absangle_A),rad2deg(absangle_B),rad2deg(absangle_C)], 'LineWidth', 1.5);
 grid on;
 xlabel('Time (s)');
@@ -172,11 +189,18 @@ ylabel('Angle (º)');
 title('Absolute angles');
 legend('Absolute angle A Z', 'Absolute angle B Z', 'Absolute angle C Y');
 
-subplot(2, 1, 2);
+subplot(3, 1, 2);
+plot(timeIncrements, [a_leg_z,a_thigh_z,a_trunk_z], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Acc (m/s2)');
+title('Accel Z axis');
+legend('Leg', 'Thigh', 'Trunk');
+
+subplot(3, 1, 3);
 plot(timeIncrements, [m1,m2,m3], 'LineWidth', 1.5);
 grid on;
 xlabel('Time (s)');
 ylabel('Momentum (Nm)');
 title('Momentums');
 legend('Ankle', 'Knee', 'Hip');
-
