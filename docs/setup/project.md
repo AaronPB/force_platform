@@ -1,4 +1,4 @@
-[< back to home](../home.md)
+<kbd>[:house: Back to Home](../home.md)</kbd>
 
 # Project setup
 
@@ -20,4 +20,4 @@ The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 12.04 L
 
 ---
 
-[< back to home](../home.md)
+<kbd>[:house: Back to Home](../home.md)</kbd>

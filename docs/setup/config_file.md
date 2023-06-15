@@ -1,14 +1,38 @@
-<kbd>[< back to home](../home.md)</kbd>
-
-<kbd>[Back to Home](../home.md)</kbd>
-
-[<kbd>Back to Home</kbd>](../home.md)
-
-<kbd>ctrl</kbd> + <kbd>c</kbd>
+<kbd>[:house: Back to Home](../home.md)</kbd>
 
 # Config File
 
-This is just a test
+Config main content:
+- [Test options](#test-options)
+- [Platform 1 loadcell list](#platform-1-loadcell-list)
+- [Platform 2 loadcell list](#platform-2-loadcell-list)
+- [Encoder list](#encoder-list)
+- [IMU list](#imu-list)
 
-https://github.com/AaronPB/force_platform/blob/ff0bc6e560059a0f24c1a4f958310db56597d932/config.yaml#L1-L6
+## Test options
 
+https://github.com/AaronPB/force_platform/blob/8ac807db260f79d6ce667008b6591c533f1d32b0/config.yaml#L1-L3
+
+## Platform 1 loadcell list
+Declare the amount of Phidget loadcells in the first platform.
+
+https://github.com/AaronPB/force_platform/blob/8ac807db260f79d6ce667008b6591c533f1d32b0/config.yaml#L11-L22
+
+## Platform 2 loadcell list
+Declare the amount of Phidget loadcells in the second platform.
+
+https://github.com/AaronPB/force_platform/blob/8ac807db260f79d6ce667008b6591c533f1d32b0/config.yaml#L144-L155
+
+## Encoder list
+Declare the amount of Phidget encoders.
+
+https://github.com/AaronPB/force_platform/blob/8ac807db260f79d6ce667008b6591c533f1d32b0/config.yaml#L277-L289
+
+## IMU list
+Declare the amount of Taobotics IMUs.
+
+https://github.com/AaronPB/force_platform/blob/8ac807db260f79d6ce667008b6591c533f1d32b0/config.yaml#L302-L312
+
+---
+
+<kbd>[:house: Back to Home](../home.md)</kbd>
