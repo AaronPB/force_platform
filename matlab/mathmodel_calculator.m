@@ -51,21 +51,22 @@ reps = 2;
 % General values
 g           = 9.81; % m/s2
 m_body      = 90;   % Body total weight (kg)
+h_body      = 170;  % Body total height (cm)
 m_barbell   = 100;  % Barbell total weight (kg)
 % Limbs lengths and CM offsets (m)
-L_leg       = 0.231;
-L_thigh     = 0.237;
-L_trunk     = 0.303;
+L_leg       = 0.231*h_body/100;
+L_thigh     = 0.237*h_body/100;
+L_trunk     = 0.303*h_body/100;
 Lp_leg      = 0.433*L_leg;
 Ld_leg      = 0.567*L_leg;
 Lp_thigh    = 0.433*L_thigh;
 Ld_thigh    = 0.567*L_thigh;
-Lp_trunk    = 0.500*L_trunk;
-Ld_trunk    = 0.500*L_trunk;
+Lp_trunk    = 0.626*L_trunk;
+Ld_trunk    = 0.374*L_trunk;
 % Limbs weights and partial weights (kg)
 m_leg       = 0.0465*m_body;
 m_thigh     = 0.1000*m_body;
-m_trunk     = 0.4970*m_body;
+m_trunk     = 0.6780*m_body;
 
 % Limb turning radios (for inertia)
 r_cg_leg    = 0.302*L_leg;
