@@ -192,14 +192,17 @@ class InputReader:
     # - Relative COP of Platform 2
     # - TODO IMU values
     def getPlotterData(self):
-        x_cop_p1 = y_cop_p1 = x_cop_p2 = y_cop_p2 = 0
+        x_cop_p1 = y_cop_p1 = 0
+        x_cop_p2 = y_cop_p2 = 0
+        ankle_angle = thigh_angle = trunk_angle = 0
+
         sensor_dataframe = self.sensor_dataframe.getDataFrame()
         dataframe_size = sensor_dataframe.shape[1]
         if dataframe_size < 13:
             self.log_handler.logger.warn(
                 "Ignoring relative COP values because the sensor dataframe has "
                 + str(dataframe_size) + " instead of minimum 13.")
-            return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2]
+            return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2, ankle_angle, thigh_angle, trunk_angle]
 
         # Get relative COPs for both platforms
         if len(self.phidgetP1LoadCellsHandler.getSensorHeaders()) == 12:
@@ -219,7 +222,7 @@ class InputReader:
             # TODO process
             pass
 
-        return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2]
+        return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2, ankle_angle, thigh_angle, trunk_angle]
 
     # == TARE PROCESS
     def tareApply(self, timestamp_init, timestamp_end):

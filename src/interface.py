@@ -472,11 +472,13 @@ class MainWindow(QtWidgets.QWidget):
         self.hbox_bottom.addLayout(vbox_plot3)
 
     def updatePlots(self):
-        x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2 = self.inputReader.getPlotterData()
+        x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2, \
+            ankle_angle, thigh_angle, trunk_angle = \
+            self.inputReader.getPlotterData()
         # Update relative COP Platform 1
         self.line1.set_data(x_cop_p1, y_cop_p1)
         self.canvas1.draw()
         # Update relative COP Platform 2
-        self.line2.set_data(x_cop_p1, y_cop_p1)
+        self.line2.set_data(x_cop_p2, y_cop_p2)
         self.canvas2.draw()
         # TODO Update IMU
