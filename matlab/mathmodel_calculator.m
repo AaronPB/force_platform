@@ -44,8 +44,9 @@ pos_f_B = pi/1.2;
 pos_f_C = pi/5;
 reps = 2;
 
-% [absangle_A,absangle_B,absangle_C] = test_angle_trajectories_linear(timeIncrements,pos_i,pos_f_A,pos_f_B,pos_f_C,reps);
-[absangle_A,absangle_B,absangle_C] = test_angle_trajectories_parabolic(timeIncrements,pos_i,pos_f_A,pos_f_B,pos_f_C,reps);
+absangle_A = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_A);
+absangle_B = test_angle_trajectories_parabolic(timeIncrements,reps,pos_i,pos_f_B);
+absangle_C = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_C);
 
 %% MODEL PARAMETERS
 % General values
