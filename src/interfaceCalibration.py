@@ -236,9 +236,10 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.measure_reference_button.setEnabled(False)
         self.calibrate_button.setEnabled(False)
         # Start calibration process with the specified rate in ms
-        self.calibration_timer.start(10)
+        self.calibration_timer.start(self.inputReader.getCalibrationInterval())
         # During specified time in ms
-        QtCore.QTimer.singleShot(3000, self.calibration_timer.stop)
+        QtCore.QTimer.singleShot(
+            self.inputReader.getCalibrationTime(), self.calibration_timer.stop)
 
         while self.calibration_timer.isActive():
             QtCore.QCoreApplication.processEvents()

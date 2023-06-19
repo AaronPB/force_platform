@@ -372,7 +372,7 @@ class MainWindow(QtWidgets.QWidget):
         self.tare_btn.setEnabled(True)
         self.stop_btn.setEnabled(True)
         # Start reader process with the specified rate in ms
-        self.test_timer.start(10)
+        self.test_timer.start(self.inputReader.getTestInterval())
 
     def stopTest(self):
         self.tare_btn.setEnabled(False)
@@ -388,8 +388,9 @@ class MainWindow(QtWidgets.QWidget):
         self.tare_btn.setEnabled(False)
         start_time = round(time.time()*1000)
         self.tare_timer.start()
-        # Tare with 3 seconds of current data
-        QtCore.QTimer.singleShot(3000, self.tare_timer.stop)
+        # Tare with current data in specified time
+        QtCore.QTimer.singleShot(
+            self.inputReader.getTestTareTime(), self.tare_timer.stop)
 
         while self.tare_timer.isActive():
             QtCore.QCoreApplication.processEvents()

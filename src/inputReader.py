@@ -63,19 +63,39 @@ class InputReader:
         self.configSave()
 
     def configLoadParams(self):
-        self.loadFiles()
+        self.loadGeneralSettings()
         self.loadSensors()
 
-    def loadFiles(self):
+    def loadGeneralSettings(self):
+        # TODO config format check
+        general_settings_path = self.config['general_settings']
+        # Get test and calibration times
+        self.QT_times_dict = {}
+        # Default values (all in ms)
+        self.QT_times_dict['calibration_interval'] = 10
+        self.QT_times_dict['calibration_time'] = 2000
+        self.QT_times_dict['test_interval'] = 10
+        self.QT_times_dict['test_tare_time'] = 3000
+        calibration_times_path = general_settings_path['calibration_times']
+        if 'data_interval_ms' in calibration_times_path:
+            self.QT_times_dict['calibration_interval'] = calibration_times_path['data_interval_ms']
+        if 'recording_time' in calibration_times_path:
+            self.QT_times_dict['calibration_time'] = calibration_times_path['recording_time']
+        test_times_path = general_settings_path['test_times']
+        if 'data_interval_ms' in test_times_path:
+            self.QT_times_dict['test_interval'] = test_times_path['data_interval_ms']
+        if 'tare_time_ms' in test_times_path:
+            self.QT_times_dict['test_tare_time'] = test_times_path['tare_time_ms']
+
         # Check test path and test name
         self.test_folder = ""
         self.test_name = ""
-        if 'folder' in self.config['test_options']:
-            if os.path.isdir(self.config['test_options']['folder']):
-                self.test_folder = os.path.join(
-                    self.config['test_options']['folder'])
-        if 'name' in self.config['test_options']:
-            self.test_name = self.config['test_options']['name']
+        test_file_path = general_settings_path['test_file_path']
+        if 'folder' in test_file_path:
+            if os.path.isdir(test_file_path['folder']):
+                self.test_folder = os.path.join(test_file_path['folder'])
+        if 'name' in test_file_path:
+            self.test_name = test_file_path['name']
 
     # Filter config sensor lists
     def loadSensors(self):
@@ -117,6 +137,18 @@ class InputReader:
              self.taoboticsIMUsHandler.connect()])
         self.log_handler.logger.info("Connection process done!")
 
+    def getTestInterval(self):
+        return self.QT_times_dict['test_interval']
+    
+    def getTestTareTime(self):
+        return self.QT_times_dict['test_tare_time']
+    
+    def getCalibrationInterval(self):
+        return self.QT_times_dict['calibration_interval']
+    
+    def getCalibrationTime(self):
+        return self.QT_times_dict['calibration_time']
+    
     def getPlatform1SensorStatus(self):
         return self.phidgetP1LoadCellsHandler.getSensorListDict()
 
@@ -180,7 +212,7 @@ class InputReader:
         self.sensor_dataframe_raw.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '_RAW' + '.csv'))
         # WIP Plot results
-        plot_columns = [0, 7, 14, 21]
+        plot_columns = [0, 1, 2, 3, 4]
         plot_dataframe = self.sensor_dataframe.getDataFrame(
         ).iloc[:, plot_columns].copy()
         print(plot_dataframe)

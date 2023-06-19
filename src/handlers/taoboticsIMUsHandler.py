@@ -20,8 +20,7 @@ class TaoboticsIMUsHandler:
 
     def addSensor(self, sensor_params: dict):
         required_keys = ['id', 'name', 'read_data', 'serial',
-                         'channel', 'calibration_data', 'properties',
-                         'config_path']
+                         'properties', 'config_path']
         if not all(key in sensor_params.keys() for key in required_keys):
             self.log_handler.logger.error(
                 "Sensor does not have the required keys!")
