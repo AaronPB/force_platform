@@ -166,8 +166,8 @@ class MainWindow(QtWidgets.QWidget):
             self, 'Seleccionar carpeta', options=options)
         if folder_path:
             self.inputReader.configEdit(
-                'test_options.folder', folder_path)
-            self.inputReader.loadFiles()
+                'general_settings.test_file_path.folder', folder_path)
+            self.inputReader.loadGeneralSettings()
             self.updatePaths()
             self.log_handler.logger.info(
                 "Changed folder path to: " + str(folder_path))
@@ -177,8 +177,8 @@ class MainWindow(QtWidgets.QWidget):
         if not name:
             name = "Ensayo de pruebas"
         self.inputReader.configEdit(
-            'test_options.name', name)
-        self.inputReader.loadFiles()
+            'general_settings.test_file_path.name', name)
+        self.inputReader.loadGeneralSettings()
         self.updatePaths()
         self.log_handler.logger.info("Changed test name to: " + str(name))
 
