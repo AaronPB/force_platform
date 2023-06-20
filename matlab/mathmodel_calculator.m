@@ -5,16 +5,16 @@
 
 %% IMPORT DATA
 % Change path to desired csv file
-data = readmatrix('../pruebas/EnsayoTODO.csv', 'Delimiter', ',');
+data = readtable('../pruebas/EnsayoGiros.csv', 'Delimiter', ',');
 
 % Data
-timestamps = data(:, 1);
-imu_1_q = data(:, 28:31); % x,y,z,w
-imu_1_w = data(:, 32:34); % x,y,z
-imu_2_q = data(:, 35:38); % x,y,z,w
-imu_2_w = data(:, 39:41); % x,y,z
-imu_3_q = data(:, 42:45); % x,y,z,w
-imu_3_w = data(:, 46:48); % x,y,z
+timestamps = data.timestamp;
+imu_1_q = [data.IMU_Leg_Right_qw, data.IMU_Leg_Right_qx, data.IMU_Leg_Right_qy, data.IMU_Leg_Right_qz];
+imu_1_w = [data.IMU_Leg_Right_wx, data.IMU_Leg_Right_wy, data.IMU_Leg_Right_wz];
+imu_2_q = [data.IMU_Thigh_Right_qw, data.IMU_Thigh_Right_qx, data.IMU_Thigh_Right_qy, data.IMU_Thigh_Right_qz];
+imu_2_w = [data.IMU_Thigh_Right_wx, data.IMU_Thigh_Right_wy, data.IMU_Thigh_Right_wz];
+imu_3_q = [data.IMU_UpperTrunk_Right_qw, data.IMU_UpperTrunk_Right_qx, data.IMU_UpperTrunk_Right_qy, data.IMU_UpperTrunk_Right_qz];
+imu_3_w = [data.IMU_UpperTrunk_Right_wx, data.IMU_UpperTrunk_Right_wy, data.IMU_UpperTrunk_Right_wz];
 
 % Transform timestamp to seconds
 timeIncrements = timestamps/1000 - timestamps(1)/1000;
@@ -28,7 +28,7 @@ imu_3_eul = quat2eul(imu_3_q, 'XYZ');
 % TODO CHECK REAL DATA VALUES TO TRANSFORM IN ABS ANGLES
 absangle_A = imu_1_eul(:, 3); % Leg Z angle
 absangle_B = imu_2_eul(:, 3); % Thigh Z angle
-absangle_C = imu_3_eul(:, 2); % Trunk Y angle
+absangle_C = imu_3_eul(:, 1); % Trunk Y angle
 
 size(absangle_A)
 
@@ -128,8 +128,9 @@ a_barbell_z = a_trunk_thigh_z + absangle_C_diff2.*L_trunk.*(absangle_C_cos)-L_tr
 
 iter = length(timeIncrements);
 x_cell = cell(iter, 1);
+offset = 3; % Avoid initial acceleration peaks
 
-for k = 1:iter
+for k = 1+offset:iter
     A = [
         1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0;
         0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0;
@@ -158,7 +159,7 @@ for k = 1:iter
         m_barbell*g;
     ];
 
-    x = inv(A) * b;
+    x = A\b;
     x_cell{k} = x;
 end
 
@@ -171,7 +172,7 @@ size(x_cell)
 m1 = zeros(length(timeIncrements), 1);
 m2 = zeros(length(timeIncrements), 1);
 m3 = zeros(length(timeIncrements), 1);
-for k = 1:iter
+for k = 1+offset:iter
     current_cell = x_cell{k};
     current_m1 = current_cell(9,1);
     current_m2 = current_cell(10,1);
@@ -182,14 +183,14 @@ for k = 1:iter
 end
 
 % Plot absolute angles and momentums
-figure;
+figure (1);
 subplot(3, 1, 1);
 plot(timeIncrements, [rad2deg(absangle_A),rad2deg(absangle_B),rad2deg(absangle_C)], 'LineWidth', 1.5);
 grid on;
 xlabel('Time (s)');
 ylabel('Angle (º)');
 title('Absolute angles');
-legend('Absolute angle A Z', 'Absolute angle B Z', 'Absolute angle C Y');
+legend('Ankle (Z axis)', 'Knee (Z axis)', 'Hip (Y axis)');
 
 subplot(3, 1, 2);
 plot(timeIncrements, [a_leg_z,a_thigh_z,a_trunk_z], 'LineWidth', 1.5);
@@ -205,4 +206,30 @@ grid on;
 xlabel('Time (s)');
 ylabel('Momentum (Nm)');
 title('Momentums');
+legend('Ankle', 'Knee', 'Hip');
+
+% Plot only absolute angles
+figure (2);
+subplot(3, 1, 1);
+plot(timeIncrements, [rad2deg(imu_1_eul(:, 1)),rad2deg(imu_2_eul(:, 1)),rad2deg(imu_3_eul(:, 1))], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (º)');
+title('Absolute angles X axis');
+legend('Ankle', 'Knee', 'Hip');
+
+subplot(3, 1, 2);
+plot(timeIncrements, [rad2deg(imu_1_eul(:, 2)),rad2deg(imu_2_eul(:, 2)),rad2deg(imu_3_eul(:, 2))], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (º)');
+title('Absolute angles Y axis');
+legend('Ankle', 'Knee', 'Hip');
+
+subplot(3, 1, 3);
+plot(timeIncrements, [rad2deg(imu_1_eul(:, 3)),rad2deg(imu_2_eul(:, 3)),rad2deg(imu_3_eul(:, 3))], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (º)');
+title('Absolute angles Z axis');
 legend('Ankle', 'Knee', 'Hip');
