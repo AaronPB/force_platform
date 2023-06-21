@@ -8,11 +8,10 @@ Welcome to the `force_platform` documentation! Here you will find all the necess
 
 ## Documentation sections
 
-Here is a ordered list of the documentation files provided in this wiki.
+Here is an ordered list of the documentation files provided in this wiki.
 
 1. [Project setup](setup/project.md)
-3. [Config file](setup/config_file.md)
-4. [Sensors]()
-5. [Execute a test]()
-6. [Calibrate sensors]()
-7. [Example case]()
+2. [Config file](setup/config_file.md)
+3. [Compatible sensors](setup/sensors.md)
+4. [Execute a test](features/general_test.md)
+5. [Calibrate sensors](calibration_test.md)
