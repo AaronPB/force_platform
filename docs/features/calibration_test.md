@@ -5,7 +5,7 @@
 
 Previously, you need to connect the sensors you want to calibrate in the main GUI as shown in the following picture.
 
-*TODO image*
+![Sensor connection example](../images/docs_images/calibration_sensor_connection.png)
 
 Then, click on the `Calibrar células` button on the left panel. This button will be available if at least one of the selected sensors is connected.
 
@@ -13,7 +13,7 @@ Then, click on the `Calibrar células` button on the left panel. This button wil
 
 This menu will replace the main GUI, with the compatible sensors. The appearance of the calibration menu is presented in the following image.
 
-*TODO image*
+![Calibration GUI](../images/docs_images/calibration_gui.png)
 
 The menu loads all compatible sensor lists defined in defined in `config.yaml`, but only the connected ones will be enabled.
 
@@ -29,7 +29,7 @@ In order to preform a calibration test, click the enabled button of the connecte
 
 A new window will pop up when clicking an enabled sensor button. The displayed GUI is as shown here.
 
-*TODO image*
+![Calibration test window](../images/docs_images/calibration_test_gui.png)
 
 The window is structured in the following sections:
 - A table in which all measurements will be recorded and the most relevant data (such as the mean and variance of the data sample) are displayed.
@@ -49,7 +49,7 @@ Once all measurements have been taken, linear regression can be performed by cli
 
 > A minimum of two measurements must be taken for the `Calibrar` button to be available.
 
-*TODO image*
+![Calibration test window](../images/docs_images/calibration_test_results.png)
 
 This will generate a graph with the regression line obtained (in red) and the measurements taken (as blue dots). The values of the line are displayed above the graph.
 

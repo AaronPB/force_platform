@@ -1,8 +1,8 @@
-:house: [`Back to Home`](../home.md)
+[:house: `Back to Home`](../home.md)
 
 # Compatible sensors
 **TODO**
 
 ---
 
-[`:house: Back to Home`](../home.md)
+[:house: `Back to Home`](../home.md)
