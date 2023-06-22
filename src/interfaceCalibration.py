@@ -83,7 +83,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.close_button = QtWidgets.QPushButton(
             'Volver al menú principal', self)
         self.close_button.clicked.connect(self.close)
-        self.grid_layout.addWidget(self.close_button, 13, 0, 1, 3)
+        self.grid_layout.addWidget(self.close_button, 20, 0, 1, 3)
 
     def imageWidget(self, image, size: int):
         image_widget = QtWidgets.QLabel(self)
