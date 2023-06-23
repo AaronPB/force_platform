@@ -1,4 +1,4 @@
-:house: <kbd>[Back to Home](../home.md)</kbd>
+[:house: `Back to Home`](../home.md)
 
 # Project setup
 
@@ -72,4 +72,4 @@ If the main GUI shows up, its done!
 
 ---
 
-:house: <kbd>[Back to Home](../home.md)</kbd>
+[:house: `Back to Home`](../home.md)

@@ -1,4 +1,4 @@
-:house: <kbd>[Back to Home](../home.md)</kbd>
+[:house: `Back to Home`](../home.md)
 
 # Config File
 
@@ -94,4 +94,4 @@ The config section keys are similar as in [Platform 1 loadcell list](#platform-1
 
 ---
 
-:house: <kbd>[Back to Home](../home.md)</kbd>
+[:house: `Back to Home`](../home.md)
