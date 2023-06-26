@@ -54,14 +54,14 @@ Once marked, press the <kbd>Connect sensors</kbd> button. Depending on the type 
 Once a connection is established (or not) with the indicated sensors, the table will be updated with the status of each sensor with one of the following colours listed here:
 
 | Colour | Description |
-| :--- | :--- |
-| `#808080` | No connection attempted. |
-| `#ff0000` | No connection could not be established. |
-| `#008000` | Connection successfully established. |
+| :---: | :--- |
+|<a href='#'><img valign='middle' src='https://readme-swatches.vercel.app/808080'/></a>| No connection attempted. |
+|<a href='#'><img valign='middle' src='https://readme-swatches.vercel.app/ff0000'/></a>| Connection could not be established. |
+|<a href='#'><img valign='middle' src='https://readme-swatches.vercel.app/008000'/></a>| Connection successfully established. |
 
 If at least one sensor is connected and the requirements indicated on the control panel are met, the buttons will be enabled to start the tests.
 
-![Main GUI Section 2 - Sensors connected](../../images/docs_images/main_gui_section2_connected.png)
+![Main GUI Section 2 - Sensors connected](../../images/docs_images/main_gui_section2_connections.png)
 
 ### Control panel functions
 
