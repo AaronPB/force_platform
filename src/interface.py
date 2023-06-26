@@ -116,14 +116,14 @@ class MainWindow(QtWidgets.QWidget):
 
         # Config file
         config_label = QtWidgets.QLabel('Configuration file:', self)
-        config_btn = QtWidgets.QPushButton('Select file', self)
+        config_btn = QtWidgets.QPushButton('Select config file', self)
         config_btn.clicked.connect(self.selectFile)
         self.config_path = QtWidgets.QLineEdit(self)
         self.config_path.setReadOnly(True)
 
         # Test folder
         test_path_label = QtWidgets.QLabel('Test folder path:', self)
-        test_path_btn = QtWidgets.QPushButton('Select path', self)
+        test_path_btn = QtWidgets.QPushButton('Select folder path', self)
         test_path_btn.clicked.connect(self.selectFolder)
         self.test_path = QtWidgets.QLineEdit(self)
         self.test_path.setReadOnly(True)
@@ -131,7 +131,7 @@ class MainWindow(QtWidgets.QWidget):
         # Test name
         text_label = QtWidgets.QLabel('Test name:', self)
         self.text_input = QtWidgets.QLineEdit(self)
-        aplicar_btn = QtWidgets.QPushButton('Set name', self)
+        aplicar_btn = QtWidgets.QPushButton('Set file name', self)
         aplicar_btn.clicked.connect(self.applyText)
 
         vbox_layout.addWidget(config_label, 0, 0)
