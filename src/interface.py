@@ -28,7 +28,7 @@ class MainWindow(QtWidgets.QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Programa de lecturas')
+        self.setWindowTitle('Force platform reader')
         self.setWindowIcon(QtGui.QIcon(
             os.path.join(self.dir_images, 'logo.ico')))
         screen_resolution = QtWidgets. QDesktopWidget().screenGeometry()
@@ -102,7 +102,7 @@ class MainWindow(QtWidgets.QWidget):
         pixmap = QtGui.QPixmap(os.path.join(self.dir_images, 'logo.ico'))
         image.setPixmap(pixmap.scaled(150, 150, QtCore.Qt.KeepAspectRatio))
         image.setAlignment(QtCore.Qt.AlignCenter)
-        label = QtWidgets.QLabel('Plataforma fuerza', self)
+        label = QtWidgets.QLabel('Force Platform Reader', self)
         label.setFont(QtGui.QFont("Arial", 12, QtGui.QFont.Bold))
         label.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -115,46 +115,46 @@ class MainWindow(QtWidgets.QWidget):
         vbox_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # Config file
-        config_label = QtWidgets.QLabel('Archivo configuración:', self)
-        config_btn = QtWidgets.QPushButton('Seleccionar config', self)
+        config_label = QtWidgets.QLabel('Configuration file:', self)
+        config_btn = QtWidgets.QPushButton('Select file', self)
         config_btn.clicked.connect(self.selectFile)
         self.config_path = QtWidgets.QLineEdit(self)
         self.config_path.setReadOnly(True)
 
         # Test folder
-        ubicacion_label = QtWidgets.QLabel('Carpeta del ensayo:', self)
-        ubicacion_btn = QtWidgets.QPushButton('Abrir ubicación', self)
-        ubicacion_btn.clicked.connect(self.selectFolder)
-        self.ubicacion_path = QtWidgets.QLineEdit(self)
-        self.ubicacion_path.setReadOnly(True)
+        test_path_label = QtWidgets.QLabel('Test folder path:', self)
+        test_path_btn = QtWidgets.QPushButton('Select path', self)
+        test_path_btn.clicked.connect(self.selectFolder)
+        self.test_path = QtWidgets.QLineEdit(self)
+        self.test_path.setReadOnly(True)
 
         # Test name
-        texto_label = QtWidgets.QLabel('Nombre del ensayo:', self)
-        self.texto_input = QtWidgets.QLineEdit(self)
-        aplicar_btn = QtWidgets.QPushButton('Aplicar', self)
+        text_label = QtWidgets.QLabel('Test name:', self)
+        self.text_input = QtWidgets.QLineEdit(self)
+        aplicar_btn = QtWidgets.QPushButton('Set name', self)
         aplicar_btn.clicked.connect(self.applyText)
 
         vbox_layout.addWidget(config_label, 0, 0)
         vbox_layout.addWidget(self.config_path, 0, 1)
         vbox_layout.addWidget(config_btn, 0, 2)
-        vbox_layout.addWidget(ubicacion_label, 1, 0)
-        vbox_layout.addWidget(self.ubicacion_path, 1, 1)
-        vbox_layout.addWidget(ubicacion_btn, 1, 2)
-        vbox_layout.addWidget(texto_label, 2, 0)
-        vbox_layout.addWidget(self.texto_input, 2, 1)
+        vbox_layout.addWidget(test_path_label, 1, 0)
+        vbox_layout.addWidget(self.test_path, 1, 1)
+        vbox_layout.addWidget(test_path_btn, 1, 2)
+        vbox_layout.addWidget(text_label, 2, 0)
+        vbox_layout.addWidget(self.text_input, 2, 1)
         vbox_layout.addWidget(aplicar_btn, 2, 2)
         self.hbox_top.addLayout(vbox_layout)
 
     def updatePaths(self):
         self.config_path.setText(self.inputReader.config_path)
-        self.ubicacion_path.setText(self.inputReader.test_folder)
-        self.texto_input.setText(self.inputReader.test_name)
+        self.test_path.setText(self.inputReader.test_folder)
+        self.text_input.setText(self.inputReader.test_name)
 
     def selectFile(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
         file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Seleccionar archivo', '', 'Archivo yaml (*.yaml)', options=options)
+            self, 'Select file', '', 'Archivo yaml (*.yaml)', options=options)
         if file_name:
             self.config_path.setText(file_name)
             # TODO change and load config params
@@ -163,7 +163,7 @@ class MainWindow(QtWidgets.QWidget):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(
-            self, 'Seleccionar carpeta', options=options)
+            self, 'Select folder', options=options)
         if folder_path:
             self.inputReader.configEdit(
                 'general_settings.test_file_path.folder', folder_path)
@@ -173,9 +173,9 @@ class MainWindow(QtWidgets.QWidget):
                 "Changed folder path to: " + str(folder_path))
 
     def applyText(self):
-        name = self.texto_input.text().strip()
+        name = self.text_input.text().strip()
         if not name:
-            name = "Ensayo de pruebas"
+            name = "Test"
         self.inputReader.configEdit(
             'general_settings.test_file_path.name', name)
         self.inputReader.loadGeneralSettings()
@@ -186,26 +186,26 @@ class MainWindow(QtWidgets.QWidget):
     def loadPanelLayout(self):
         vbox_layout = QtWidgets.QVBoxLayout()
         vbox_layout.setAlignment(QtCore.Qt.AlignTop)
-        title = QtWidgets.QLabel("Panel")
+        title = QtWidgets.QLabel("Control panel")
         title.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
         title.setAlignment(QtCore.Qt.AlignCenter)
 
         self.calibrate_sensors_btn = QtWidgets.QPushButton(
-            'Calibrar células', self)
+            'Calibrate sensors', self)
         self.calibrate_sensors_btn.setEnabled(False)
         self.calibrate_sensors_btn.clicked.connect(self.openCalibrationMenu)
-        self.start_btn = QtWidgets.QPushButton('Iniciar lectura', self)
+        self.start_btn = QtWidgets.QPushButton('Start test', self)
         self.start_btn.setEnabled(False)
         self.start_btn.clicked.connect(self.startTest)
-        self.tare_btn = QtWidgets.QPushButton('Tarar sensores', self)
+        self.tare_btn = QtWidgets.QPushButton('Tare sensors', self)
         self.tare_btn.setEnabled(False)
         self.tare_btn.clicked.connect(self.tareSensors)
         self.vbox_test_check = QtWidgets.QVBoxLayout()
-        self.stop_btn = QtWidgets.QPushButton('Finalizar y guardar', self)
+        self.stop_btn = QtWidgets.QPushButton('Stop test', self)
         self.stop_btn.setEnabled(False)
         self.stop_btn.clicked.connect(self.stopTest)
-        cerrar_btn = QtWidgets.QPushButton('Cerrar programa', self)
-        cerrar_btn.clicked.connect(self.close)
+        close_btn = QtWidgets.QPushButton('Close menu', self)
+        close_btn.clicked.connect(self.close)
 
         vbox_layout.addWidget(title)
         vbox_layout.addWidget(self.calibrate_sensors_btn)
@@ -213,7 +213,7 @@ class MainWindow(QtWidgets.QWidget):
         vbox_layout.addWidget(self.tare_btn)
         vbox_layout.addLayout(self.vbox_test_check)
         vbox_layout.addWidget(self.stop_btn)
-        vbox_layout.addWidget(cerrar_btn)
+        vbox_layout.addWidget(close_btn)
         self.hbox_mid.addLayout(vbox_layout)
 
     def loadSensorLayout(self):
@@ -222,12 +222,12 @@ class MainWindow(QtWidgets.QWidget):
 
         # First layout with title and sensor update button
         hbox_title_layout = QtWidgets.QHBoxLayout()
-        title = QtWidgets.QLabel("Información sensores")
+        title = QtWidgets.QLabel("Sensor information")
         title.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
         title.setAlignment(QtCore.Qt.AlignCenter)
 
         update_sensors_btn = QtWidgets.QPushButton(
-            'Conectar sensores', self)
+            'Connect sensors', self)
         update_sensors_btn.setMaximumWidth(200)
         update_sensors_btn.clicked.connect(self.updateSensors)
 
@@ -242,11 +242,11 @@ class MainWindow(QtWidgets.QWidget):
         grid_layout.setAlignment(QtCore.Qt.AlignTop)
 
         vbox_p1 = QtWidgets.QVBoxLayout()
-        vbox_p1.addWidget(QtWidgets.QLabel("Plataforma 1"))
+        vbox_p1.addWidget(QtWidgets.QLabel("Platform 1"))
         vbox_p2 = QtWidgets.QVBoxLayout()
-        vbox_p2.addWidget(QtWidgets.QLabel("Plataforma 2"))
+        vbox_p2.addWidget(QtWidgets.QLabel("Platform 2"))
         vbox_p3 = QtWidgets.QVBoxLayout()
-        vbox_p3.addWidget(QtWidgets.QLabel("Sensores externos"))
+        vbox_p3.addWidget(QtWidgets.QLabel("External sensors"))
         grid_layout.addLayout(vbox_p1, 0, 0)
         grid_layout.addLayout(vbox_p2, 0, 1)
         grid_layout.addLayout(vbox_p3, 0, 2)
@@ -340,10 +340,10 @@ class MainWindow(QtWidgets.QWidget):
 
     def updateTestChecks(self):
         test_status_text = [
-            ('Config cargada', '(!!) Pendiente cargar config'),
-            ('Ubicación seleccionada', '(!!) Selecciona ubicación para el ensayo'),
-            ('Nombre del ensayo definido', '(!!) Asigna un nombre de ensayo'),
-            ('Conexión establecida', '(!!) Conecta al menos un sensor')]
+            ('Config loaded', '(!!) Pending config upload'),
+            ('Folder path selected', '(!!) Select a folder to save files'),
+            ('Test name set', '(!!) Set a test name'),
+            ('Sensors connected', '(!!) Connect at least one sensor')]
         test_status = self.inputReader.getReaderChecks()
 
         while self.vbox_test_check.count():

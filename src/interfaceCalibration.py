@@ -32,7 +32,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
     def initUI(self):
         self.main_vbox_layout = QtWidgets.QVBoxLayout()
         # Set title and grid layout
-        title = QtWidgets.QLabel("Panel de Calibración")
+        title = QtWidgets.QLabel("Calibration Panel")
         title.setFont(QtGui.QFont("Arial", 14, QtGui.QFont.Bold))
         title.setAlignment(QtCore.Qt.AlignCenter)
         self.setLayout(self.main_vbox_layout)
@@ -59,9 +59,9 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
     def loadGridLayout(self):
         # Column labels and images
-        self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 1"), 0, 0)
-        self.grid_layout.addWidget(QtWidgets.QLabel("Plataforma 2"), 0, 1)
-        self.grid_layout.addWidget(QtWidgets.QLabel("Otros sensores"), 0, 2)
+        self.grid_layout.addWidget(QtWidgets.QLabel("Platform 1"), 0, 0)
+        self.grid_layout.addWidget(QtWidgets.QLabel("Platform 2"), 0, 1)
+        self.grid_layout.addWidget(QtWidgets.QLabel("External sensors"), 0, 2)
         self.grid_layout.addWidget(
             self.imageWidget('platform1.png', 350), 1, 0)
         self.grid_layout.addWidget(
@@ -81,7 +81,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
         # Add close button
         self.close_button = QtWidgets.QPushButton(
-            'Volver al menú principal', self)
+            'Back to main menu', self)
         self.close_button.clicked.connect(self.close)
         self.grid_layout.addWidget(self.close_button, 20, 0, 1, 3)
 
@@ -120,7 +120,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
 
         calibration_dialog = QtWidgets.QDialog()
         calibration_dialog.setWindowTitle(
-            'Calibración del sensor ' + str(sensor['name']))
+            'Calibration process of sensor ' + str(sensor['name']))
         calibration_dialog.resize(900, 800)
         calibration_dialog_layout = QtWidgets.QVBoxLayout(calibration_dialog)
         calibration_dialog_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -143,7 +143,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
             self.test_tree_widget.headerItem().setTextAlignment(column, QtCore.Qt.AlignCenter)
         self.test_tree_widget.expandAll()
         calibration_dialog_layout.addWidget(
-            QtWidgets.QLabel('Mediciones realizadas'))
+            QtWidgets.QLabel('Measurements information'))
         calibration_dialog_layout.addWidget(self.test_tree_widget)
 
         # Calibration results
@@ -153,7 +153,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         self.text_calibration_widget.addItem("Intercept (b):\t-")
         self.text_calibration_widget.addItem("Score (r2):\t\t-")
         calibration_dialog_layout.addWidget(
-            QtWidgets.QLabel('Resultados de la regresión lineal'))
+            QtWidgets.QLabel('Linear regression results'))
         calibration_dialog_layout.addWidget(self.text_calibration_widget)
         # Plot
         canvas, toolbar = self.generateDefaultPlot()
@@ -163,28 +163,28 @@ class MainCalibrationMenu(QtWidgets.QWidget):
         # Calibration input value
         self.test_value_input = QtWidgets.QLineEdit()
         self.test_value_input.setPlaceholderText(
-            'Introduce el valor de calibración: (ejemplo) 14.67')
+            'Enter calibration value: (example) 14.67')
         calibration_dialog_layout.addWidget(self.test_value_input)
 
         # Dialog buttons
         upper_button_box = QtWidgets.QHBoxLayout()
         lower_button_box = QtWidgets.QHBoxLayout()
-        self.measure_button = QtWidgets.QPushButton('Medir con valor')
+        self.measure_button = QtWidgets.QPushButton('Measure with value')
         self.measure_button.clicked.connect(lambda: self.executeTest(False))
         self.measure_reference_button = QtWidgets.QPushButton(
-            'Medir con sensor')
+            'Measure with sensor')
         self.measure_reference_button.setEnabled(
             self.inputReader.isCalibrationReferenceConnected())
         self.measure_reference_button.clicked.connect(
             lambda: self.executeTest(True))
-        self.calibrate_button = QtWidgets.QPushButton('Calibrar')
+        self.calibrate_button = QtWidgets.QPushButton('Calibrate')
         self.calibrate_button.setEnabled(False)
         self.calibrate_button.clicked.connect(self.calibrationResults)
-        self.save_button = QtWidgets.QPushButton('Guardar y cerrar')
+        self.save_button = QtWidgets.QPushButton('Save results and close')
         self.save_button.setEnabled(False)
         self.save_button.clicked.connect(
             lambda: self.saveCalibration(calibration_dialog, sensor['config_path']))
-        cancel_button = QtWidgets.QPushButton('Cancelar')
+        cancel_button = QtWidgets.QPushButton('Cancel process')
         cancel_button.clicked.connect(
             lambda: self.closeCalibrationDialog(calibration_dialog))
         upper_button_box.addWidget(self.measure_button)
@@ -227,7 +227,7 @@ class MainCalibrationMenu(QtWidgets.QWidget):
                 value = float(text)
             except ValueError:
                 QtWidgets.QMessageBox.warning(
-                    self, 'Error', 'Debe ingresar un número decimal.')
+                    self, 'Error', 'You must enter a valid number (integer or float).')
                 return
 
         # Execute calibration test
