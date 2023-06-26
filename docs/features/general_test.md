@@ -53,7 +53,7 @@ Once marked, press the <kbd>Connect sensors</kbd> button. Depending on the type 
 
 Once a connection is established (or not) with the indicated sensors, the table will be updated with the status of each sensor with one of the following colours listed here:
 
-| Colour | Description | |
+| Colour | Description |
 | :--- | :--- |
 | `#808080` | No connection attempted. |
 | `#ff0000` | No connection could not be established. |
