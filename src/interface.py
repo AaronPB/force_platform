@@ -431,9 +431,9 @@ class MainWindow(QtWidgets.QWidget):
         x_length = 600  # mm
         y_length = 400  # mm
         rect1 = patches.Rectangle(
-            (0, 0), x_length, y_length, edgecolor='blue', facecolor='none')
+            (-x_length/2, -y_length/2), x_length, y_length, edgecolor='blue', facecolor='none')
         rect2 = patches.Rectangle(
-            (0, 0), x_length, y_length, edgecolor='blue', facecolor='none')
+            (-x_length/2, -y_length/2), x_length, y_length, edgecolor='blue', facecolor='none')
 
         # Generate empty plots
         self.fig1, self.ax1 = plt.subplots()

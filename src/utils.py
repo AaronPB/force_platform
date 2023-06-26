@@ -63,7 +63,9 @@ class DataFramePlotter:
         self.df = pd.concat([self.df, data_frame.iloc[:, 1:]], axis=1)
 
     def plot_line(self, x_col, y_cols):
-        fig, ax = plt.subplots()
+        plt.close('all')
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
         for y_col in y_cols:
             ax.plot(self.df[x_col], self.df[y_col], label=y_col)
         ax.legend()

@@ -36,7 +36,7 @@ class InputReader:
             os.path.dirname(__file__), '..', 'config.yaml')
         self.config_path = self.default_config_path
         self.configLoad()
-        if 'custom_config_path' in self.config['general_settings']:
+        if self.config['general_settings']['custom_config_path']:
             self.configLoadCustomFile(os.path.join(
                 self.config['general_settings']['custom_config_path']))
             return
@@ -228,13 +228,15 @@ class InputReader:
             self.test_folder, self.test_name + '.csv'))
         self.sensor_dataframe_raw.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '_RAW' + '.csv'))
-        # WIP Plot results
-        plot_columns = [0, 1, 2, 3, 4]
-        plot_dataframe = self.sensor_dataframe.getDataFrame(
-        ).iloc[:, plot_columns].copy()
-        print(plot_dataframe)
-        preview = DataFramePlotter(plot_dataframe)
-        preview.plot_line('time', plot_dataframe.columns[1:])
+        # Plot desired sensor values if enabled in config
+        if self.config['general_settings']['test_results']['generate_plot']:
+            sensor_headers = self.config['general_settings']['test_results']['column_headers']
+            plot_columns = [0]
+            plot_columns.extend(sensor_headers)
+            plot_dataframe = self.sensor_dataframe.getDataFrame(
+            ).iloc[:, plot_columns].copy()
+            preview = DataFramePlotter(plot_dataframe)
+            preview.plot_line('time', plot_dataframe.columns[1:])
 
     # Return fixed format of:
     # - Relative COP of Platform 1
