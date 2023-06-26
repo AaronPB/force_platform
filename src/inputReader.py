@@ -32,17 +32,14 @@ class InputReader:
         self.taoboticsIMUsHandler = TaoboticsIMUsHandler("BodyIMUs")
 
         # Load config
-        self.config_path = os.path.join(
+        self.default_config_path = os.path.join(
             os.path.dirname(__file__), '..', 'config.yaml')
+        self.config_path = self.default_config_path
         self.configLoad()
-        if 'custom_config_path' in self.config:
-            self.config_path = os.path.join(self.config['custom_config_path'])
-            if os.path.exists(self.config_path):
-                print('Loading custom file: ' + self.config_path)
-                self.configLoad()
-            else:
-                print('Could not find custom config file: ' +
-                      self.config_path + '.\nDefault config has been loaded.')
+        if 'custom_config_path' in self.config['general_settings']:
+            self.configLoadCustomFile(os.path.join(
+                self.config['general_settings']['custom_config_path']))
+            return
         self.configLoadParams()
 
     # Config methods
@@ -61,6 +58,22 @@ class InputReader:
             currentDict = currentDict[key]
         currentDict[keys[-1]] = value
         self.configSave()
+
+    def configLoadCustomFile(self, path):
+        if not os.path.exists(path):
+            self.log_handler.logger.warn(
+                'Could not find custom config file: ' +
+                self.config_path + '.\nDefault config has been loaded.')
+            self.configLoadParams()
+            return
+        print('Loading custom file: ' + str(path))
+        # Define first the custom config path in default config.yaml
+        if self.config_path is self.default_config_path:
+            self.configEdit('general_settings.custom_config_path', str(path))
+        # Load custom config file
+        self.config_path = path
+        self.configLoad()
+        self.configLoadParams()
 
     def configLoadParams(self):
         self.loadGeneralSettings()
@@ -113,10 +126,14 @@ class InputReader:
     def loadSensorType(self, type, config_list):
         if not config_list in self.config:
             self.log_handler.logger.warn(
-                "Cannot find " + config_list + "in config! Ignoring list.")
+                "Cannot find " + config_list + " in config! Ignoring list.")
             return
         type.clearSensors()
         config_list_path = self.config[config_list]
+        if not bool(config_list_path):
+            self.log_handler.logger.warn(
+                "No keys found in " + str(config_list) + "! Ignoring list.")
+            return
         for sensor_id in list(config_list_path.keys()):
             sensor_data = config_list_path[sensor_id].copy()
             sensor_data['id'] = sensor_id  # Add ID to dict
@@ -139,16 +156,16 @@ class InputReader:
 
     def getTestInterval(self):
         return self.QT_times_dict['test_interval']
-    
+
     def getTestTareTime(self):
         return self.QT_times_dict['test_tare_time']
-    
+
     def getCalibrationInterval(self):
         return self.QT_times_dict['calibration_interval']
-    
+
     def getCalibrationTime(self):
         return self.QT_times_dict['calibration_time']
-    
+
     def getPlatform1SensorStatus(self):
         return self.phidgetP1LoadCellsHandler.getSensorListDict()
 

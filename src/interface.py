@@ -153,12 +153,12 @@ class MainWindow(QtWidgets.QWidget):
     def selectFile(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(
+        config_file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Select file', '', 'Archivo yaml (*.yaml)', options=options)
-        if file_name:
-            self.config_path.setText(file_name)
-            # TODO change and load config params
-            self.updateTestChecks()
+        if config_file_path:
+            self.config_path.setText(config_file_path)
+            self.inputReader.configLoadCustomFile(config_file_path)
+            self.updateSensorPanel()
 
     def selectFolder(self):
         options = QtWidgets.QFileDialog.Options()
@@ -232,7 +232,7 @@ class MainWindow(QtWidgets.QWidget):
         update_sensors_btn = QtWidgets.QPushButton(
             'Connect sensors', self)
         update_sensors_btn.setMaximumWidth(200)
-        update_sensors_btn.clicked.connect(self.updateSensors)
+        update_sensors_btn.clicked.connect(self.connectSensors)
 
         hbox_title_layout.addWidget(update_sensors_btn)
         hbox_title_layout.addWidget(title)
@@ -268,9 +268,7 @@ class MainWindow(QtWidgets.QWidget):
         vbox_layout.addLayout(grid_layout)
         self.hbox_mid.addLayout(vbox_layout)
 
-    def updateSensors(self):
-        # Connect sensors
-        self.inputReader.connectSensors()
+    def updateSensorPanel(self):
         # Clear grid layouts and load again
         sensor_layout = self.hbox_mid.itemAt(2).layout()
         if sensor_layout is not None:
@@ -340,6 +338,10 @@ class MainWindow(QtWidgets.QWidget):
         sender = self.sender()
         self.inputReader.configEdit(
             sender.objectName() + '.read_data', state == 2)
+
+    def connectSensors(self):
+        self.inputReader.connectSensors()
+        self.updateSensorPanel()
 
     def updateTestChecks(self):
         test_status_text = [
