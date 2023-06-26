@@ -158,6 +158,7 @@ class MainWindow(QtWidgets.QWidget):
         if file_name:
             self.config_path.setText(file_name)
             # TODO change and load config params
+            self.updateTestChecks()
 
     def selectFolder(self):
         options = QtWidgets.QFileDialog.Options()
@@ -171,6 +172,7 @@ class MainWindow(QtWidgets.QWidget):
             self.updatePaths()
             self.log_handler.logger.info(
                 "Changed folder path to: " + str(folder_path))
+            self.updateTestChecks()
 
     def applyText(self):
         name = self.text_input.text().strip()
@@ -181,6 +183,7 @@ class MainWindow(QtWidgets.QWidget):
         self.inputReader.loadGeneralSettings()
         self.updatePaths()
         self.log_handler.logger.info("Changed test name to: " + str(name))
+        self.updateTestChecks()
 
     # MID LAYOUT METHODS
     def loadPanelLayout(self):
