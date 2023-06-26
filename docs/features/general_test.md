@@ -7,7 +7,7 @@ The main objective of the program is to record data from the connected sensors i
 
 When running the `main.py` file of the program, a window like this will open:
 
-![Main GUI](../../images/docs_images/main_gui.png)
+![Main GUI](../../images/docs_images/main_gui_default.png)
 
 The interface is organised in three main sections which will be detailed below:
 - File management.
@@ -21,13 +21,16 @@ The interface is organised in three main sections which will be detailed below:
 In this section you can configure the following options listed below.
 
 ### Load a custom configuration file
-**Not yet implemented**
 
 It is possible to load another `.yaml` file than the default `config.yaml` file. This is useful when you want to run tests that have different sensor and platform layouts and other calibration values.
 
 If you want to load another configuration file, click on the <kbd>Select config file</kbd> button and select the custom file with extension `.yaml`.
 
-Once selected, if it is in the correct format, the window will be updated with the new sensor information. The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
+Once selected, if it is in the correct format, the window will be updated with the new sensor information.
+
+![Main GUI Section 1](../../images/docs_images/main_gui_custom_config.png)
+
+The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
 
 > This can be cancelled by deleting the custom configuration path in the default `config.yaml` file.
 
@@ -53,11 +56,11 @@ Once marked, press the <kbd>Connect sensors</kbd> button. Depending on the type 
 
 Once a connection is established (or not) with the indicated sensors, the table will be updated with the status of each sensor with one of the following colours listed here:
 
-| Colour | Description |
+| Color | Description |
 | :---: | :--- |
-|<a href='#'><img valign='middle' src='https://readme-swatches.vercel.app/808080'/></a>| No connection attempted. |
-|<a href='#'><img valign='middle' src='https://readme-swatches.vercel.app/ff0000'/></a>| Connection could not be established. |
-|<a href='#'><img valign='middle' src='https://readme-swatches.vercel.app/008000'/></a>| Connection successfully established. |
+|<img valign='middle' src='https://readme-swatches.vercel.app/808080'/>| No connection attempted. |
+|<img valign='middle' src='https://readme-swatches.vercel.app/ff0000'/>| Connection could not be established. |
+|<img valign='middle' src='https://readme-swatches.vercel.app/008000'/>| Connection successfully established. |
 
 If at least one sensor is connected and the requirements indicated on the control panel are met, the buttons will be enabled to start the tests.
 

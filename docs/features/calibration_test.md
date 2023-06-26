@@ -4,7 +4,9 @@
 
 Previously, you need to connect the sensors you want to calibrate in the main GUI as shown in the following picture.
 
-![Sensor connection example](../../images/docs_images/calibration_sensor_connection.png)
+![Sensor connection example](../../images/docs_images/main_gui_section2_connections.png)
+
+> Need more information about how to connect sensors? Check the [sensor connection](general_test.md#sensor-connection) section of the general test procedure.
 
 Then, click on the <kbd>Calibrate sensors</kbd> button on the left panel. This button will be available if at least one of the selected sensors is connected.
 
