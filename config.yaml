@@ -154,7 +154,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Z_1
     channel: 0
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: W019737
       max_weight: 150kg
@@ -165,7 +165,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Z_2
     channel: 1
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: Z1162733
       max_weight: 150kg
@@ -176,7 +176,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Z_3
     channel: 2
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: Z1162736
       max_weight: 150kg
@@ -187,7 +187,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Z_4
     channel: 3
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: Z1162741
       max_weight: 150kg
@@ -198,7 +198,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_X_1
     channel: 0
     serial: 588718
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805059
       max_weight: 110kg
@@ -209,7 +209,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_X_2
     channel: 1
     serial: 588718
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805079
       max_weight: 110kg
@@ -220,7 +220,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_X_3
     channel: 2
     serial: 588718
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805063
       max_weight: 110kg
@@ -231,7 +231,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_X_4
     channel: 3
     serial: 588718
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805056
       max_weight: 110kg
@@ -242,7 +242,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Y_1
     channel: 0
     serial: 582535
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805080
       max_weight: 110kg
@@ -253,7 +253,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Y_2
     channel: 1
     serial: 582535
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805058
       max_weight: 110kg
@@ -264,7 +264,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Y_3
     channel: 2
     serial: 582535
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805068
       max_weight: 110kg
@@ -275,7 +275,7 @@ p2_phidget_loadcell_list:
     name: P2_LoadCell_Y_4
     channel: 3
     serial: 582535
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805066
       max_weight: 110kg
@@ -311,19 +311,19 @@ taobotics_imu_list:
   imu_1:
     name: IMU_Leg_Right
     serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.3:1.0-port0
-    read_data: false
+    read_data: true
     properties:
       tag: IMU_1
   imu_2:
     name: IMU_Thigh_Right
     serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.4:1.0-port0
-    read_data: false
+    read_data: true
     properties:
       tag: IMU_2
   imu_3:
     name: IMU_UpperTrunk_Right
     serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.2:1.0-port0
-    read_data: false
+    read_data: true
     properties:
       tag: IMU_3
 calibration_sensor:
