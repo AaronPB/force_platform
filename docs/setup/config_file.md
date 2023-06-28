@@ -12,24 +12,26 @@ Config main content:
 
 ## General settings
 
-https://github.com/AaronPB/force_platform/blob/88ecc364dc7c97f09efae3091a1ce522aba9c423/config.yaml#L1-L12
+https://github.com/AaronPB/force_platform/blob/fdb52dbe9a6d9100263b5b0a4648fc77fb0aabaf/config.yaml#L1-L18
 
 Information of all the keys involved in this config section:
 
 | Key | Type | Description |
 | :--- | :---: | :--- |
+| `custom_config_path` | STRING | Custom config to load instead of this default config. Set to `null` if the default config is needed. |
 | `calibration_times.data_interval_ms` | INT | Data recording frequency (in ms). |
 | `calibration_times.recording_time` | INT | Data recording duration (in ms). |
 | `test_times.data_interval_ms` | INT | Data recording frequency (in ms). |
 | `test_times.tare_time_ms` | INT | Duration of data recording to tare (in ms). |
 | `test_file_path.folder` | STRING | Path to desired folder where the `csv` files will be saved. |
 | `test_file_path.name` | STRING | Name of the generated `csv` files. |
-| `test_results.generate_plots` | BOOL | Work in progress. |
+| `test_results.generate_plots` | BOOL | Generate a plot with the recorded values when the test ends. |
+| `test_results.column_headers` | LIST | A list of integers indicating the header positions that will be plotted. |
 
 ## Platform 1 loadcell list
 Declare the amount of Phidget loadcells in the first platform.
 
-https://github.com/AaronPB/force_platform/blob/88ecc364dc7c97f09efae3091a1ce522aba9c423/config.yaml#L13-L24
+https://github.com/AaronPB/force_platform/blob/fdb52dbe9a6d9100263b5b0a4648fc77fb0aabaf/config.yaml#L19-L30
 
 Information of all the keys involved in this config section:
 
@@ -47,14 +49,14 @@ Information of all the keys involved in this config section:
 ## Platform 2 loadcell list
 Declare the amount of Phidget loadcells in the second platform.
 
-https://github.com/AaronPB/force_platform/blob/88ecc364dc7c97f09efae3091a1ce522aba9c423/config.yaml#L146-L157
+https://github.com/AaronPB/force_platform/blob/fdb52dbe9a6d9100263b5b0a4648fc77fb0aabaf/config.yaml#L152-L163
 
 The config section keys are the same as in [Platform 1 loadcell list](#platform-1-loadcell-list).
 
 ## Encoder list
 Declare the amount of Phidget encoders.
 
-https://github.com/AaronPB/force_platform/blob/88ecc364dc7c97f09efae3091a1ce522aba9c423/config.yaml#L279-L291
+https://github.com/AaronPB/force_platform/blob/fdb52dbe9a6d9100263b5b0a4648fc77fb0aabaf/config.yaml#L285-L297
 
 Information of all the keys involved in this config section:
 
@@ -73,7 +75,7 @@ Information of all the keys involved in this config section:
 ## IMU list
 Declare the amount of Taobotics IMUs.
 
-https://github.com/AaronPB/force_platform/blob/88ecc364dc7c97f09efae3091a1ce522aba9c423/config.yaml#L304-L310
+https://github.com/AaronPB/force_platform/blob/fdb52dbe9a6d9100263b5b0a4648fc77fb0aabaf/config.yaml#L310-L316
 
 Information of all the keys involved in this config section:
 
@@ -88,7 +90,7 @@ Information of all the keys involved in this config section:
 ## Calibration sensor
 Define here a Phidget loadcell that will be used for reference data when calibrating, instead of manual inputs.
 
-https://github.com/AaronPB/force_platform/blob/88ecc364dc7c97f09efae3091a1ce522aba9c423/config.yaml#L323-L333
+https://github.com/AaronPB/force_platform/blob/fdb52dbe9a6d9100263b5b0a4648fc77fb0aabaf/config.yaml#L329-L339
 
 The config section keys are similar as in [Platform 1 loadcell list](#platform-1-loadcell-list).
 
