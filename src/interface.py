@@ -435,8 +435,12 @@ class MainWindow(QtWidgets.QWidget):
         rect2 = patches.Rectangle(
             (-x_length/2, -y_length/2), x_length, y_length, edgecolor='blue', facecolor='none')
 
+        # Figure size
+        x_size = 4
+        y_size = 4
+
         # Generate empty plots
-        self.fig1, self.ax1 = plt.subplots()
+        self.fig1, self.ax1 = plt.subplots(figsize=(x_size, y_size))
         self.canvas1 = FigureCanvas(self.fig1)
         self.ax1.set_xlabel('Medio-Lateral Motion (mm)')
         self.ax1.set_ylabel('Anterior-Posterior Motion (mm)')
@@ -445,7 +449,7 @@ class MainWindow(QtWidgets.QWidget):
         self.ax1.grid(True)
         self.ax1.add_patch(rect1)
 
-        self.fig2, self.ax2 = plt.subplots()
+        self.fig2, self.ax2 = plt.subplots(figsize=(x_size, y_size))
         self.canvas2 = FigureCanvas(self.fig2)
         toolbar2 = NavigationToolbar(self.canvas2, self)
         self.ax2.set_xlabel('Medio-Lateral Motion (mm)')
@@ -454,7 +458,7 @@ class MainWindow(QtWidgets.QWidget):
         self.ax2.grid(True)
         self.ax2.add_patch(rect2)
 
-        self.fig3, self.ax3 = plt.subplots()
+        self.fig3, self.ax3 = plt.subplots(figsize=(x_size, y_size))
         self.canvas3 = FigureCanvas(self.fig3)
         toolbar3 = NavigationToolbar(self.canvas3, self)
         self.ax3.set_xlabel('Time (s)')
