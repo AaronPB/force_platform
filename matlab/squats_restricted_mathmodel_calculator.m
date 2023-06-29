@@ -1,7 +1,8 @@
 %% FORCES AND MOMENTUM VALUES CALCULATOR
 % Author: Aaron Raul Poyatos Bakker
 % Date: 13/06/2023
-% With the angle information, obtain all forces and momentums
+% With the angle information and an horizontal force, obtain all unknown
+% forces and momentums for the squats restricted model.
 
 %% IMPORT DATA
 % Change path to desired csv file
@@ -9,6 +10,8 @@ data = readtable('../pruebas/EnsayoGiros.csv', 'Delimiter', ',');
 
 % Data
 timestamps = data.timestamp;
+force_horizontal = -data.P1_LoadCell_X_1 + data.P1_LoadCell_X_2 + data.P1_LoadCell_X_3 - data.P1_LoadCell_X_4 ...
+    -data.P2_LoadCell_X_1 + data.P2_LoadCell_X_2 + data.P2_LoadCell_X_3 - data.P2_LoadCell_X_4;
 imu_1_q = [data.IMU_Leg_Right_qw, data.IMU_Leg_Right_qx, data.IMU_Leg_Right_qy, data.IMU_Leg_Right_qz];
 imu_1_w = [data.IMU_Leg_Right_wx, data.IMU_Leg_Right_wy, data.IMU_Leg_Right_wz];
 imu_2_q = [data.IMU_Thigh_Right_qw, data.IMU_Thigh_Right_qx, data.IMU_Thigh_Right_qy, data.IMU_Thigh_Right_qz];
@@ -33,20 +36,20 @@ absangle_C = imu_3_eul(:, 1); % Trunk Y angle
 size(absangle_A)
 
 %% EXAMPLES WITH VIRTUAL ANGLES
-% Comment/delete this section if you want to use imported data from csv
-timeIncrements = 0:0.01:4;
-% absangle_A = transpose(linspace(pi/2, pi/4, numel(timeIncrements)));
-% absangle_B = transpose(linspace(pi/2, pi/1.2, numel(timeIncrements)));
-% absangle_C = transpose(linspace(pi/2, pi/5, numel(timeIncrements)));
-pos_i = pi/2;
-pos_f_A = pi/4;
-pos_f_B = pi/1.2;
-pos_f_C = pi/5;
-reps = 2;
-
-absangle_A = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_A);
-absangle_B = test_angle_trajectories_parabolic(timeIncrements,reps,pos_i,pos_f_B);
-absangle_C = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_C);
+% % Comment/delete this section if you want to use imported data from csv
+% timeIncrements = 0:0.01:4;
+% % absangle_A = transpose(linspace(pi/2, pi/4, numel(timeIncrements)));
+% % absangle_B = transpose(linspace(pi/2, pi/1.2, numel(timeIncrements)));
+% % absangle_C = transpose(linspace(pi/2, pi/5, numel(timeIncrements)));
+% pos_i = pi/2;
+% pos_f_A = pi/4;
+% pos_f_B = pi/1.2;
+% pos_f_C = pi/5;
+% reps = 2;
+% 
+% absangle_A = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_A);
+% absangle_B = test_angle_trajectories_parabolic(timeIncrements,reps,pos_i,pos_f_B);
+% absangle_C = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_C);
 
 %% MODEL PARAMETERS
 % General values
@@ -57,28 +60,31 @@ m_barbell   = 100;  % Barbell total weight (kg)
 % Limbs lengths and CM offsets (m)
 L_leg       = 0.231*h_body/100;
 L_thigh     = 0.237*h_body/100;
-L_trunk     = 0.303*h_body/100;
+L_hat       = (0.303+1-0.814)*h_body/100;
+L_uppertrunk= 0.303*h_body/100;
 Lp_leg      = 0.433*L_leg;
 Ld_leg      = 0.567*L_leg;
 Lp_thigh    = 0.433*L_thigh;
 Ld_thigh    = 0.567*L_thigh;
-Lp_trunk    = 0.626*L_trunk;
-Ld_trunk    = 0.374*L_trunk;
+Lp_hat      = 0.626*L_hat;
+Ld_hat      = 0.374*L_hat;
 % Limbs weights and partial weights (kg)
 m_leg       = 0.0465*m_body;
 m_thigh     = 0.1000*m_body;
-m_trunk     = 0.6780*m_body;
+m_hat       = 0.6780*m_body;
 
 % Limb turning radios (for inertia)
 r_cg_leg    = 0.302*L_leg;
 r_cg_thigh  = 0.323*L_thigh;
-r_cg_trunk  = 0.503*L_trunk;
+r_cg_hat  = 0.503*L_hat;
 
 %% OBTAIN MATRIX VALUES
 % Inertia values: I = m*R2
 I_leg = m_leg*r_cg_leg*r_cg_leg;
 I_thigh = m_thigh*r_cg_thigh*r_cg_thigh;
-I_trunk = m_trunk*r_cg_trunk*r_cg_trunk;
+I_hat = m_hat*r_cg_hat*r_cg_hat;
+d = L_uppertrunk - Ld_hat;
+I_barbell = m_barbell*d*d;
 
 % --- Absolute angles management
 % Sines and cosines of absolute angles
@@ -115,13 +121,13 @@ a_thigh_leg_z = absangle_A_diff2.*L_leg.*(absangle_A_cos)-L_leg.*absangle_A_diff
 a_thigh_x = a_thigh_leg_x + absangle_B_diff2.*Lp_thigh.*(-absangle_B_sin)-Lp_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_cos;
 a_thigh_z = a_thigh_leg_z + absangle_B_diff2.*Lp_thigh.*(absangle_B_cos)-Lp_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_sin;
 % Trunk COG accelerations
-a_trunk_thigh_x = a_thigh_leg_x + absangle_B_diff2.*L_thigh.*(-absangle_B_sin)-L_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_cos;
-a_trunk_thigh_z = a_thigh_leg_z + absangle_B_diff2.*L_thigh.*(absangle_B_cos)-L_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_sin;
-a_trunk_x = a_trunk_thigh_x + absangle_C_diff2.*Lp_trunk.*(-absangle_C_sin)-Lp_trunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
-a_trunk_z = a_trunk_thigh_z + absangle_C_diff2.*Lp_trunk.*(absangle_C_cos)-Lp_trunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
+a_hat_thigh_x = a_thigh_leg_x + absangle_B_diff2.*L_thigh.*(-absangle_B_sin)-L_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_cos;
+a_hat_thigh_z = a_thigh_leg_z + absangle_B_diff2.*L_thigh.*(absangle_B_cos)-L_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_sin;
+a_hat_x = a_hat_thigh_x + absangle_C_diff2.*Lp_hat.*(-absangle_C_sin)-Lp_hat.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
+a_hat_z = a_hat_thigh_z + absangle_C_diff2.*Lp_hat.*(absangle_C_cos)-Lp_hat.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
 % Barbell COG accelerations
-a_barbell_x = a_trunk_thigh_x + absangle_C_diff2.*L_trunk.*(-absangle_C_sin)-L_trunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
-a_barbell_z = a_trunk_thigh_z + absangle_C_diff2.*L_trunk.*(absangle_C_cos)-L_trunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
+a_barbell_x = a_hat_thigh_x + absangle_C_diff2.*L_uppertrunk.*(-absangle_C_sin)-L_uppertrunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
+a_barbell_z = a_hat_thigh_z + absangle_C_diff2.*L_uppertrunk.*(absangle_C_cos)-L_uppertrunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
 
 %% BUILD A AND B MATRIX
 % Ax = b -> x = A(-1)*b
@@ -132,31 +138,27 @@ offset = 3; % Avoid initial acceleration peaks
 
 for k = 1+offset:iter
     A = [
-        1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0;
-        0, 1, 0, -1, 0, 0, 0, 0, 0, 0, 0;
-        Lp_leg*absangle_A_sin(k,1), -Lp_leg*absangle_A_cos(k,1), Ld_leg*absangle_A_sin(k,1), -Ld_leg*absangle_A_cos(k,1), 0, 0, 0, 0, 1, -1, 0;
-        0, 0, 1, 0, -1, 0, 0, 0, 0, 0, 0;
-        0, 0, 0, 1, 0, -1, 0, 0, 0, 0, 0;
-        0, 0, Lp_thigh*absangle_B_sin(k,1), Lp_thigh*absangle_B_cos(k,1), Ld_thigh*absangle_B_sin(k,1), Ld_thigh*absangle_B_cos(k,1), 0, 0, 0, 1, -1;
-        0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0;
-        0, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0;
-        0, 0, 0, 0, Lp_trunk*absangle_C_sin(k,1), -Lp_trunk*absangle_C_cos(k,1), Ld_trunk*absangle_C_sin(k,1), -Ld_trunk*absangle_C_cos(k,1), 0, 0, 1;
-        0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0;
-        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0;
+        0, -1, 0, 0, 0, 0, 0, 0, 0;
+        1, 0, -1, 0, 0, 0, 0, 0, 0;
+        -Ld_leg*absangle_A_cos(k,1), Lp_leg*absangle_A_sin(k,1), -Lp_leg*absangle_A_cos(k,1), 0, 0, 0, 1, -1, 0;
+        0, 1, 0, -1, 0, 0, 0, 0, 0;
+        0, 0, 1, 0, -1, 0, 0, 0, 0;
+        0, Ld_thigh*absangle_B_sin(k,1), Ld_thigh*absangle_B_cos(k,1), Lp_thigh*absangle_B_sin(k,1), Lp_thigh*absangle_B_cos(k,1), 0, 0, 1, -1;
+        0, 0, 0, 1, 0, -1, 0, 0, 0;
+        0, 0, 0, 0, 1, 0, 0, 0, 0;
+        0, 0, 0, Ld_hat*absangle_C_sin(k,1), -Ld_hat*absangle_C_cos(k,1), Lp_hat*absangle_C_sin(k,1), 0, 0, 1;
     ];
 
     b = [
-        m_leg*a_leg_x(k,1);
+        -force_horizontal + m_leg*a_leg_x(k,1);
         m_leg*a_leg_z(k,1) + m_leg*g;
-        I_leg*absangle_A_diff2(k,1);
+        -force_horizontal * Ld_leg * absangle_A_sin(k,1) + I_leg*absangle_A_diff2(k,1);
         m_thigh*a_thigh_x(k,1);
         m_thigh*a_thigh_z(k,1) + m_thigh*g;
         I_thigh*absangle_B_diff2(k,1);
-        m_trunk*a_trunk_x(k,1) + m_barbell*a_barbell_x(k,1);
-        m_trunk*a_trunk_z(k,1) + m_trunk*g + m_barbell*a_barbell_z(k,1);
-        I_trunk*absangle_C_diff2(k,1) - m_barbell*a_barbell_x(k,1)*Ld_trunk*absangle_C_sin(k,1) + m_barbell*a_barbell_z(k,1).*Ld_trunk*absangle_C_cos(k,1);
-        0;
-        m_barbell*g;
+        m_hat*a_hat_x(k,1);
+        m_hat*a_hat_z(k,1) + m_hat*g + m_barbell*a_barbell_z(k,1) + m_barbell*g;
+        m_barbell*g*Lp_hat*absangle_C_cos(k,1) + (I_hat+I_barbell)*absangle_C_diff2(k,1) + m_barbell*a_barbell_z(k,1).*d*absangle_C_cos(k,1);
     ];
 
     x = A\b;
@@ -164,7 +166,7 @@ for k = 1+offset:iter
 end
 
 % Each cell contains the force and momentum values in the following order:
-% x: [F12x;F12z;F23x;F23z;F34x;F34z;Fx;Fz;Ma;Mk;Mh]
+% x: [F12z;F23x;F23z;F34x;F34z;Fx;Ma;Mk;Mh]
 size(x_cell)
 
 %% PLOT RESULTS
@@ -174,9 +176,9 @@ m2 = zeros(length(timeIncrements), 1);
 m3 = zeros(length(timeIncrements), 1);
 for k = 1+offset:iter
     current_cell = x_cell{k};
-    current_m1 = current_cell(9,1);
-    current_m2 = current_cell(10,1);
-    current_m3 = current_cell(11,1);
+    current_m1 = current_cell(7,1);
+    current_m2 = current_cell(8,1);
+    current_m3 = current_cell(9,1);
     m1(k) = current_m1;
     m2(k) = current_m2;
     m3(k) = current_m3;
@@ -193,7 +195,7 @@ title('Absolute angles');
 legend('Ankle (Z axis)', 'Knee (Z axis)', 'Hip (Y axis)');
 
 subplot(3, 1, 2);
-plot(timeIncrements, [a_leg_z,a_thigh_z,a_trunk_z], 'LineWidth', 1.5);
+plot(timeIncrements, [a_leg_z,a_thigh_z,a_hat_z], 'LineWidth', 1.5);
 grid on;
 xlabel('Time (s)');
 ylabel('Acc (m/s2)');
