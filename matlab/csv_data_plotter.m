@@ -45,14 +45,15 @@ if ismember('P1_LoadCell_X_1', data.Properties.VariableNames) && ...
    ismember('P1_LoadCell_X_4', data.Properties.VariableNames)
 
     loadCell_X1 = [data.P1_LoadCell_X_1, data.P1_LoadCell_X_2, data.P1_LoadCell_X_3, data.P1_LoadCell_X_4];
+    resultant_X1 = -data.P1_LoadCell_X_1 + data.P1_LoadCell_X_2 + data.P1_LoadCell_X_3 - data.P1_LoadCell_X_4;
 
     subplot(3, 1, 2);
-    plot(timeIncrements, loadCell_X1, 'LineWidth', 1.5);
+    plot(timeIncrements, [loadCell_X1,resultant_X1], 'LineWidth', 1.5);
     grid on;
     xlabel('Time (s)');
     ylabel('Force (N)');
     title('P1\_LoadCell\_X');
-    legend('P1\_LoadCell\_X\_1', 'P1\_LoadCell\_X\_2', 'P1\_LoadCell\_X\_3', 'P1\_LoadCell\_X\_4');
+    legend('P1\_LoadCell\_X\_1', 'P1\_LoadCell\_X\_2', 'P1\_LoadCell\_X\_3', 'P1\_LoadCell\_X\_4', 'RESULTANTE');
     
 else
     disp('Los datos de Plataforma 1 - Eje X no se encuentran disponibles. Ignorando figura.');
@@ -65,14 +66,15 @@ if ismember('P1_LoadCell_Y_1', data.Properties.VariableNames) && ...
    ismember('P1_LoadCell_Y_4', data.Properties.VariableNames)
 
     loadCell_Y1 = [data.P1_LoadCell_Y_1, data.P1_LoadCell_Y_2, data.P1_LoadCell_Y_3, data.P1_LoadCell_Y_4];
+    resultant_Y1 = -data.P1_LoadCell_Y_1 - data.P1_LoadCell_Y_2 + data.P1_LoadCell_Y_3 + data.P1_LoadCell_Y_4;
     
     subplot(3, 1, 3);
-    plot(timeIncrements, loadCell_Y1, 'LineWidth', 1.5);
+    plot(timeIncrements, [loadCell_Y1,resultant_Y1], 'LineWidth', 1.5);
     grid on;
     xlabel('Time (s)');
     ylabel('Force (N)');
     title('P1\_LoadCell\_Y');
-    legend('P1\_LoadCell\_Y\_1', 'P1\_LoadCell\_Y\_2', 'P1\_LoadCell\_Y\_3', 'P1\_LoadCell\_Y\_4');
+    legend('P1\_LoadCell\_Y\_1', 'P1\_LoadCell\_Y\_2', 'P1\_LoadCell\_Y\_3', 'P1\_LoadCell\_Y\_4', 'RESULTANTE');
 else
     disp('Los datos de Plataforma 1 - Eje Y no se encuentran disponibles. Ignorando figura.');
 end
