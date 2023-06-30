@@ -9,7 +9,7 @@
 % - 3 subfigures for IMUs angular velocity data
 
 %% IMPORT DATA
-data = readtable('../pruebas/TestInclinado.csv', 'Delimiter', ',');
+data = readtable('../pruebas/TestViktorApoyos.csv', 'Delimiter', ',');
 
 % Transform timestamp to seconds
 timestamps = data.timestamp;
@@ -44,7 +44,7 @@ if ismember('P1_LoadCell_X_1', data.Properties.VariableNames) && ...
    ismember('P1_LoadCell_X_3', data.Properties.VariableNames) && ...
    ismember('P1_LoadCell_X_4', data.Properties.VariableNames)
 
-    loadCell_X1 = [data.P1_LoadCell_X_1, data.P1_LoadCell_X_2, data.P1_LoadCell_X_3, data.P1_LoadCell_X_4];
+    loadCell_X1 = [-data.P1_LoadCell_X_1, data.P1_LoadCell_X_2, data.P1_LoadCell_X_3, - data.P1_LoadCell_X_4];
     resultant_X1 = -data.P1_LoadCell_X_1 + data.P1_LoadCell_X_2 + data.P1_LoadCell_X_3 - data.P1_LoadCell_X_4;
 
     subplot(3, 1, 2);
@@ -65,7 +65,7 @@ if ismember('P1_LoadCell_Y_1', data.Properties.VariableNames) && ...
    ismember('P1_LoadCell_Y_3', data.Properties.VariableNames) && ...
    ismember('P1_LoadCell_Y_4', data.Properties.VariableNames)
 
-    loadCell_Y1 = [data.P1_LoadCell_Y_1, data.P1_LoadCell_Y_2, data.P1_LoadCell_Y_3, data.P1_LoadCell_Y_4];
+    loadCell_Y1 = [-data.P1_LoadCell_Y_1, - data.P1_LoadCell_Y_2, data.P1_LoadCell_Y_3, data.P1_LoadCell_Y_4];
     resultant_Y1 = -data.P1_LoadCell_Y_1 - data.P1_LoadCell_Y_2 + data.P1_LoadCell_Y_3 + data.P1_LoadCell_Y_4;
     
     subplot(3, 1, 3);
