@@ -12,7 +12,7 @@ from src.handlers.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
 from src.handlers.phidgetEncodersHandler import PhidgetEncodersHandler
 from src.handlers.taoboticsIMUsHandler import TaoboticsIMUsHandler
 from src.sensorCalibrator import SensorCalibrator
-from src.utils import LogHandler, TestDataFrame, DataFramePlotter
+from src.utils import LogHandler, TestDataFrame, DataFramePlotter, StabilogramPlotter
 
 
 class InputReader:
@@ -32,17 +32,14 @@ class InputReader:
         self.taoboticsIMUsHandler = TaoboticsIMUsHandler("BodyIMUs")
 
         # Load config
-        self.config_path = os.path.join(
+        self.default_config_path = os.path.join(
             os.path.dirname(__file__), '..', 'config.yaml')
+        self.config_path = self.default_config_path
         self.configLoad()
-        if 'custom_config_path' in self.config:
-            self.config_path = os.path.join(self.config['custom_config_path'])
-            if os.path.exists(self.config_path):
-                print('Loading custom file: ' + self.config_path)
-                self.configLoad()
-            else:
-                print('Could not find custom config file: ' +
-                      self.config_path + '.\nDefault config has been loaded.')
+        if self.config['general_settings']['custom_config_path']:
+            self.configLoadCustomFile(os.path.join(
+                self.config['general_settings']['custom_config_path']))
+            return
         self.configLoadParams()
 
     # Config methods
@@ -62,20 +59,56 @@ class InputReader:
         currentDict[keys[-1]] = value
         self.configSave()
 
+    def configLoadCustomFile(self, path):
+        if not os.path.exists(path):
+            self.log_handler.logger.warn(
+                'Could not find custom config file: ' +
+                self.config_path + '.\nDefault config has been loaded.')
+            self.configLoadParams()
+            return
+        print('Loading custom file: ' + str(path))
+        # Define first the custom config path in default config.yaml
+        if self.config_path is self.default_config_path:
+            self.configEdit('general_settings.custom_config_path', str(path))
+        # Load custom config file
+        self.config_path = path
+        self.configLoad()
+        self.configLoadParams()
+
     def configLoadParams(self):
-        self.loadFiles()
+        self.loadGeneralSettings()
         self.loadSensors()
 
-    def loadFiles(self):
+    def loadGeneralSettings(self):
+        # TODO config format check
+        general_settings_path = self.config['general_settings']
+        # Get test and calibration times
+        self.QT_times_dict = {}
+        # Default values (all in ms)
+        self.QT_times_dict['calibration_interval'] = 10
+        self.QT_times_dict['calibration_time'] = 2000
+        self.QT_times_dict['test_interval'] = 10
+        self.QT_times_dict['test_tare_time'] = 3000
+        calibration_times_path = general_settings_path['calibration_times']
+        if 'data_interval_ms' in calibration_times_path:
+            self.QT_times_dict['calibration_interval'] = calibration_times_path['data_interval_ms']
+        if 'recording_time' in calibration_times_path:
+            self.QT_times_dict['calibration_time'] = calibration_times_path['recording_time']
+        test_times_path = general_settings_path['test_times']
+        if 'data_interval_ms' in test_times_path:
+            self.QT_times_dict['test_interval'] = test_times_path['data_interval_ms']
+        if 'tare_time_ms' in test_times_path:
+            self.QT_times_dict['test_tare_time'] = test_times_path['tare_time_ms']
+
         # Check test path and test name
         self.test_folder = ""
         self.test_name = ""
-        if 'folder' in self.config['test_options']:
-            if os.path.isdir(self.config['test_options']['folder']):
-                self.test_folder = os.path.join(
-                    self.config['test_options']['folder'])
-        if 'name' in self.config['test_options']:
-            self.test_name = self.config['test_options']['name']
+        test_file_path = general_settings_path['test_file_path']
+        if 'folder' in test_file_path:
+            if os.path.isdir(test_file_path['folder']):
+                self.test_folder = os.path.join(test_file_path['folder'])
+        if 'name' in test_file_path:
+            self.test_name = test_file_path['name']
 
     # Filter config sensor lists
     def loadSensors(self):
@@ -93,10 +126,14 @@ class InputReader:
     def loadSensorType(self, type, config_list):
         if not config_list in self.config:
             self.log_handler.logger.warn(
-                "Cannot find " + config_list + "in config! Ignoring list.")
+                "Cannot find " + config_list + " in config! Ignoring list.")
             return
         type.clearSensors()
         config_list_path = self.config[config_list]
+        if not bool(config_list_path):
+            self.log_handler.logger.warn(
+                "No keys found in " + str(config_list) + "! Ignoring list.")
+            return
         for sensor_id in list(config_list_path.keys()):
             sensor_data = config_list_path[sensor_id].copy()
             sensor_data['id'] = sensor_id  # Add ID to dict
@@ -116,6 +153,18 @@ class InputReader:
              self.phidgetEncodersHandler.connect(),
              self.taoboticsIMUsHandler.connect()])
         self.log_handler.logger.info("Connection process done!")
+
+    def getTestInterval(self):
+        return self.QT_times_dict['test_interval']
+
+    def getTestTareTime(self):
+        return self.QT_times_dict['test_tare_time']
+
+    def getCalibrationInterval(self):
+        return self.QT_times_dict['calibration_interval']
+
+    def getCalibrationTime(self):
+        return self.QT_times_dict['calibration_time']
 
     def getPlatform1SensorStatus(self):
         return self.phidgetP1LoadCellsHandler.getSensorListDict()
@@ -149,16 +198,23 @@ class InputReader:
             self.taoboticsIMUsHandler.getSensorHeaders())
         self.log_handler.logger.info("Test headers: " + str(dataframe_headers))
         self.sensor_dataframe = TestDataFrame(dataframe_headers)
+        self.sensor_dataframe_raw = TestDataFrame(dataframe_headers)
 
     def readerProcess(self):
         # Get and acumulate values in dataframe from all sensor classes
         current_time = round(time.time()*1000)
         data = [current_time]
+        data_raw = [current_time]
         data.extend(self.phidgetP1LoadCellsHandler.getSensorData() +
                     self.phidgetP2LoadCellsHandler.getSensorData() +
                     self.phidgetEncodersHandler.getSensorData() +
                     self.taoboticsIMUsHandler.getSensorData())
+        data_raw.extend(self.phidgetP1LoadCellsHandler.getSensorDataRaw() +
+                        self.phidgetP2LoadCellsHandler.getSensorDataRaw() +
+                        self.phidgetEncodersHandler.getSensorDataRaw() +
+                        self.taoboticsIMUsHandler.getSensorData())
         self.sensor_dataframe.addRow(data)
+        self.sensor_dataframe_raw.addRow(data_raw)
         # self.log_handler.logger.debug("Clocking data! - " + str(data))
         # print(str(self.taoboticsIMUsHandler.getSensorData()))
 
@@ -166,16 +222,58 @@ class InputReader:
         self.phidgetP1LoadCellsHandler.stop()
         self.phidgetP2LoadCellsHandler.stop()
         self.phidgetEncodersHandler.stop()
-        self.taoboticsIMUsHandler.stop()
+        self.loadSensorType(self.taoboticsIMUsHandler, 'taobotics_imu_list')
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
-        # WIP Plot results
-        plot_columns = [0,1,2,3,4]
-        plot_dataframe = self.sensor_dataframe.getDataFrame().iloc[:, plot_columns].copy()
-        print(plot_dataframe)
-        preview = DataFramePlotter(plot_dataframe)
-        preview.plot_line('time', plot_dataframe.columns[1:])
+        self.sensor_dataframe_raw.exportToCSV(os.path.join(
+            self.test_folder, self.test_name + '_RAW' + '.csv'))
+        # Plot desired sensor values if enabled in config
+        if self.config['general_settings']['test_results']['generate_plot']:
+            sensor_headers = self.config['general_settings']['test_results']['column_headers']
+            plot_columns = [0]
+            plot_columns.extend(sensor_headers)
+            plot_dataframe = self.sensor_dataframe.getDataFrame(
+            ).iloc[:, plot_columns].copy()
+            preview = DataFramePlotter(plot_dataframe)
+            preview.plot_line('time', plot_dataframe.columns[1:])
+
+    # Return fixed format of:
+    # - Relative COP of Platform 1
+    # - Relative COP of Platform 2
+    # - TODO IMU values
+    def getPlotterData(self):
+        x_cop_p1 = y_cop_p1 = 0
+        x_cop_p2 = y_cop_p2 = 0
+        ankle_angle = thigh_angle = trunk_angle = 0
+
+        sensor_dataframe = self.sensor_dataframe.getDataFrame()
+        dataframe_size = sensor_dataframe.shape[1]
+        if dataframe_size < 13:
+            self.log_handler.logger.warn(
+                "Ignoring relative COP values because the sensor dataframe has "
+                + str(dataframe_size) + " instead of minimum 13.")
+            return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2, ankle_angle, thigh_angle, trunk_angle]
+
+        # Get relative COPs for both platforms
+        if len(self.phidgetP1LoadCellsHandler.getSensorHeaders()) == 12:
+            sensor_cols = self.phidgetP1LoadCellsHandler.getSensorHeaders()
+            sensor_cols.insert(0, 'timestamp')
+            stabilogram_p1 = StabilogramPlotter(
+                sensor_dataframe[sensor_cols].copy())
+            x_cop_p1, y_cop_p1 = stabilogram_p1.getPlotValues()
+        if len(self.phidgetP2LoadCellsHandler.getSensorHeaders()) == 12:
+            sensor_cols = self.phidgetP2LoadCellsHandler.getSensorHeaders()
+            sensor_cols.insert(0, 'timestamp')
+            stabilogram_p2 = StabilogramPlotter(
+                sensor_dataframe[sensor_cols].copy())
+            x_cop_p2, y_cop_p2 = stabilogram_p2.getPlotValues()
+        # Get IMU values
+        if len(self.taoboticsIMUsHandler.getSensorHeaders()) > 0:
+            # TODO process
+            pass
+
+        return [x_cop_p1, y_cop_p1, x_cop_p2, y_cop_p2, ankle_angle, thigh_angle, trunk_angle]
 
     # == TARE PROCESS
     def tareApply(self, timestamp_init, timestamp_end):

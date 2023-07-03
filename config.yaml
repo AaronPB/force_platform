@@ -1,13 +1,21 @@
-test_options:
-  folder: /home/aaroncite4/Documents/Github/force_platform/pruebas
-  name: Ensayo1
-  type:
-    limited: false
-    time_limit: 100
-file_config:
-  folder_path: ../data/
-  generate_plots: false
-  save_data: true
+general_settings:
+  custom_config_path: null
+  calibration_times:
+    data_interval_ms: 10
+    recording_time: 3000
+  test_times:
+    data_interval_ms: 10
+    tare_time_ms: 3000
+  test_file_path:
+    folder: /home/aaroncite4/Documents/Github/force_platform/pruebas
+    name: Test
+  test_results:
+    generate_plot: true
+    column_headers:
+    - 1
+    - 2
+    - 3
+    - 4
 p1_phidget_loadcell_list:
   load_cell_1:
     name: P1_LoadCell_Z_1
@@ -18,8 +26,8 @@ p1_phidget_loadcell_list:
       serial_number: Y2131167
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148893.5596545
+      b: -0.6307595051800341
   load_cell_2:
     name: P1_LoadCell_Z_2
     channel: 1
@@ -29,257 +37,257 @@ p1_phidget_loadcell_list:
       serial_number: Y2131169
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148669.5630852
+      b: 0.03810777513459129
   load_cell_3:
     name: P1_LoadCell_Z_3
     channel: 2
     serial: 583477
     read_data: true
     properties:
-      serial_number: Y2131168
+      serial_number: W020822
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 149632.0166783
+      b: -0.14545850287585083
   load_cell_4:
     name: P1_LoadCell_Z_4
     channel: 3
     serial: 583477
     read_data: true
     properties:
-      serial_number: W020822
+      serial_number: Y2131168
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148981.2171817
+      b: -0.7590389289353823
   load_cell_5:
     name: P1_LoadCell_X_1
     channel: 0
     serial: 583467
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805051
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 108087.9728225
+      b: -0.6423735162860709
   load_cell_6:
     name: P1_LoadCell_X_2
     channel: 1
     serial: 583467
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805067
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 108969.1503263
+      b: 0.12085782679337953
   load_cell_7:
     name: P1_LoadCell_X_3
     channel: 2
     serial: 583467
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805061
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109557.5296413
+      b: -0.7429386923191892
   load_cell_8:
     name: P1_LoadCell_X_4
     channel: 3
     serial: 583467
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805082
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109054.0987733
+      b: -0.7297277360961338
   load_cell_9:
     name: P1_LoadCell_Y_1
     channel: 0
     serial: 588715
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805088
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109091.7733242
+      b: -0.1587153674825359
   load_cell_10:
     name: P1_LoadCell_Y_2
     channel: 1
     serial: 588715
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805064
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109202.4262106
+      b: -0.7142529812102083
   load_cell_11:
     name: P1_LoadCell_Y_3
     channel: 2
     serial: 588715
-    read_data: false
+    read_data: true
     properties:
       serial_number: TC755992
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109117.3520608
+      b: -1.2116328220676955
   load_cell_12:
     name: P1_LoadCell_Y_4
     channel: 3
     serial: 588715
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805053
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109062.232258
+      b: -0.9654276058173821
 p2_phidget_loadcell_list:
   load_cell_1:
     name: P2_LoadCell_Z_1
     channel: 0
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: W019737
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148746.6259125
+      b: -5.6381197962843475
   load_cell_2:
     name: P2_LoadCell_Z_2
     channel: 1
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: Z1162733
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148810.6036536
+      b: -0.8234176348519066
   load_cell_3:
     name: P2_LoadCell_Z_3
     channel: 2
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: Z1162736
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148820.9384659
+      b: -4.717023129888452
   load_cell_4:
     name: P2_LoadCell_Z_4
     channel: 3
     serial: 588569
-    read_data: false
+    read_data: true
     properties:
       serial_number: Z1162741
       max_weight: 150kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 148868.3620599
+      b: -1.5141569678683349
   load_cell_5:
     name: P2_LoadCell_X_1
     channel: 0
     serial: 588718
-    read_data: false
-    properties:
-      serial_number: TT805080
-      max_weight: 110kg
-    calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_6:
-    name: P2_LoadCell_X_2
-    channel: 1
-    serial: 588718
-    read_data: false
-    properties:
-      serial_number: TT805058
-      max_weight: 110kg
-    calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_7:
-    name: P2_LoadCell_X_3
-    channel: 2
-    serial: 588718
-    read_data: false
-    properties:
-      serial_number: TT805066
-      max_weight: 110kg
-    calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_8:
-    name: P2_LoadCell_X_4
-    channel: 3
-    serial: 588718
-    read_data: false
-    properties:
-      serial_number: TT805068
-      max_weight: 110kg
-    calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_9:
-    name: P2_LoadCell_Y_1
-    channel: 0
-    serial: 582535
-    read_data: false
+    read_data: true
     properties:
       serial_number: TT805059
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_10:
-    name: P2_LoadCell_Y_2
+      m: 109277.2383537
+      b: -0.6519176093285637
+  load_cell_6:
+    name: P2_LoadCell_X_2
     channel: 1
-    serial: 582535
-    read_data: false
+    serial: 588718
+    read_data: true
     properties:
       serial_number: TT805079
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_11:
-    name: P2_LoadCell_Y_3
+      m: 108167.7664113
+      b: -0.714905327747779
+  load_cell_7:
+    name: P2_LoadCell_X_3
     channel: 2
-    serial: 582535
-    read_data: false
-    properties:
-      serial_number: TT805056
-      max_weight: 110kg
-    calibration_data:
-      m: 1092233.0
-      b: -5.5889
-  load_cell_12:
-    name: P2_LoadCell_Y_4
-    channel: 3
-    serial: 582535
-    read_data: false
+    serial: 588718
+    read_data: true
     properties:
       serial_number: TT805063
       max_weight: 110kg
     calibration_data:
-      m: 1092233.0
-      b: -5.5889
+      m: 109645.8122859
+      b: -0.6690181962431225
+  load_cell_8:
+    name: P2_LoadCell_X_4
+    channel: 3
+    serial: 588718
+    read_data: true
+    properties:
+      serial_number: TT805056
+      max_weight: 110kg
+    calibration_data:
+      m: 109510.7046296
+      b: -0.6135379763459383
+  load_cell_9:
+    name: P2_LoadCell_Y_1
+    channel: 0
+    serial: 582535
+    read_data: true
+    properties:
+      serial_number: TT805080
+      max_weight: 110kg
+    calibration_data:
+      m: 108559.4790098
+      b: -0.7794562145538997
+  load_cell_10:
+    name: P2_LoadCell_Y_2
+    channel: 1
+    serial: 582535
+    read_data: true
+    properties:
+      serial_number: TT805058
+      max_weight: 110kg
+    calibration_data:
+      m: 109123.0620917
+      b: -0.8536595136361385
+  load_cell_11:
+    name: P2_LoadCell_Y_3
+    channel: 2
+    serial: 582535
+    read_data: true
+    properties:
+      serial_number: TT805068
+      max_weight: 110kg
+    calibration_data:
+      m: 108907.1348579
+      b: -0.32279350513333327
+  load_cell_12:
+    name: P2_LoadCell_Y_4
+    channel: 3
+    serial: 582535
+    read_data: true
+    properties:
+      serial_number: TT805066
+      max_weight: 110kg
+    calibration_data:
+      m: 108359.7289318
+      b: -0.3276362911703359
 phidget_encoder_list:
   encoder_1:
     name: Encoder_Z_1
     channel: 0
     serial: 641800
-    read_data: false
+    read_data: true
     initial_position: 0
     properties:
       serial_number: AAAA
@@ -291,7 +299,7 @@ phidget_encoder_list:
     name: Encoder_Z_2
     channel: 1
     serial: 641800
-    read_data: false
+    read_data: true
     initial_position: 0
     properties:
       serial_number: AAAA
@@ -302,64 +310,22 @@ phidget_encoder_list:
 taobotics_imu_list:
   imu_1:
     name: IMU_Leg_Right
-    channel: 0
-    serial: /dev/ttyUSB0
-    read_data: false
+    serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.3:1.0-port0
+    read_data: true
     properties:
-      serial_number: AAAA
-    calibration_data:
-      m: 1.0
-      b: 0.0
+      tag: IMU_1
   imu_2:
-    name: IMU_Leg_Left
-    channel: 0
-    serial: /dev/ttyUSB1
-    read_data: false
-    properties:
-      serial_number: AAAA
-    calibration_data:
-      m: 1.0
-      b: 0.0
-  imu_3:
     name: IMU_Thigh_Right
-    channel: 0
-    serial: /dev/ttyUSB2
-    read_data: false
+    serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.4:1.0-port0
+    read_data: true
     properties:
-      serial_number: AAAA
-    calibration_data:
-      m: 1.0
-      b: 0.0
-  imu_4:
-    name: IMU_Thigh_Left
-    channel: 0
-    serial: /dev/ttyUSB3
-    read_data: false
-    properties:
-      serial_number: AAAA
-    calibration_data:
-      m: 1.0
-      b: 0.0
-  imu_5:
+      tag: IMU_2
+  imu_3:
     name: IMU_UpperTrunk_Right
-    channel: 0
-    serial: /dev/ttyUSB4
-    read_data: false
+    serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.2:1.0-port0
+    read_data: true
     properties:
-      serial_number: AAAA
-    calibration_data:
-      m: 1.0
-      b: 0.0
-  imu_6:
-    name: IMU_UpperTrunk_Left
-    channel: 0
-    serial: /dev/ttyUSB5
-    read_data: false
-    properties:
-      serial_number: AAAA
-    calibration_data:
-      m: 1.0
-      b: 0.0
+      tag: IMU_3
 calibration_sensor:
   name: S-Type Phidget Load Cell
   channel: 0
@@ -369,5 +335,5 @@ calibration_sensor:
     serial_number: 1906240722
     max_weight: 100kg
   calibration_data:
-    m: 183526.0
-    b: 6.4245
+    m: 31851.0
+    b: -0.3355
