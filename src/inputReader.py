@@ -222,7 +222,7 @@ class InputReader:
         self.phidgetP1LoadCellsHandler.stop()
         self.phidgetP2LoadCellsHandler.stop()
         self.phidgetEncodersHandler.stop()
-        self.taoboticsIMUsHandler.stop()
+        self.loadSensorType(self.taoboticsIMUsHandler, 'taobotics_imu_list')
         self.log_handler.logger.info("Test finished!")
         self.sensor_dataframe.exportToCSV(os.path.join(
             self.test_folder, self.test_name + '.csv'))
