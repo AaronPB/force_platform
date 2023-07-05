@@ -6,7 +6,8 @@
 
 %% IMPORT DATA
 % Change path to desired csv file
-data = readtable('../pruebas/EnsayoGiros.csv', 'Delimiter', ',');
+% data = readtable('../pruebas/EnsayoGiros.csv', 'Delimiter', ',');
+data = readtable('../ensayos_2023_06_30/EnsayoLento.csv', 'Delimiter', ',');
 
 % Data
 timestamps = data.timestamp;
@@ -27,24 +28,20 @@ imu_3_eul = quat2eul(imu_3_q, 'XYZ');
 
 % Extract absolute angles
 % TODO CHECK REAL DATA VALUES TO TRANSFORM IN ABS ANGLES
-absangle_A = imu_1_eul(:, 3); % Leg Z angle
-absangle_B = imu_2_eul(:, 3); % Thigh Z angle
-absangle_C = imu_3_eul(:, 1); % Trunk Y angle
+absangle_A = pi - imu_1_eul(:, 3); % Leg Z angle
+absangle_B = pi - imu_2_eul(:, 3); % Thigh Z angle
+absangle_C = imu_3_eul(:, 2); % Trunk Y angle
 
 size(absangle_A)
 
 %% EXAMPLES WITH VIRTUAL ANGLES
 % % Comment/delete this section if you want to use imported data from csv
 % timeIncrements = 0:0.01:4;
-% % absangle_A = transpose(linspace(pi/2, pi/4, numel(timeIncrements)));
-% % absangle_B = transpose(linspace(pi/2, pi/1.2, numel(timeIncrements)));
-% % absangle_C = transpose(linspace(pi/2, pi/5, numel(timeIncrements)));
 % pos_i = pi/2;
 % pos_f_A = pi/4;
 % pos_f_B = pi/1.2;
 % pos_f_C = pi/5;
 % reps = 2;
-% 
 % absangle_A = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_A);
 % absangle_B = test_angle_trajectories_parabolic(timeIncrements,reps,pos_i,pos_f_B);
 % absangle_C = test_angle_trajectories_linear(timeIncrements,reps,pos_i,pos_f_C);
@@ -52,9 +49,9 @@ size(absangle_A)
 %% MODEL PARAMETERS
 % General values
 g           = 9.81; % m/s2
-m_body      = 90;   % Body total weight (kg)
+m_body      = 70;   % Body total weight (kg)
 h_body      = 170;  % Body total height (cm)
-m_barbell   = 100;  % Barbell total weight (kg)
+m_barbell   = 40;  % Barbell total weight (kg)
 % Limbs lengths and CM offsets (m)
 L_leg       = 0.231*h_body/100;
 L_thigh     = 0.237*h_body/100;
@@ -66,10 +63,10 @@ Lp_thigh    = 0.433*L_thigh;
 Ld_thigh    = 0.567*L_thigh;
 Lp_hat      = 0.626*L_hat;
 Ld_hat      = 0.374*L_hat;
-% Limbs weights and partial weights (kg)
-m_leg       = 0.0465*m_body;
-m_thigh     = 0.1000*m_body;
-m_hat       = 0.6780*m_body;
+% Limbs partial weights (kg)
+m_leg       = 2*0.0465*m_body;
+m_thigh     = 2*0.1000*m_body;
+m_hat       = (0.6780 - 0.029)*m_body; % 0.6780 + remain
 
 % Limb turning radios (for inertia)
 r_cg_leg    = 0.302*L_leg;
@@ -93,7 +90,7 @@ absangle_B_cos = cos(absangle_B);
 absangle_C_sin = sin(absangle_C);
 absangle_C_cos = cos(absangle_C);
 
-% Get first and second absolute angle derivates
+% Get first and second absolute angle derivatives
 dt = timeIncrements(2) - timeIncrements(1);
 absangle_A_diff = diff(absangle_A,1) ./ dt;
 absangle_B_diff = diff(absangle_B,1) ./ dt;
@@ -111,18 +108,18 @@ absangle_C_diff2 = [zeros(2, 1); absangle_C_diff2];
 
 % --- Limb accelerations
 % Leg COG accelerations
-a_leg_x = absangle_A_diff2.*Lp_leg.*(-absangle_A_sin)-Lp_leg.*absangle_A_diff.*absangle_A_diff.*absangle_A_cos;
-a_leg_z = absangle_A_diff2.*Lp_leg.*(absangle_A_cos)-Lp_leg.*absangle_A_diff.*absangle_A_diff.*absangle_A_sin;
+a_leg_x = absangle_A_diff2.*Ld_leg.*(-absangle_A_sin)-Ld_leg.*absangle_A_diff.*absangle_A_diff.*absangle_A_cos;
+a_leg_z = absangle_A_diff2.*Ld_leg.*(absangle_A_cos)-Ld_leg.*absangle_A_diff.*absangle_A_diff.*absangle_A_sin;
 % Thigh COG accelerations
 a_thigh_leg_x = absangle_A_diff2.*L_leg.*(-absangle_A_sin)-L_leg.*absangle_A_diff.*absangle_A_diff.*absangle_A_cos;
 a_thigh_leg_z = absangle_A_diff2.*L_leg.*(absangle_A_cos)-L_leg.*absangle_A_diff.*absangle_A_diff.*absangle_A_sin;
-a_thigh_x = a_thigh_leg_x + absangle_B_diff2.*Lp_thigh.*(-absangle_B_sin)-Lp_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_cos;
-a_thigh_z = a_thigh_leg_z + absangle_B_diff2.*Lp_thigh.*(absangle_B_cos)-Lp_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_sin;
+a_thigh_x = a_thigh_leg_x + absangle_B_diff2.*Ld_thigh.*(-absangle_B_sin)-Ld_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_cos;
+a_thigh_z = a_thigh_leg_z + absangle_B_diff2.*Ld_thigh.*(absangle_B_cos)-Ld_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_sin;
 % Trunk COG accelerations
 a_hat_thigh_x = a_thigh_leg_x + absangle_B_diff2.*L_thigh.*(-absangle_B_sin)-L_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_cos;
 a_hat_thigh_z = a_thigh_leg_z + absangle_B_diff2.*L_thigh.*(absangle_B_cos)-L_thigh.*absangle_B_diff.*absangle_B_diff.*absangle_B_sin;
-a_hat_x = a_hat_thigh_x + absangle_C_diff2.*Lp_hat.*(-absangle_C_sin)-Lp_hat.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
-a_hat_z = a_hat_thigh_z + absangle_C_diff2.*Lp_hat.*(absangle_C_cos)-Lp_hat.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
+a_hat_x = a_hat_thigh_x + absangle_C_diff2.*Ld_hat.*(-absangle_C_sin)-Ld_hat.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
+a_hat_z = a_hat_thigh_z + absangle_C_diff2.*Ld_hat.*(absangle_C_cos)-Ld_hat.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
 % Barbell COG accelerations
 a_barbell_x = a_hat_thigh_x + absangle_C_diff2.*L_uppertrunk.*(-absangle_C_sin)-L_uppertrunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_cos;
 a_barbell_z = a_hat_thigh_z + absangle_C_diff2.*L_uppertrunk.*(absangle_C_cos)-L_uppertrunk.*absangle_C_diff.*absangle_C_diff.*absangle_C_sin;
@@ -156,7 +153,7 @@ for k = 1+offset:iter
         I_thigh*absangle_B_diff2(k,1);
         m_hat*a_hat_x(k,1) + m_barbell*a_barbell_x(k,1);
         m_hat*a_hat_z(k,1) + m_hat*g + m_barbell*a_barbell_z(k,1) + m_barbell*g;
-        m_barbell*g*Lp_hat*absangle_C_cos(k,1) + (I_hat+I_barbell)*absangle_C_diff2(k,1) - m_barbell*a_barbell_x(k,1)*d*absangle_C_sin(k,1) + m_barbell*a_barbell_z(k,1).*d*absangle_C_cos(k,1);
+        m_barbell*g*d*absangle_C_cos(k,1) + (I_hat+I_barbell)*absangle_C_diff2(k,1) - m_barbell*a_barbell_x(k,1)*d*absangle_C_sin(k,1) + m_barbell*a_barbell_z(k,1).*d*absangle_C_cos(k,1);
     ];
 
     x = A\b;
@@ -185,7 +182,12 @@ end
 % Plot absolute angles and momentums
 figure (1);
 subplot(3, 1, 1);
-plot(timeIncrements, [rad2deg(absangle_A),rad2deg(absangle_B),rad2deg(absangle_C)], 'LineWidth', 1.5);
+% plot(timeIncrements, [rad2deg(absangle_A),rad2deg(absangle_B),rad2deg(absangle_C)], 'LineWidth', 1.5);
+hold on;
+plot(timeIncrements, rad2deg(absangle_A), 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, rad2deg(absangle_B), 'b-', 'LineWidth', 1.5);
+plot(timeIncrements, rad2deg(absangle_C), 'k-', 'LineWidth', 1.5);
+hold off;
 grid on;
 xlabel('Time (s)');
 ylabel('Angle (º)');
@@ -193,19 +195,30 @@ title('Absolute angles');
 legend('Ankle (Z axis)', 'Knee (Z axis)', 'Hip (Y axis)');
 
 subplot(3, 1, 2);
-plot(timeIncrements, [a_leg_z,a_thigh_z,a_hat_z], 'LineWidth', 1.5);
+% plot(timeIncrements, [a_leg_z,a_thigh_z,a_hat_z], 'LineWidth', 1.5);
+hold on;
+plot(timeIncrements, a_leg_z, 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, a_thigh_z, 'b-', 'LineWidth', 1.5);
+plot(timeIncrements, a_hat_z, 'k-', 'LineWidth', 1.5);
+hold off;
 grid on;
 xlabel('Time (s)');
 ylabel('Acc (m/s2)');
+ylim([-5,5]);
 title('Accel Z axis');
-legend('Leg', 'Thigh', 'Trunk');
+legend('Leg', 'Thigh', 'HAT');
 
 subplot(3, 1, 3);
-plot(timeIncrements, [m1,m2,m3], 'LineWidth', 1.5);
+% plot(timeIncrements, [m1,m2,m3], 'LineWidth', 1.5);
+hold on;
+plot(timeIncrements, m1, 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, m2, 'b-', 'LineWidth', 1.5);
+plot(timeIncrements, m3, 'k-', 'LineWidth', 1.5);
+hold off;
 grid on;
 xlabel('Time (s)');
-ylabel('Momentum (Nm)');
-title('Momentums');
+ylabel('Torque (Nm)');
+title('Torques');
 legend('Ankle', 'Knee', 'Hip');
 
 % Plot only absolute angles
