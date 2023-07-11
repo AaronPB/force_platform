@@ -1,7 +1,7 @@
 %% FORCES AND MOMENTUM VALUES CALCULATOR
 % Author: Aaron Raul Poyatos Bakker
 % Date: 13/06/2023
-% With the angle information, obtain all unknown forces and momentums for
+% With the angle information, obtain all unknown forces and torques for
 % the squats free model.
 
 %% IMPORT DATA
@@ -27,7 +27,7 @@ imu_2_eul = quat2eul(imu_2_q, 'XYZ');
 imu_3_eul = quat2eul(imu_3_q, 'XYZ');
 
 % Extract absolute angles
-% TODO CHECK REAL DATA VALUES TO TRANSFORM IN ABS ANGLES
+% CHECK LOCAL COORDS OF IMUS TO GET THE DESIRED ANGLES
 absangle_A = pi - imu_1_eul(:, 3); % Leg Z angle
 absangle_B = pi - imu_2_eul(:, 3); % Thigh Z angle
 absangle_C = imu_3_eul(:, 2); % Trunk Y angle
@@ -85,26 +85,26 @@ I_barbell = m_barbell*d*d;
 % Sines and cosines of absolute angles
 absangle_A_sin = sin(absangle_A);
 absangle_A_cos = cos(absangle_A);
-absangle_B_sin = sin(absangle_B);
-absangle_B_cos = cos(absangle_B);
+absangle_B_sin = sin(pi - absangle_B);
+absangle_B_cos = cos(pi - absangle_B);
 absangle_C_sin = sin(absangle_C);
 absangle_C_cos = cos(absangle_C);
 
-% Get first and second absolute angle derivatives
-dt = timeIncrements(2) - timeIncrements(1);
-absangle_A_diff = diff(absangle_A,1) ./ dt;
-absangle_B_diff = diff(absangle_B,1) ./ dt;
-absangle_C_diff = diff(absangle_C,1) ./ dt;
-absangle_A_diff2 = diff(absangle_A,2) ./ dt;
-absangle_B_diff2 = diff(absangle_B,2) ./ dt;
-absangle_C_diff2 = diff(absangle_C,2) ./ dt;
-% Add initial ceros to match lengths
-absangle_A_diff = [zeros(1, 1); absangle_A_diff];
-absangle_B_diff = [zeros(1, 1); absangle_B_diff];
-absangle_C_diff = [zeros(1, 1); absangle_C_diff];
-absangle_A_diff2 = [zeros(2, 1); absangle_A_diff2];
-absangle_B_diff2 = [zeros(2, 1); absangle_B_diff2];
-absangle_C_diff2 = [zeros(2, 1); absangle_C_diff2];
+% Get first and second absolute angle derivatives filtered (Butterworth)
+FS = 100;
+FC = 1.2;
+
+[b,a] = butter(6,FC/(FS/2));
+absangle_Af = filtfilt(b,a,absangle_A);
+absangle_Bf = filtfilt(b,a,absangle_B);
+absangle_Cf = filtfilt(b,a,absangle_C);
+
+absangle_A_diff = [(-absangle_Af(3)+4*absangle_Af(2)-3*absangle_Af(1))*FS/2;diff(absangle_Af)*FS];
+absangle_A_diff2 = [(-absangle_A_diff(3)+4*absangle_A_diff(2)-3*absangle_A_diff(1))*FS/2;diff(absangle_A_diff)*FS];
+absangle_B_diff = [(-absangle_Bf(3)+4*absangle_Bf(2)-3*absangle_Bf(1))*FS/2;diff(absangle_Bf)*FS];
+absangle_B_diff2 = [(-absangle_B_diff(3)+4*absangle_B_diff(2)-3*absangle_B_diff(1))*FS/2;diff(absangle_B_diff)*FS];
+absangle_C_diff = [(-absangle_Cf(3)+4*absangle_Cf(2)-3*absangle_Cf(1))*FS/2;diff(absangle_Cf)*FS];
+absangle_C_diff2 = [(-absangle_C_diff(3)+4*absangle_C_diff(2)-3*absangle_C_diff(1))*FS/2;diff(absangle_C_diff)*FS];
 
 % --- Limb accelerations
 % Leg COG accelerations
@@ -153,19 +153,19 @@ for k = 1+offset:iter
         I_thigh*absangle_B_diff2(k,1);
         m_hat*a_hat_x(k,1) + m_barbell*a_barbell_x(k,1);
         m_hat*a_hat_z(k,1) + m_hat*g + m_barbell*a_barbell_z(k,1) + m_barbell*g;
-        m_barbell*g*d*absangle_C_cos(k,1) + (I_hat+I_barbell)*absangle_C_diff2(k,1) - m_barbell*a_barbell_x(k,1)*d*absangle_C_sin(k,1) + m_barbell*a_barbell_z(k,1).*d*absangle_C_cos(k,1);
+        m_barbell*g*d*absangle_C_cos(k,1) + (I_hat)*absangle_C_diff2(k,1) - m_barbell*a_barbell_x(k,1)*d*absangle_C_sin(k,1) + m_barbell*a_barbell_z(k,1).*d*absangle_C_cos(k,1);
     ];
 
     x = A\b;
     x_cell{k} = x;
 end
 
-% Each cell contains the force and momentum values in the following order:
+% Each cell contains the force and torque values in the following order:
 % x: [F12x;F12z;F23x;F23z;F34x;F34z;Ma;Mk;Mh]
 size(x_cell)
 
 %% PLOT RESULTS
-% Get momentum vectors (ankle, knee and hip)
+% Get torque vectors (ankle, knee and hip)
 m1 = zeros(length(timeIncrements), 1);
 m2 = zeros(length(timeIncrements), 1);
 m3 = zeros(length(timeIncrements), 1);
@@ -246,3 +246,70 @@ xlabel('Time (s)');
 ylabel('Angle (º)');
 title('Absolute angles Z axis');
 legend('Ankle', 'Knee', 'Hip');
+
+% Plot derivatives
+% figure (3);
+subplot(3, 1, 1);
+plot(timeIncrements, [absangle_A,absangle_B,absangle_C], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (rad)');
+title('Absolute angles');
+legend('Ankle', 'Knee', 'Hip');
+
+subplot(3, 1, 2);
+plot(timeIncrements, [absangle_A_diff,absangle_B_diff,absangle_C_diff], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (rad/s)');
+ylim([-5,5]);
+title('Absolute angles velocity');
+legend('Ankle', 'Knee', 'Hip');
+
+subplot(3, 1, 3);
+plot(timeIncrements, [absangle_A_diff2,absangle_B_diff2,absangle_C_diff2], 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (rad/s2)');
+ylim([-30,40]);
+title('Absolute angles acceleration');
+legend('Ankle', 'Knee', 'Hip');
+
+return;
+%% Pose animation
+% Determine poses
+pos_A_x = zeros(size(timeIncrements));
+pos_A_z = zeros(size(timeIncrements));
+pos_B_x = pos_A_x + L_leg .* absangle_A_cos;
+pos_B_z = pos_A_z + L_leg .* absangle_A_sin;
+pos_C_x = pos_B_x + L_thigh .* absangle_B_cos;
+pos_C_z = pos_B_z + L_thigh .* absangle_B_sin;
+pos_D_x = pos_C_x + L_uppertrunk .* absangle_C_cos;
+pos_D_z = pos_C_z + L_uppertrunk .* absangle_C_sin;
+pos_E_x = pos_C_x + L_hat .* absangle_C_cos;
+pos_E_z = pos_C_z + L_hat .* absangle_C_sin;
+
+fig = figure(4);
+axis([-1 1 0 2]);
+xlabel('X (m)');
+ylabel('Z (m)');
+title('Animacion del cuerpo');
+
+% Body
+joint(1) = line(pos_A_x(1),pos_A_z(1),'Marker','o','Color','r','MarkerSize', 10);
+joint(2) = line([pos_A_x(1), pos_B_x(1)],[pos_A_z(1), pos_B_z(1)], 'Color', 'b', 'LineWidth', 2);
+joint(3) = line([pos_B_x(1), pos_C_x(1)],[pos_B_z(1), pos_C_z(1)], 'Color', 'b', 'LineWidth', 2);
+joint(4) = line([pos_C_x(1), pos_E_x(1)],[pos_C_z(1), pos_E_z(1)], 'Color', 'b', 'LineWidth', 2);
+joint(5) = line(pos_D_x(1),pos_D_z(1),'Marker','o','Color','r','MarkerSize', 5, 'LineWidth', 3);
+joint(6) = line(pos_E_x(1),pos_E_z(1),'Marker','o','Color','b','MarkerSize', 20);
+
+for frame = 2:size(timeIncrements)
+    cla;
+    joint(1) = line(pos_A_x(frame),pos_A_z(frame),'Marker','o','Color','k','MarkerSize', 10);
+    joint(2) = line([pos_A_x(frame), pos_B_x(frame)],[pos_A_z(frame), pos_B_z(frame)], 'Color', 'b', 'LineWidth', 2);
+    joint(3) = line([pos_B_x(frame), pos_C_x(frame)],[pos_B_z(frame), pos_C_z(frame)], 'Color', 'b', 'LineWidth', 2);
+    joint(4) = line([pos_C_x(frame), pos_E_x(frame)],[pos_C_z(frame), pos_E_z(frame)], 'Color', 'b', 'LineWidth', 2);
+    joint(5) = line(pos_D_x(frame),pos_D_z(frame),'Marker','o','Color','r','MarkerSize', 5, 'LineWidth', 3);
+    joint(6) = line(pos_E_x(frame),pos_E_z(frame),'Marker','o','Color','b','MarkerSize', 20);
+    pause(0.01);
+end
