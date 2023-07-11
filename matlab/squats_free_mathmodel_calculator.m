@@ -82,19 +82,11 @@ d = L_uppertrunk - Ld_hat;
 I_barbell = m_barbell*d*d;
 
 % --- Absolute angles management
-% Sines and cosines of absolute angles
-absangle_A_sin = sin(absangle_A);
-absangle_A_cos = cos(absangle_A);
-absangle_B_sin = sin(pi - absangle_B);
-absangle_B_cos = cos(pi - absangle_B);
-absangle_C_sin = sin(absangle_C);
-absangle_C_cos = cos(absangle_C);
-
 % Get first and second absolute angle derivatives filtered (Butterworth)
 FS = 100;
-FC = 1.2;
-
+FC = 2;
 [b,a] = butter(6,FC/(FS/2));
+
 absangle_Af = filtfilt(b,a,absangle_A);
 absangle_Bf = filtfilt(b,a,absangle_B);
 absangle_Cf = filtfilt(b,a,absangle_C);
@@ -105,6 +97,16 @@ absangle_B_diff = [(-absangle_Bf(3)+4*absangle_Bf(2)-3*absangle_Bf(1))*FS/2;diff
 absangle_B_diff2 = [(-absangle_B_diff(3)+4*absangle_B_diff(2)-3*absangle_B_diff(1))*FS/2;diff(absangle_B_diff)*FS];
 absangle_C_diff = [(-absangle_Cf(3)+4*absangle_Cf(2)-3*absangle_Cf(1))*FS/2;diff(absangle_Cf)*FS];
 absangle_C_diff2 = [(-absangle_C_diff(3)+4*absangle_C_diff(2)-3*absangle_C_diff(1))*FS/2;diff(absangle_C_diff)*FS];
+
+% Sines and cosines of absolute angles
+absangle_A_sin = sin(absangle_Af);
+absangle_A_cos = cos(absangle_Af);
+absangle_B_sin = sin(absangle_Bf);
+absangle_B_cos = cos(absangle_Bf);
+absangle_B_sin_M = sin(pi - absangle_Bf); % For torque values
+absangle_B_cos_M = cos(pi - absangle_Bf); % For torque values
+absangle_C_sin = sin(absangle_Cf);
+absangle_C_cos = cos(absangle_Cf);
 
 % --- Limb accelerations
 % Leg COG accelerations
@@ -138,7 +140,7 @@ for k = 1+offset:iter
         Ld_leg*absangle_A_sin(k,1), -Ld_leg*absangle_A_cos(k,1), Lp_leg*absangle_A_sin(k,1), -Lp_leg*absangle_A_cos(k,1), 0, 0, 1, -1, 0;
         0, 0, 1, 0, -1, 0, 0, 0, 0;
         0, 0, 0, 1, 0, -1, 0, 0, 0;
-        0, 0, Ld_thigh*absangle_B_sin(k,1), Ld_thigh*absangle_B_cos(k,1), Lp_thigh*absangle_B_sin(k,1), Lp_thigh*absangle_B_cos(k,1), 0, 1, -1;
+        0, 0, Ld_thigh*absangle_B_sin_M(k,1), Ld_thigh*absangle_B_cos_M(k,1), Lp_thigh*absangle_B_sin_M(k,1), Lp_thigh*absangle_B_cos_M(k,1), 0, 1, -1;
         0, 0, 0, 0, 1, 0, 0, 0, 0;
         0, 0, 0, 0, 0, 1, 0, 0, 0;
         0, 0, 0, 0, Ld_hat*absangle_C_sin(k,1), -Ld_hat*absangle_C_cos(k,1), 0, 0, 1;
@@ -274,6 +276,40 @@ ylabel('Angle (rad/s2)');
 ylim([-30,40]);
 title('Absolute angles acceleration');
 legend('Ankle', 'Knee', 'Hip');
+
+%% Compare ground forces with platform readings
+% Get ground f12x and f12z vectors
+f12x = zeros(length(timeIncrements), 1);
+f12z = zeros(length(timeIncrements), 1);
+for k = 1+offset:iter
+    current_cell = x_cell{k};
+    current_f12x = current_cell(1,1);
+    current_f12z = current_cell(2,1);
+    f12x(k) = current_f12x;
+    f12z(k) = current_f12z;
+end
+% Get forces from platfom
+p_f12x = - data.P1_LoadCell_X_1 + data.P1_LoadCell_X_2 + data.P1_LoadCell_X_3 - data.P1_LoadCell_X_4 + ...
+    - data.P2_LoadCell_X_1 + data.P2_LoadCell_X_2 + data.P2_LoadCell_X_3 - data.P2_LoadCell_X_4;
+p_f12z = data.P1_LoadCell_Z_1 + data.P1_LoadCell_Z_2 + data.P1_LoadCell_Z_3 + data.P1_LoadCell_Z_4 +...
+    data.P2_LoadCell_Z_1 + data.P2_LoadCell_Z_2 + data.P2_LoadCell_Z_3 + data.P2_LoadCell_Z_4;
+p_f12x = p_f12x * g;
+p_f12z = p_f12z * g;
+% Plot
+figure(4);
+% plot(timeIncrements, [f12x,f12z,p_f12x,p_f12z], 'LineWidth', 1.5);
+hold on;
+plot(timeIncrements, f12x, 'r--', 'LineWidth', 1.5);
+plot(timeIncrements, f12z, 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, p_f12x, 'b--', 'LineWidth', 1.5);
+plot(timeIncrements, p_f12z, 'b-', 'LineWidth', 1.5);
+hold off;
+grid on;
+xlabel('Time (s)');
+ylabel('Force (N)');
+ylim([-500,2000]);
+title('Comparison between platform and model total forces');
+legend('Math model horizontal force', 'Math model vertical force', 'Platform horizontal force', 'Platform vertical force');
 
 return;
 %% Pose animation
