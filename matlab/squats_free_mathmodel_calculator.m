@@ -30,7 +30,7 @@ imu_3_eul = quat2eul(imu_3_q, 'XYZ');
 % CHECK LOCAL COORDS OF IMUS TO GET THE DESIRED ANGLES
 absangle_A = pi - imu_1_eul(:, 3); % Leg Z angle
 absangle_B = pi - imu_2_eul(:, 3); % Thigh Z angle
-absangle_C = imu_3_eul(:, 2); % Trunk Y angle
+absangle_C = imu_3_eul(:, 2) + deg2rad(30); % Trunk Y angle
 
 size(absangle_A)
 
@@ -84,12 +84,16 @@ I_barbell = m_barbell*d*d;
 % --- Absolute angles management
 % Get first and second absolute angle derivatives filtered (Butterworth)
 FS = 100;
-FC = 2;
+FC = 7;
 [b,a] = butter(6,FC/(FS/2));
 
 absangle_Af = filtfilt(b,a,absangle_A);
 absangle_Bf = filtfilt(b,a,absangle_B);
 absangle_Cf = filtfilt(b,a,absangle_C);
+
+% absangle_Af = absangle_A;
+% absangle_Bf = absangle_B;
+% absangle_Cf = absangle_C;
 
 absangle_A_diff = [(-absangle_Af(3)+4*absangle_Af(2)-3*absangle_Af(1))*FS/2;diff(absangle_Af)*FS];
 absangle_A_diff2 = [(-absangle_A_diff(3)+4*absangle_A_diff(2)-3*absangle_A_diff(1))*FS/2;diff(absangle_A_diff)*FS];
@@ -311,7 +315,87 @@ ylim([-500,2000]);
 title('Comparison between platform and model total forces');
 legend('Math model horizontal force', 'Math model vertical force', 'Platform horizontal force', 'Platform vertical force');
 
-return;
+%% Plot checks
+% Angles, Forces, COG Accelerations
+figure (5);
+subplot(3, 1, 1);
+% plot(timeIncrements, [rad2deg(absangle_A),rad2deg(absangle_B),rad2deg(absangle_C)], 'LineWidth', 1.5);
+hold on;
+plot(timeIncrements, rad2deg(absangle_A), 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, rad2deg(absangle_B), 'b-', 'LineWidth', 1.5);
+plot(timeIncrements, rad2deg(absangle_C), 'k-', 'LineWidth', 1.5);
+hold off;
+grid on;
+xlabel('Time (s)');
+ylabel('Angle (º)');
+title('Absolute angles');
+legend('Ankle (Z axis)', 'Knee (Z axis)', 'Hip (Y axis)');
+
+subplot(3, 1, 2);
+hold on;
+plot(timeIncrements, f12z, 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, p_f12z, 'b-', 'LineWidth', 1.5);
+hold off;
+grid on;
+xlabel('Time (s)');
+ylabel('Force (N)');
+ylim([-500,1700]);
+title('Comparison between platform and model total forces');
+legend('Model vertical force', 'Platform vertical force');
+
+subplot(3, 1, 3);
+% plot(timeIncrements, [a_leg_z,a_thigh_z,a_hat_z], 'LineWidth', 1.5);
+hold on;
+plot(timeIncrements, a_leg_z, 'r-', 'LineWidth', 1.5);
+plot(timeIncrements, a_thigh_z, 'b-', 'LineWidth', 1.5);
+plot(timeIncrements, a_hat_z, 'k-', 'LineWidth', 1.5);
+hold off;
+grid on;
+xlabel('Time (s)');
+ylabel('Acc (m/s2)');
+ylim([-5,5]);
+title('Accel Z axis');
+legend('Leg', 'Thigh', 'HAT');
+
+% Thigh angle and forces
+figure (6);
+f12z = f12z(725:size(timeIncrements));
+p_f12z = p_f12z(725:size(timeIncrements));
+hold on;
+plot(timeIncrements(725:end), f12z - mean(f12z), 'r-', 'LineWidth', 1.5);
+plot(timeIncrements(725:end), p_f12z - mean(p_f12z), 'b-', 'LineWidth', 1.5);
+hold off;
+grid on;
+xlabel('Time (s)');
+ylabel('Force (N)');
+% ylim([500,1700]);
+% yyaxis right
+% plot(timeIncrements, rad2deg(absangle_B), 'k-', 'LineWidth', 1.5);
+% ylabel('Angle (º)');
+% legend('Model vertical force', 'Platform vertical force','Knee absolute angle');
+% title('Comparison between platform and model total forces');
+
+% Frequency
+figure (7);
+signal = f12z - mean(f12z);
+time = timeIncrements(725:end);
+L = length(signal);
+Y = fft(signal);
+P2 = abs(Y/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+f = FS*(0:(L/2))/L;
+plot(f,P1)
+% amplitude = abs(Y);
+% freqs = (-FS/2):(FS/L):(FS/2-FS/L);
+% plot(freqs,fftshift(amplitude));
+grid on;
+xlabel('f (Hz)');
+ylabel('|P1(f)|');
+title('Single-Sided Amplitude Spectrum of Model Force signal');
+% xlim([0,15]);
+
+
 %% Pose animation
 % Determine poses
 pos_A_x = zeros(size(timeIncrements));
@@ -325,7 +409,24 @@ pos_D_z = pos_C_z + L_uppertrunk .* absangle_C_sin;
 pos_E_x = pos_C_x + L_hat .* absangle_C_cos;
 pos_E_z = pos_C_z + L_hat .* absangle_C_sin;
 
-fig = figure(4);
+% Plot D position
+figure (8);
+plot(timeIncrements,(data.Encoder_Z_1 + data.Encoder_Z_2)/2, 'r-', 'LineWidth', 1.5);
+grid on;
+xlabel('Time (s)');
+ylabel('L (mm)');
+yyaxis right
+plot(timeIncrements, pos_D_z*1000, 'b-', 'LineWidth', 1.5);
+ylabel('L (mm)');
+ylim([800, 1400]);
+yticks(800:100:1400);
+set(gca, 'YDir', 'reverse');
+legend('Encoder','Model');
+% title('Single-Sided Amplitude Spectrum of Model Force signal');
+
+return;
+
+fig = figure(10);
 axis([-1 1 0 2]);
 xlabel('X (m)');
 ylabel('Z (m)');
