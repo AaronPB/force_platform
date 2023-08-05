@@ -224,10 +224,10 @@ class InputReader:
         self.phidgetEncodersHandler.stop()
         self.loadSensorType(self.taoboticsIMUsHandler, 'taobotics_imu_list')
         self.log_handler.logger.info("Test finished!")
-        self.sensor_dataframe.exportToCSV(os.path.join(
-            self.test_folder, self.test_name + '.csv'))
-        self.sensor_dataframe_raw.exportToCSV(os.path.join(
-            self.test_folder, self.test_name + '_RAW' + '.csv'))
+        self.sensor_dataframe.exportToCSV(
+            self.test_folder, self.test_name + '.csv')
+        self.sensor_dataframe_raw.exportToCSV(
+            self.test_folder, self.test_name + '_RAW' + '.csv')
         # Plot desired sensor values if enabled in config
         if self.config['general_settings']['test_results']['generate_plot']:
             sensor_headers = self.config['general_settings']['test_results']['column_headers']
