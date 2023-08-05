@@ -53,7 +53,8 @@ class TaoboticsIMUsHandler:
         keys = list(self.sensor_data.keys())
         self.sensor_data_mutex.release()
         new_keys = []
-        data_types = ['qx', 'qy', 'qz', 'qw', 'wx', 'wy', 'wz']
+        data_types = ['qx', 'qy', 'qz', 'qw', 'wx',
+                      'wy', 'wz', 'x_acc', 'y_acc', 'z_acc']
         for key in keys:
             for suf in data_types:
                 new_keys.append(key + '_' + suf)
@@ -69,7 +70,7 @@ class TaoboticsIMUsHandler:
             if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
                 continue
 
-            q_x = q_y = q_z = q_w = w_x = w_y = w_z = -1
+            q_x = q_y = q_z = q_w = w_x = w_y = w_z = x_acc = y_acc = z_acc = -1
             sensor['sensor'].doProcess()
             obs_list = sensor['sensor'].getObservations()
             if not obs_list.empty():
@@ -83,7 +84,11 @@ class TaoboticsIMUsHandler:
                     w_x = obs.get(mrpt.obs.TIMUDataIndex.IMU_WX)
                     w_y = obs.get(mrpt.obs.TIMUDataIndex.IMU_WY)
                     w_z = obs.get(mrpt.obs.TIMUDataIndex.IMU_WZ)
-            values = [q_x, q_y, q_z, q_w, w_x, w_y, w_z]
+                    # Accelerations
+                    x_acc = obs.get(mrpt.obs.TIMUDataIndex.IMU_X_ACC)
+                    y_acc = obs.get(mrpt.obs.TIMUDataIndex.IMU_Y_ACC)
+                    z_acc = obs.get(mrpt.obs.TIMUDataIndex.IMU_Z_ACC)
+            values = [q_x, q_y, q_z, q_w, w_x, w_y, w_z, x_acc, y_acc, z_acc]
             self.sensor_data_mutex.acquire()
             self.sensor_data[sensor['name']] = values
             self.sensor_data_mutex.release()
