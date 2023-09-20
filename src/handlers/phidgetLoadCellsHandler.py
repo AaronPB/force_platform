@@ -110,12 +110,11 @@ class PhidgetLoadCellsHandler:
         self.sensor_data_mutex.release()
         return data
 
-    def connectionProcess(self, sensor):
+    def checkSensorConnection(self, sensor):
         if not sensor['read_data']:
             return False
         if sensor['sensor'].getAttached():
             return False
-
         try:
             sensor['sensor'].openWaitForAttachment(
                 1000)  # default value, in ms
@@ -133,8 +132,26 @@ class PhidgetLoadCellsHandler:
                 sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
             sensor['status'] = "Disconnected"
             return False
-
         return True
+
+    def connectSensor(self, sensor):
+        if sensor['status'] != "Active":
+            return
+        try:
+            sensor['sensor'].openWaitForAttachment(2000)  # in ms
+            sensor['sensor'].setDataInterval(8)  # in ms
+        except (PhidgetException):
+            self.log_handler.logger.warn("Could not connect to serial " + str(
+                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+
+    def disconnectSensor(self, sensor):
+        if sensor['status'] != "Active":
+            return
+        try:
+            sensor['sensor'].close()
+        except (PhidgetException):
+            self.log_handler.logger.error("Could not close serial " + str(
+                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
 
     # Returns true if there is at least one sensor connected
     def connect(self):
@@ -147,7 +164,7 @@ class PhidgetLoadCellsHandler:
         sensor_connections = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensor_connections = executor.map(
-                self.connectionProcess, self.sensor_list)
+                self.checkSensorConnection, self.sensor_list)
 
         self.sensors_connected = any(sensor_connections)
         return self.sensors_connected
@@ -157,25 +174,11 @@ class PhidgetLoadCellsHandler:
             self.log_handler.logger.info(
                 "Ignoring Load Cells sensors in test, no one connected.")
             return
-        for sensor in self.sensor_list:
-            if not sensor['read_data']:
-                continue
-            try:
-                sensor['sensor'].openWaitForAttachment(2000)  # in ms
-                sensor['sensor'].setDataInterval(8)  # in ms
-            except (PhidgetException):
-                self.log_handler.logger.warn("Could not open serial " + str(sensor['sensor'].getDeviceSerialNumber(
-                )) + ", channel " + str(sensor['sensor'].getChannel()))
-                sensor['sensor'].close()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.connectSensor, self.sensor_list)
 
     def stop(self):
         if not self.sensors_connected:
             return
-        for sensor in self.sensor_list:
-            if not sensor['read_data']:
-                continue
-            try:
-                sensor['sensor'].close()
-            except (PhidgetException):
-                self.log_handler.logger.error("Could not close serial " + str(
-                    sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.disconnectSensor, self.sensor_list)
