@@ -5,6 +5,7 @@ Date: 05/05/2023
 """
 
 import threading
+import concurrent.futures
 from mrpt import pymrpt
 from src.utils import LogHandler
 mrpt = pymrpt.mrpt
@@ -98,6 +99,26 @@ class TaoboticsIMUsHandler:
         self.sensor_data_mutex.release()
         return sum(data, [])
 
+    def connectionProcess(self, sensor):
+        if not sensor['read_data']:
+            return False
+
+        try:
+            sensor['sensor'].initialize()
+        except (Exception):
+            self.log_handler.logger.error(
+                "IMU " + str(sensor['name']) + " throws an exception!")
+            sensor['status'] = "Disconnected"
+            return False
+
+        if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
+            self.log_handler.logger.warn(
+                "Could not connect to IMU " + str(sensor['name']))
+            sensor['status'] = "Disconnected"
+            return False
+
+        return True
+
     # Returns true if there is at least one sensor connected
     def connect(self):
         self.sensors_connected = False
@@ -105,24 +126,13 @@ class TaoboticsIMUsHandler:
             self.log_handler.logger.info(
                 "No IMUs added to try connection.")
             return self.sensors_connected
-        for sensor in self.sensor_list:
-            if sensor['read_data']:
-                try:
-                    sensor['sensor'].initialize()
-                except (Exception):
-                    self.log_handler.logger.error(
-                        "IMU " + str(sensor['name']) + " throws an exception!")
-                    sensor['status'] = "Disconnected"
-                    continue
 
-                if sensor['sensor'].getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
-                    self.log_handler.logger.warn(
-                        "Could not connect to IMU " + str(sensor['name']))
-                    sensor['status'] = "Disconnected"
-                    continue
+        sensor_connections = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            sensor_connections = executor.map(
+                self.connectionProcess, self.sensor_list)
 
-                sensor['status'] = "Active"
-                self.sensors_connected = True
+        self.sensors_connected = any(sensor_connections)
         return self.sensors_connected
 
     def start(self):
