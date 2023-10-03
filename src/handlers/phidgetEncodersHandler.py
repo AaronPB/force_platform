@@ -166,7 +166,7 @@ class PhidgetEncodersHandler:
         sensor_connections = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensor_connections = executor.map(
-                self.connectionProcess, self.sensor_list)
+                self.checkSensorConnection, self.sensor_list)
 
         self.sensors_connected = any(sensor_connections)
         return self.sensors_connected
