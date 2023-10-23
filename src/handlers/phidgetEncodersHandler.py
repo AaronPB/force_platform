@@ -5,6 +5,7 @@ Date: 12/05/2023
 """
 
 import threading
+import concurrent.futures
 from Phidget22.Phidget import *
 from Phidget22.Devices.Encoder import *
 from src.utils import LogHandler
@@ -110,6 +111,51 @@ class PhidgetEncodersHandler:
         self.sensor_data_mutex.release()
         return data
 
+    def checkSensorConnection(self, sensor):
+        if not sensor['read_data']:
+            return False
+        if sensor['sensor'].getAttached():
+            return False
+
+        try:
+            sensor['sensor'].openWaitForAttachment(
+                1000)  # default value, in ms
+            sensor['sensor'].setDataInterval(8)  # default value, in ms
+            # FIXME Identifica también los otros canales aunque no haya sensor conectado!
+            # if loadCell['input'].getSensorType() != Bridge.PHIDGET_BRIDGE_SENSOR_TYPE_NONE:
+            #     loadCell['status'] = "Active"
+            #     self.phidget_sensor_connected = True
+            # Close communication until start process
+            sensor['status'] = "Active"
+            sensor['sensor'].close()
+            # print(loadCell['input'].getSensorType())
+        except (PhidgetException):
+            self.log_handler.logger.warn("Could not connect to serial " + str(
+                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+            sensor['status'] = "Disconnected"
+            return False
+
+        return True
+    
+    def connectSensor(self, sensor):
+        if sensor['status'] != "Active":
+            return
+        try:
+            sensor['sensor'].openWaitForAttachment(2000)  # in ms
+            sensor['sensor'].setDataInterval(8)  # in ms
+        except (PhidgetException):
+            self.log_handler.logger.warn("Could not connect to serial " + str(
+                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+
+    def disconnectSensor(self, sensor):
+        if sensor['status'] != "Active":
+            return
+        try:
+            sensor['sensor'].close()
+        except (PhidgetException):
+            self.log_handler.logger.error("Could not close serial " + str(
+                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+
     # Returns true if there is at least one sensor connected
     def connect(self):
         self.sensors_connected = False
@@ -117,24 +163,12 @@ class PhidgetEncodersHandler:
             self.log_handler.logger.info(
                 "No encoders added to try connection.")
             return self.sensors_connected
-        for sensor in self.sensor_list:
-            if not sensor['sensor'].getAttached() and sensor['read_data']:
-                try:
-                    sensor['sensor'].openWaitForAttachment(1000)  # in ms
-                    sensor['sensor'].setDataInterval(8)  # in ms
-                    # FIXME Identifica también los otros canales aunque no haya sensor conectado!
-                    # if loadCell['input'].getSensorType() != Bridge.PHIDGET_BRIDGE_SENSOR_TYPE_NONE:
-                    #     loadCell['status'] = "Active"
-                    #     self.phidget_sensor_connected = True
-                    # Close communication until start process
-                    sensor['status'] = "Active"
-                    sensor['sensor'].close()
-                    self.sensors_connected = True
-                    # print(loadCell['input'].getSensorType())
-                except (PhidgetException):
-                    self.log_handler.logger.warn("Could not connect to serial " + str(
-                        sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
-                    sensor['status'] = "Disconnected"
+        sensor_connections = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            sensor_connections = executor.map(
+                self.checkSensorConnection, self.sensor_list)
+
+        self.sensors_connected = any(sensor_connections)
         return self.sensors_connected
 
     def start(self):
@@ -142,27 +176,16 @@ class PhidgetEncodersHandler:
             self.log_handler.logger.info(
                 "Ignoring Encoders sensors in test, no one connected.")
             return
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.connectSensor, self.sensor_list)
         for sensor in self.sensor_list:
-            if not sensor['read_data']:
+            if sensor['status'] != "Active":
                 continue
-            try:
-                sensor['sensor'].openWaitForAttachment(2000)  # in ms
-                sensor['sensor'].setDataInterval(8)  # in ms
-            except (PhidgetException):
-                self.log_handler.logger.warn("Could not open serial " + str(sensor['sensor'].getDeviceSerialNumber(
-                )) + ", channel " + str(sensor['sensor'].getChannel()))
-                sensor['sensor'].close()
             # WIP Initial value
             self.sensor_data[sensor['name']] = -1
 
     def stop(self):
         if not self.sensors_connected:
             return
-        for sensor in self.sensor_list:
-            if not sensor['read_data']:
-                continue
-            try:
-                sensor['sensor'].close()
-            except (PhidgetException):
-                self.log_handler.logger.error("Could not close serial " + str(
-                    sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.disconnectSensor, self.sensor_list)
