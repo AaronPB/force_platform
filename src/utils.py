@@ -25,18 +25,40 @@ class TestDataFrame:
             return
         self.df.loc[len(self.df)] = values
 
-    def exportToCSV(self, file_path):
+    def checkFileNameDuplication(self, file_path, file_name):
+        total_path = os.path.join(file_path, file_name)
+        if not os.path.exists(total_path):
+            return file_name
+        file_num = 1
+        while True:
+            new_file_name = f"{os.path.splitext(file_name)[0]}_{file_num}{os.path.splitext(file_name)[1]}"
+            total_path = os.path.join(file_path, new_file_name)
+            if not os.path.exists(total_path):
+                self.log_handler.logger.info(
+                    "There is already a file named " + file_name + " The new file will be "
+                    + new_file_name)
+                break
+            file_num += 1
+        return new_file_name
+
+    def exportToCSV(self, file_path, file_name):
         # Format all data values to: 0.000000e+00
         formatted_df = self.df.copy()
         formatted_df.iloc[:, 1:] = formatted_df.iloc[:, 1:].applymap(
             lambda x: "{:.6e}".format(x))
-        formatted_df.to_csv(file_path, index=False)
+
+        file_name = self.checkFileNameDuplication(file_path, file_name)
+        total_path = os.path.join(file_path, file_name)
+        formatted_df.to_csv(total_path, index=False)
+
         file_size = os.path.getsize(file_path) / (1024 * 1024)
         self.log_handler.logger.info(
             "Test file saved in: " + str(file_path) + " (" + str(round(file_size, 2)) + " MB)")
 
-    def exportToBinary(self, file_path):
-        self.df.to_pickle(file_path, index=False)
+    def exportToBinary(self, file_path, file_name):
+        file_name = self.checkFileNameDuplication(file_path, file_name)
+        total_path = os.path.join(file_path, file_name)
+        self.df.to_pickle(total_path, index=False)
         file_size = os.path.getsize(file_path) / (1024 * 1024)
         self.log_handler.logger.info(
             "Test file saved in: " + str(file_path) + " (" + str(round(file_size, 2)) + " MB)")
