@@ -8,177 +8,99 @@ import threading
 import concurrent.futures
 from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageRatioInput import *
+from enums.sensorParams import SensorParams as SParams
+from enums.sensorStatus import SensorStatus as SStatus
 from src.utils import LogHandler
 
 
 class PhidgetLoadCellsHandler:
-    log_handler = None
-
-    def __init__(self, sensor_set_name):
+    def __init__(self, group_name: str) -> None:
+        self.group_name = group_name
         self.log_handler = LogHandler(
-            str(__class__.__name__ + '-' + sensor_set_name))
-        self.sensor_list = []
+            str(__class__.__name__ + '-' + self.group_name))
+
         self.sensor_data = {}
-        self.sensor_data_raw = {}
+        # TODO self.dataframe = None
         self.sensor_data_mutex = threading.Lock()
 
-        def onVoltageRatioChange(self,
-                                 voltageRatio,
-                                 mutex: threading.Lock() = self.sensor_data_mutex,
-                                 sensor_list: list = self.sensor_list,
-                                 sensor_data_raw: dict = self.sensor_data_raw,
-                                 sensor_data: dict = self.sensor_data,
-                                 log_handler: LogHandler = self.log_handler,):
-            serial = self.getDeviceSerialNumber()
-            channel = self.getChannel()
-            connected_sensor = False
-            m = b = 0
-            for i, sensor in enumerate(sensor_list):
-                if not sensor['read_data']:
-                    continue
-                if sensor['serial'] == serial and sensor['channel'] == channel:
-                    m = sensor['calibration_data']['m']
-                    b = sensor['calibration_data']['b']
-                    name = sensor['name']
-                    connected_sensor = True
-                    break
-            if not connected_sensor:
-                return
-            force = voltageRatio * m + b
+    def onVoltageRatioChange(self, sensor_id: str):
+        def handler(vontageRatio):
+            self.sensor_data_mutex.acquire()
+            self.sensor_data[sensor_id][SParams.VALUE] = vontageRatio
+            self.sensor_data_mutex.release()
+        return handler
 
-            # log_handler.logger.debug("[" + str(serial) + "_" +
-            #                          str(channel) + "]: " + str(voltageRatio) + " V (" + str(force) + " N)")
+    def setSensorGroup(self, sensor_group_dict: dict) -> bool:
+        if not sensor_group_dict:
+            self.log_handler.logger.warn('The sensor group is empty.')
+            return False
 
-            mutex.acquire()
-            sensor_data_raw[name] = voltageRatio
-            sensor_data[name] = force
-            mutex.release()
+        self.sensor_data.clear()
+        required_keys = [SParams.NAME, SParams.CHANNEL,
+                         SParams.SERIAL, SParams.READ]
+        for sensor_id, sensor_dict in sensor_group_dict:
+            self.storeSensor(sensor_id, sensor_dict, required_keys)
+        return bool(self.sensor_data)
 
-        self.onVoltageRatioChange = onVoltageRatioChange
-
-    def addSensor(self, sensor_params: dict):
-        required_keys = ['id', 'name', 'read_data', 'serial',
-                         'channel', 'calibration_data', 'properties',
-                         'config_path']
-        if not all(key in sensor_params.keys() for key in required_keys):
+    def storeSensor(self, sensor_id: str, sensor_dict: dict, required_keys: list) -> None:
+        if not all(key in sensor_dict.keys() for key in required_keys):
             self.log_handler.logger.error(
-                "Sensor does not have the required keys!")
+                f'Sensor {sensor_id} does not have the required keys!')
             return
 
-        sensor = sensor_params.copy()
-        sensor['status'] = "Ignored"  # Default status until connection check
-        sensor['sensor'] = VoltageRatioInput()
-        sensor['sensor'].setDeviceSerialNumber(sensor_params['serial'])
-        sensor['sensor'].setChannel(sensor_params['channel'])
-        sensor['sensor'].setOnVoltageRatioChangeHandler(
-            self.onVoltageRatioChange)
+        sensor = sensor_dict.copy()
+        # Default status until connection check
+        sensor['status'] = SStatus.IGNORED
+        sensor['sensor'] = VoltageRatioInput(
+            device_serial_number=sensor[SParams.SERIAL],
+            channel=sensor[SParams.CHANNEL],
+            on_voltage_ratio_change=self.onVoltageRatioChange(sensor_id)
+        )
 
-        self.sensor_list.append(sensor)
+        self.sensor_data[sensor_id] = sensor
 
-    def clearSensors(self):
-        self.sensor_list.clear()
-        self.sensor_data.clear()
-
-    def tareSensors(self, tare_dict: dict):
-        for sensor in self.sensor_list:
-            if sensor['name'] in tare_dict:
-                prev_value = sensor['calibration_data']['b']
-                sensor['calibration_data']['b'] -= tare_dict[sensor['name']]
-                self.log_handler.logger.debug(
-                    "TARED " + sensor['name'] + " with value: " + str(prev_value) + " to value: " + str(sensor['calibration_data']['b']))
-
-    def getSensorListDict(self):
-        key_list = ['id', 'name', 'read_data',
-                    'status', 'properties', 'config_path']
-        return [{k: sensor[k] for k in key_list} for sensor in self.sensor_list]
-
-    def getSensorHeaders(self):
-        self.sensor_data_mutex.acquire()
-        keys = list(self.sensor_data.keys())
-        self.sensor_data_mutex.release()
-        return keys
-
-    def getSensorData(self):
-        self.sensor_data_mutex.acquire()
-        data = list(self.sensor_data.values())
-        self.sensor_data_mutex.release()
-        return data
-
-    def getSensorDataRaw(self):
-        self.sensor_data_mutex.acquire()
-        data = list(self.sensor_data_raw.values())
-        self.sensor_data_mutex.release()
-        return data
-
-    def checkSensorConnection(self, sensor):
-        if not sensor['read_data']:
-            return False
-        if sensor['sensor'].getAttached():
+    def connectSensor(self, sensor: dict) -> bool:
+        if not sensor[SParams.READ]:
             return False
         try:
-            sensor['sensor'].openWaitForAttachment(
-                1000)  # default value, in ms
-            sensor['sensor'].setDataInterval(8)  # default value, in ms
-            # FIXME Identifica también los otros canales aunque no haya sensor conectado!
-            # if loadCell['input'].getSensorType() != Bridge.PHIDGET_BRIDGE_SENSOR_TYPE_NONE:
-            #     loadCell['status'] = "Active"
-            #     self.phidget_sensor_connected = True
-            # Close communication until start process
-            sensor['status'] = "Active"
-            sensor['sensor'].close()
-            # print(loadCell['input'].getSensorType())
+            sensor[SParams.SENSOR].openWaitForAttachment(2000)
+            sensor[SParams.SENSOR].setDataInterval(8)
+            sensor[SParams.STATUS] = SStatus.AVAILABLE
         except (PhidgetException):
             self.log_handler.logger.warn("Could not connect to serial " + str(
                 sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
-            sensor['status'] = "Disconnected"
+            sensor[SParams.STATUS] = SStatus.NOT_FOUND
             return False
         return True
 
-    def connectSensor(self, sensor):
-        if sensor['status'] != "Active":
+    def disconnectSensor(self, sensor: dict) -> None:
+        if not sensor[SParams.READ]:
             return
-        try:
-            sensor['sensor'].openWaitForAttachment(2000)  # in ms
-            sensor['sensor'].setDataInterval(8)  # in ms
-        except (PhidgetException):
-            self.log_handler.logger.warn("Could not connect to serial " + str(
-                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
-
-    def disconnectSensor(self, sensor):
-        if sensor['status'] != "Active":
+        if sensor[SParams.STATUS] != SStatus.AVAILABLE:
             return
-        try:
-            sensor['sensor'].close()
-        except (PhidgetException):
-            self.log_handler.logger.error("Could not close serial " + str(
-                sensor['sensor'].getDeviceSerialNumber()) + ", channel " + str(sensor['sensor'].getChannel()))
 
-    # Returns true if there is at least one sensor connected
-    def connect(self):
-        self.sensors_connected = False
-        if not self.sensor_list:
-            self.log_handler.logger.info(
-                "No load cells added to try connection.")
-            return self.sensors_connected
-
+    def checkConnections(self) -> bool:
+        if not self.sensor_data:
+            self.log_handler.logger.warn(
+                'The sensor group is empty. Ignore connection check.')
+            return False
         sensor_connections = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensor_connections = executor.map(
-                self.checkSensorConnection, self.sensor_list)
+                self.connectSensor, self.sensor_data)
+            executor.map(self.disconnectSensor, self.sensor_data)
+        return any(sensor_connections)
 
-        self.sensors_connected = any(sensor_connections)
-        return self.sensors_connected
-
-    def start(self):
-        if not self.sensors_connected:
-            self.log_handler.logger.info(
-                "Ignoring Load Cells sensors in test, no one connected.")
+    def startSensors(self) -> None:
+        if not self.sensor_data:
+            self.log_handler.logger.warn(
+                'The sensor group is empty. Ignore start.')
             return
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(self.connectSensor, self.sensor_list)
+            sensor_connections = executor.map(
+                self.connectSensor, self.sensor_data)
+        # TODO dataframe  and tare management
 
-    def stop(self):
-        if not self.sensors_connected:
-            return
+    def stopSensors(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(self.disconnectSensor, self.sensor_list)
+            executor.map(self.disconnectSensor, self.sensor_data)
