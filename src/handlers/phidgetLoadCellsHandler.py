@@ -24,9 +24,9 @@ class PhidgetLoadCellsHandler:
         self.sensor_data_mutex = threading.Lock()
 
     def onVoltageRatioChange(self, sensor_id: str):
-        def handler(vontageRatio):
+        def handler(voltageRatio):
             self.sensor_data_mutex.acquire()
-            self.sensor_data[sensor_id][SParams.VALUE] = vontageRatio
+            self.sensor_data[sensor_id][SParams.VALUE] = voltageRatio
             self.sensor_data_mutex.release()
         return handler
 
