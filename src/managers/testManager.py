@@ -45,7 +45,8 @@ class TestManager:
 
     def testRegisterValues(self) -> None:
         current_time = round(time.time()*1000)
-        # TODO [handler.registerData() for handler in self.sensor_handlers]
+        [handler.registerData(current_time)
+         for handler in self.sensor_handlers]
 
     def testStop(self) -> None:
         [handler.stopSensors() for handler in self.sensor_handlers]

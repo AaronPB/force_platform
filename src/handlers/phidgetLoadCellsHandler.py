@@ -10,6 +10,7 @@ from Phidget22.Phidget import *
 from Phidget22.Devices.VoltageRatioInput import *
 from enums.sensorParams import SensorParams as SParams
 from enums.sensorStatus import SensorStatus as SStatus
+from src.sensorDataFrame import SensorDataFrame
 from src.utils import LogHandler
 
 
@@ -20,7 +21,7 @@ class PhidgetLoadCellsHandler:
             str(__class__.__name__ + '-' + self.group_name))
 
         self.sensor_data = {}
-        # TODO self.dataframe = None
+        self.dataframe = None
         self.sensor_data_mutex = threading.Lock()
 
     def onVoltageRatioChange(self, sensor_id: str):
@@ -29,6 +30,10 @@ class PhidgetLoadCellsHandler:
             self.sensor_data[sensor_id][SParams.VALUE] = voltageRatio
             self.sensor_data_mutex.release()
         return handler
+
+    """
+    Sensor information import methods
+    """
 
     def setSensorGroup(self, sensor_group_dict: dict) -> bool:
         if not sensor_group_dict:
@@ -58,6 +63,10 @@ class PhidgetLoadCellsHandler:
         )
 
         self.sensor_data[sensor_id] = sensor
+
+    """
+    Sensor connection methods
+    """
 
     def connectSensor(self, sensor: dict) -> bool:
         if not sensor[SParams.READ]:
@@ -91,6 +100,10 @@ class PhidgetLoadCellsHandler:
             executor.map(self.disconnectSensor, self.sensor_data)
         return any(sensor_connections)
 
+    """
+    Test methods
+    """
+
     def startSensors(self) -> None:
         if not self.sensor_data:
             self.log_handler.logger.warn(
@@ -99,8 +112,39 @@ class PhidgetLoadCellsHandler:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensor_connections = executor.map(
                 self.connectSensor, self.sensor_data)
-        # TODO dataframe  and tare management
+        self.createDataFrame()
 
     def stopSensors(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(self.disconnectSensor, self.sensor_data)
+
+    """
+    Sensor data management methods
+    """
+
+    def createDataFrame(self) -> None:
+        if not self.sensor_data:
+            return
+        # TODO is it necessary to store timestamp values in each dataframe?
+        sensor_names = ['timestamp'] + \
+            [sensor[SParams.NAME]
+                for sensor in self.sensor_data if sensor[SParams.STATUS] == SStatus.AVAILABLE]
+        self.dataframe = SensorDataFrame(self.group_name, sensor_names)
+
+    def registerData(self, timestamp: int) -> None:
+        if not self.sensor_data:
+            return
+        sensor_values = [timestamp] + \
+            [sensor[SParams.VALUE]
+                for sensor in self.sensor_data if sensor[SParams.STATUS] == SStatus.AVAILABLE]
+        self.dataframe.addRow(sensor_values)
+
+    def getSensorDataFrame(self) -> SensorDataFrame:
+        return self.dataframe
+
+    def getSensorData(self) -> dict:
+        return self.sensor_data.copy()
+
+    def tareSensors(self, time_start: int, time_end: int) -> None:
+        # TODO
+        pass
