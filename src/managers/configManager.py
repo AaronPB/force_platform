@@ -4,7 +4,7 @@ from src.enums.configPaths import ConfigPaths
 from src.utils import LogHandler
 
 
-class configManager:
+class ConfigManager:
     def __init__(self) -> None:
         self.log_hangler = LogHandler(str(__class__.__name__))
         self.default_config_path = os.path.join(
