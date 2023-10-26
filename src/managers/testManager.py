@@ -1,8 +1,10 @@
 import time
-import handlers
 
 from managers.configManager import ConfigManager
+from handlers import SensorGroup
 from enums.configPaths import ConfigPaths as CfgPaths
+from enums.sensorParams import SensorParams as SParams
+from enums.sensorDrivers import SensorDrivers as SDrivers
 from src.utils import LogHandler
 
 
@@ -10,43 +12,54 @@ class TestManager:
     def __init__(self, config_mngr: ConfigManager) -> None:
         self.log_handler = LogHandler(str(__class__.__name__))
 
-        # Initial values
+        # Global values
         self.config_mngr = config_mngr
         self.sensors_connected = False
 
-        # Sensor handlers
-        self.sensor_handlers = [
-            handlers.PhidgetLoadCellsHandler('Platform 1'),
-            handlers.PhidgetLoadCellsHandler('Platform 2'),
-            handlers.PhidgetEncodersHandler('Barbell Encoders'),
-            handlers.TaoboticsIMUsHandler('Body IMUs')
-        ]
-        self.sensor_config_paths = [
-            CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION,
-            CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION,
-            CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION,
-            CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION
-        ]
+        # Required config keys for each sensor group
+        required_keys_loadcells = [SParams.NAME, SParams.SERIAL,
+                                   SParams.CHANNEL, SParams.CALIBRATION_SECTION]
+        required_keys_encoders = [SParams.NAME, SParams.SERIAL,
+                                  SParams.CHANNEL, SParams.CALIBRATION_SECTION, SParams.INITIAL_POS]
+        required_keys_taobotics = [SParams.NAME,
+                                   SParams.SERIAL, SParams.CALIBRATION_SECTION]
 
-        # TODO check other needed initializers
+        # Sensor group handlers
+        self.sensor_group_platform1 = self.setSensorGroup(
+            'Platform 1', CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION,
+            required_keys_loadcells, SDrivers.PHIDGET_LOADCELL_DRIVER)
+        self.sensor_group_platform2 = self.setSensorGroup(
+            'Platform 2', CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION,
+            required_keys_loadcells, SDrivers.PHIDGET_LOADCELL_DRIVER)
+        self.sensor_group_encoders = self.setSensorGroup(
+            'Barbell encoders', CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION,
+            required_keys_encoders, SDrivers.PHIDGET_ENCODER_DRIVER)
+        self.sensor_group_imus = self.setSensorGroup(
+            'Body IMUs', CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION,
+            required_keys_taobotics, SDrivers.TAOBOTICS_IMU_DRIVER)
+        self.sensor_group_list = [self.sensor_group_platform1, self.sensor_group_platform2,
+                                  self.sensor_group_encoders, self.sensor_group_imus]
 
-    def importSensors(self) -> None:
-        for handler, config_path in zip(self.sensor_handlers, self.sensor_config_paths):
-            sensor_group = self.config_mngr.getConfigValue(config_path)
-            handler.setSensorGroup(sensor_group)
+    def setSensorGroup(self, group_name: str, config_section: CfgPaths, required_keys, sensor_driver: SDrivers) -> SensorGroup:
+        sensor_group = SensorGroup(group_name)
+        for sensor_id in self.config_mngr.getConfigValue(config_section):
+            sensor_params = self.config_mngr.getConfigValue(
+                config_section + '.' + sensor_id)
+            sensor_group.addSensor(
+                sensor_id, sensor_params, required_keys, sensor_driver)
+        return sensor_group
 
     def checkConnection(self) -> bool:
         self.sensors_connected = any(
-            handler.checkSensorsConnection() for handler in self.sensor_handlers)
+            handler.checkConnections() for handler in self.sensor_group_list)
         return self.sensors_connected
 
     def testStart(self) -> None:
-        [handler.startSensors() for handler in self.sensor_handlers]
+        [handler.start() for handler in self.sensor_group_list]
 
     def testRegisterValues(self) -> None:
-        current_time = round(time.time()*1000)
-        [handler.registerData(current_time)
-         for handler in self.sensor_handlers]
+        # TODO
+        pass
 
     def testStop(self) -> None:
-        [handler.stopSensors() for handler in self.sensor_handlers]
+        [handler.stop() for handler in self.sensor_group_list]
