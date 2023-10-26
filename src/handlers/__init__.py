@@ -1,6 +1,4 @@
-__all__ = ['phidgetLoadCellsHandler',
-           'phidgetEncodersHandler', 'taoboticsIMUsHandler']
+__all__ = ['sensor', 'sensorGroup']
 # Deprecated for older python versions
-from handlers.phidgetLoadCellsHandler import PhidgetLoadCellsHandler
-from handlers.phidgetEncodersHandler import PhidgetEncodersHandler
-from handlers.taoboticsIMUsHandler import TaoboticsIMUsHandler
+from handlers.sensor import Sensor
+from handlers.sensorGroup import SensorGroup
