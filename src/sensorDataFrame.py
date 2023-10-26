@@ -34,9 +34,7 @@ class SensorDataFrame:
             return df
         return df * slope_values + intercept_values
 
-    # TODO check if timestamp values is really necessary or it could be done other way (get df pointers instead, for example)
-    def getIntervalMeans(self, slope_values: list, intercept_values: list, timestamp_init: int, timestamp_end: int):
+    def getIntervalMeans(self, slope_values: list, intercept_values: list, first_index: int, last_index: int):
         df = self.getDataFrame(slope_values, intercept_values)
-        df_interval = df[(df['timestamp'] >= timestamp_init) & (
-            df['timestamp'] <= timestamp_end)]
-        return np.mean(df_interval.drop('timestamp', axis=1), axis=0)
+        df_interval = df.iloc[first_index:last_index+1]
+        return np.mean(df_interval)
