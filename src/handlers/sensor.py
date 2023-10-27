@@ -35,6 +35,8 @@ class Sensor:
     def registerValue(self) -> None:
         self.values.append(self.driver.getValue())
 
+    # Getter methods
+
     def getName(self) -> str:
         return self.params[SParams.NAME]
 
@@ -47,6 +49,15 @@ class Sensor:
             text = text + '|' + \
                 self.params[SParams.PROPERTIES_SECTION][property]
         return text
+
+    def getSlopeIntercept(self) -> list:
+        slope = self.params[SParams.CALIBRATION_SECTION][SParams.SLOPE]
+        intercept = self.params[SParams.CALIBRATION_SECTION][SParams.INTERCEPT]
+        if slope is None:
+            slope = 1
+        if intercept is None:
+            intercept = 0
+        return [slope, intercept]
 
     def getValues(self) -> list:
         return self.values

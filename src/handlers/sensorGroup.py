@@ -31,7 +31,7 @@ class SensorGroup:
             executor.map(lambda sensor: sensor.connect(), sensors_list)
 
     def register(self) -> None:
-        [sensor.registerValue() for sensor in self.sensors.items()]
+        [sensor.registerValue() for sensor in self.sensors.values()]
 
     def stop(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -49,4 +49,10 @@ class SensorGroup:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             group_dict[sensor_id] = sensor.getValues()
+        return group_dict
+
+    def getGroupCalibrationParams(self) -> dict:
+        group_dict = {}
+        for sensor_id, sensor in self.sensors.items():
+            group_dict[sensor_id] = sensor.getSlopeIntercept()
         return group_dict
