@@ -11,7 +11,7 @@ class PhidgetEncoder:
         self.handler = Encoder()
         self.handler.setDeviceSerialNumber(serial)
         self.handler.setChannel(channel)
-        self.handler.setOnPositionChangeHandler()
+        self.handler.setOnPositionChangeHandler(self.onPositionChange)
         self.mutex = threading.Lock()
         self.value = None
 
