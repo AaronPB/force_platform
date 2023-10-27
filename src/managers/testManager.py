@@ -50,17 +50,40 @@ class TestManager:
 
     # Sensor setters and getters
 
-    def setP1SensorRead(self, index: int, read: bool) -> None:
-        group_ids = self.sensor_group_platform1.getGroupInfo().keys()
+    def setSensorRead(self, sensor_group: SensorGroup, config_section: CfgPaths, index: int, read: bool) -> None:
+        group_ids = sensor_group.getGroupInfo().keys()
         sensor_id = group_ids[index]
-        self.sensor_group_platform1.setSensorRead(sensor_id, read)
+        sensor_group.setSensorRead(sensor_id, read)
         self.config_mngr.setConfigValue(
-            CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION + '.' + str(sensor_id) + '.' + SParams.READ, read)
+            config_section + '.' + str(sensor_id) + '.' + SParams.READ, read)
+
+    def setP1SensorRead(self, index: int, read: bool) -> None:
+        self.setSensorRead(self.sensor_group_platform1,
+                           CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION, index, read)
+
+    def setP2SensorRead(self, index: int, read: bool) -> None:
+        self.setSensorRead(self.sensor_group_platform2,
+                           CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION, index, read)
+
+    def setOthersSensorRead(self, index: int, read: bool) -> None:
+        ptr = self.sensor_group_encoders.getGroupSize()
+        if index <= ptr:
+            self.setSensorRead(self.sensor_group_encoders,
+                               CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION, index, read)
+            return
+        self.setSensorRead(self.sensor_group_imus,
+                           CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION, index-ptr, read)
 
     def getP1SensorStatus(self) -> dict:
         return self.sensor_group_platform1.getGroupInfo()
 
-    # TODO repeat this setters and getters other 3 times... maybe abstract methods?
+    def getP2SensorStatus(self) -> dict:
+        return self.sensor_group_platform2.getGroupInfo()
+
+    def getOthersSensorStatus(self) -> dict:
+        encoder_dict = self.sensor_group_encoders.getGroupInfo()
+        imu_dict = self.sensor_group_imus.getGroupInfo()
+        return {**encoder_dict, **imu_dict}
 
     # Test methods
     def checkConnection(self) -> bool:

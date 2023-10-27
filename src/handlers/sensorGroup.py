@@ -52,6 +52,9 @@ class SensorGroup:
                 sensor.getName(), sensor.getProperties(), sensor.getStatus()]
         return group_dict
 
+    def getGroupSize(self) -> int:
+        return len(self.sensors)
+
     def getGroupValues(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
