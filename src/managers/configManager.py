@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import yaml
 from src.enums.configPaths import ConfigPaths
@@ -44,15 +46,16 @@ class ConfigManager:
         with open(self.config_path, "w") as file:
             yaml.dump(self.config, file, sort_keys=False)
 
-        # Setters and getters
-    def setConfigValue(self, key_path: ConfigPaths, value) -> None:
+    # Setters and getters
+
+    def setConfigValue(self, key_path: str, value) -> None:
         keys = key_path.value.split('.')
         for key in keys[:-1]:
             self.config_dict = self.config_dict.get(key, {})
         self.config_dict[keys[-1]] = value
         self.saveConfig()
 
-    def getConfigValue(self, key_path: ConfigPaths, default_value=None):
+    def getConfigValue(self, key_path: str, default_value=None):
         keys = key_path.value.split('.')
         for key in keys[:-1]:
             self.config_dict = self.config_dict.get(key, {})
