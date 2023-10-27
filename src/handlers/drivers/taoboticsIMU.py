@@ -12,7 +12,8 @@ class TaoboticsIMU:
         self.setHandler()
 
     def setHandler(self):
-        del self.handler
+        if hasattr(self, 'handler'):
+            del self.handler
         self.handler = mrpt.hwdrivers.CTaoboticsIMU()
         self.handler.setSerialPort(self.serial)
 
