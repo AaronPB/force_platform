@@ -1,24 +1,16 @@
 # -*- coding: utf-8 -*-
-"""
-Author: Aaron Poyatos
-Date: 13/04/2023
-"""
 
 import sys
-from PyQt5.QtWidgets import QApplication
-from src.interface import MainWindow
+from src.qtUIs.mainUI import MainUI
+from PySide6 import QtWidgets
 
 
-class Main:
-    def __init__(self):
-        self.app = QApplication(sys.argv)
-        self.menu = MainWindow()
-
-    def run(self):
-        self.menu.show()
-        sys.exit(self.app.exec_())
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    app.setStyleSheet(open('src/qtUIs/style.qss').read())
+    window = MainUI()
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':
-    app = Main()
-    app.run()
+    main()

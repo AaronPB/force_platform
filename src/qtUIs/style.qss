@@ -1,0 +1,65 @@
+* {
+    font-family: Titillium;
+    font-size: 16px;
+}
+
+QLabel#status_ok {
+    background-color: green;
+    color: white;
+    padding: 15px;
+}
+
+QLabel#status_warn {
+    background-color: red;
+    color: white;
+    padding: 15px;
+}
+
+QPushButton {
+    background-color: #326295;
+}
+
+QPushButton#cp_btn {
+    padding: 15px;
+}
+
+QPushButton:disabled#cp_btn {
+    background-color: gray;
+    color: darkslategray;
+}
+
+QProgressBar {
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #326295;
+}
+
+QCheckBox {
+    padding: 8px;
+    border: 4px solid darkslategray;
+    border-radius: 5px;
+    text-align: center;
+}
+
+QCheckBox::indicator {
+    width: 0;
+    height: 0;
+    border: none;
+}
+
+QCheckBox:checked {
+    border-color: green;
+}
+
+QCheckBox:checked#connected {
+    background-color: lightgreen;
+    color: black
+}
+
+QCheckBox:checked#not_connected {
+    border-color: red;
+    background-color: lightcoral;
+    color: black
+}
