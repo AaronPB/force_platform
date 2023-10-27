@@ -1,5 +1,5 @@
 __all__ = ['phidgetLoadCell', 'phidgetEncoder', 'taoboticsIMU']
 # Deprecated for older python versions
-from drivers.phidgetLoadCell import PhidgetLoadCell
-from drivers.phidgetEncoder import PhidgetEncoder
-from drivers.taoboticsIMU import TaoboticsIMU
+from src.handlers.drivers.phidgetLoadCell import PhidgetLoadCell
+from src.handlers.drivers.phidgetEncoder import PhidgetEncoder
+from src.handlers.drivers.taoboticsIMU import TaoboticsIMU

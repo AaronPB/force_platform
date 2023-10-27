@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import time
 
-from managers.configManager import ConfigManager
-from handlers import SensorGroup
-from enums.configPaths import ConfigPaths as CfgPaths
-from enums.sensorParams import SensorParams as SParams
-from enums.sensorDrivers import SensorDrivers as SDrivers
+from src.managers.configManager import ConfigManager
+from src.handlers import SensorGroup
+from src.enums.configPaths import ConfigPaths as CfgPaths
+from src.enums.sensorParams import SensorParams as SParams
+from src.enums.sensorDrivers import SensorDrivers as SDrivers
 from src.utils import LogHandler
 
 
@@ -39,11 +41,11 @@ class TestManager:
         self.sensor_group_list = [self.sensor_group_platform1, self.sensor_group_platform2,
                                   self.sensor_group_encoders, self.sensor_group_imus]
 
-    def setSensorGroup(self, group_name: str, config_section: CfgPaths, required_keys, sensor_driver: SDrivers) -> SensorGroup:
+    def setSensorGroup(self, group_name: str, config_section: CfgPaths, required_keys: list, sensor_driver: SDrivers) -> SensorGroup:
         sensor_group = SensorGroup(group_name)
-        for sensor_id in self.config_mngr.getConfigValue(config_section):
+        for sensor_id in self.config_mngr.getConfigValue(config_section.value):
             sensor_params = self.config_mngr.getConfigValue(
-                config_section + '.' + sensor_id)
+                config_section.value + '.' + sensor_id)
             sensor_group.addSensor(
                 sensor_id, sensor_params, required_keys, sensor_driver)
         return sensor_group
@@ -55,7 +57,7 @@ class TestManager:
         sensor_id = group_ids[index]
         sensor_group.setSensorRead(sensor_id, read)
         self.config_mngr.setConfigValue(
-            config_section + '.' + str(sensor_id) + '.' + SParams.READ, read)
+            config_section.value + '.' + sensor_id + '.' + SParams.READ.value, read)
 
     def setP1SensorRead(self, index: int, read: bool) -> None:
         self.setSensorRead(self.sensor_group_platform1,

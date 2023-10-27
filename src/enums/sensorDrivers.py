@@ -1,5 +1,5 @@
 from enum import Enum
-from handlers import drivers
+from src.handlers import drivers
 
 
 class SensorDrivers(Enum):

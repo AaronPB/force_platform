@@ -2,8 +2,8 @@
 
 import concurrent.futures
 
-from enums.sensorDrivers import SensorDrivers as SDrivers
-from handlers.sensor import Sensor
+from src.enums.sensorDrivers import SensorDrivers as SDrivers
+from src.handlers.sensor import Sensor
 
 
 class SensorGroup:
@@ -12,7 +12,7 @@ class SensorGroup:
         self.sensors = {}
 
     def addSensor(self, sensor_id: str, sensor_params: dict, required_config_keys: list, sensor_driver: SDrivers) -> None:
-        if not all(key in sensor_params.keys() for key in required_config_keys):
+        if not all(key.value in sensor_params.keys() for key in required_config_keys):
             return
         sensor = Sensor(sensor_id, sensor_params, sensor_driver)
         self.sensors[sensor_id] = sensor
@@ -49,7 +49,7 @@ class SensorGroup:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             group_dict[sensor_id] = [
-                sensor.getName(), sensor.getProperties(), sensor.getStatus()]
+                sensor.getName(), sensor.getProperties(), sensor.getStatus(), sensor.getIsReadable()]
         return group_dict
 
     def getGroupSize(self) -> int:
