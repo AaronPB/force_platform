@@ -17,12 +17,11 @@ class TestManager:
         self.sensors_connected = False
 
         # Required config keys for each sensor group
-        required_keys_loadcells = [SParams.NAME, SParams.SERIAL,
+        required_keys_loadcells = [SParams.NAME, SParams.READ, SParams.SERIAL,
                                    SParams.CHANNEL, SParams.CALIBRATION_SECTION]
-        required_keys_encoders = [SParams.NAME, SParams.SERIAL,
+        required_keys_encoders = [SParams.NAME, SParams.READ, SParams.SERIAL,
                                   SParams.CHANNEL, SParams.CALIBRATION_SECTION, SParams.INITIAL_POS]
-        required_keys_taobotics = [SParams.NAME,
-                                   SParams.SERIAL, SParams.CALIBRATION_SECTION]
+        required_keys_taobotics = [SParams.NAME, SParams.READ, SParams.SERIAL]
 
         # Sensor group handlers
         self.sensor_group_platform1 = self.setSensorGroup(
