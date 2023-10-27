@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import concurrent.futures
+
 from enums.sensorDrivers import SensorDrivers as SDrivers
 from handlers.sensor import Sensor
 
@@ -16,13 +18,35 @@ class SensorGroup:
         self.sensors[sensor_id] = sensor
 
     def checkConnections(self) -> bool:
-        pass
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            sensors_list = list(self.sensors.values())
+            results = list(executor.map(
+                lambda sensor: sensor.connect(), sensors_list))
+            executor.map(lambda sensor: sensor.disconnect(), sensors_list)
+            return any(results)
 
     def start(self) -> None:
-        pass
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            sensors_list = list(self.sensors.values())
+            executor.map(lambda sensor: sensor.connect(), sensors_list)
 
     def register(self) -> None:
-        pass
+        [sensor.registerValue() for sensor in self.sensors.items()]
 
     def stop(self) -> None:
-        pass
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            sensors_list = list(self.sensors.values())
+            executor.map(lambda sensor: sensor.disconnect(), sensors_list)
+
+    def getGroupInfo(self) -> dict:
+        group_dict = {}
+        for sensor_id, sensor in self.sensors.items():
+            group_dict[sensor_id] = [
+                sensor.getName(), sensor.getProperties(), sensor.getStatus()]
+        return group_dict
+
+    def getGroupValues(self) -> dict:
+        group_dict = {}
+        for sensor_id, sensor in self.sensors.items():
+            group_dict[sensor_id] = sensor.getValues()
+        return group_dict
