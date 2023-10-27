@@ -48,6 +48,21 @@ class TestManager:
                 sensor_id, sensor_params, required_keys, sensor_driver)
         return sensor_group
 
+    # Sensor setters and getters
+
+    def setP1SensorRead(self, index: int, read: bool) -> None:
+        group_ids = self.sensor_group_platform1.getGroupInfo().keys()
+        sensor_id = group_ids[index]
+        self.sensor_group_platform1.setSensorRead(sensor_id, read)
+        self.config_mngr.setConfigValue(
+            CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION + '.' + str(sensor_id) + '.' + SParams.READ, read)
+
+    def getP1SensorStatus(self) -> dict:
+        return self.sensor_group_platform1.getGroupInfo()
+
+    # TODO repeat this setters and getters other 3 times... maybe abstract methods?
+
+    # Test methods
     def checkConnection(self) -> bool:
         self.sensors_connected = any(
             handler.checkConnections() for handler in self.sensor_group_list)

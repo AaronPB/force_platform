@@ -35,7 +35,10 @@ class Sensor:
     def registerValue(self) -> None:
         self.values.append(self.driver.getValue())
 
-    # Getter methods
+    # Setters and getters methods
+
+    def setRead(self, read: bool) -> None:
+        self.params[SParams.READ] = read
 
     def getName(self) -> str:
         return self.params[SParams.NAME]

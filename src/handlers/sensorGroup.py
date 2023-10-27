@@ -38,6 +38,13 @@ class SensorGroup:
             sensors_list = list(self.sensors.values())
             executor.map(lambda sensor: sensor.disconnect(), sensors_list)
 
+    # Setters and getters
+
+    def setSensorRead(self, sensor_id: str, read: bool) -> None:
+        if sensor_id not in self.sensors.keys():
+            return
+        self.sensors[sensor_id].setRead(read)
+
     def getGroupInfo(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
