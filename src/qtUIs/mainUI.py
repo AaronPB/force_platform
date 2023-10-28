@@ -91,6 +91,8 @@ class MainUI(QtWidgets.QWidget):
             self, 'Select file', '', 'yaml file (*.yaml)', options=options)
         if config_file_path:
             self.cfg_mngr.loadConfigFile(config_file_path)
+        self.initManagers()
+        self.getSensorInformation()
         self.updateTestStatus()
 
     def setTestFolder(self):
