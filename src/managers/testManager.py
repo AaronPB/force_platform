@@ -86,6 +86,9 @@ class TestManager:
         encoder_dict = self.sensor_group_encoders.getGroupInfo()
         imu_dict = self.sensor_group_imus.getGroupInfo()
         return {**encoder_dict, **imu_dict}
+    
+    def getSensorConnected(self) -> bool:
+        return self.sensors_connected
 
     # Test methods
     def checkConnection(self) -> bool:

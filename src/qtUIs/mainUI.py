@@ -91,13 +91,32 @@ class MainUI(QtWidgets.QWidget):
         self.updateTestStatus()
 
     def setTestFolder(self):
-        pass
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(
+            self, 'Select folder', options=options)
+        if folder_path:
+            self.cfg_mngr.setConfigValue(
+                CfgPaths.GENERAL_TEST_FOLDER.value, folder_path)
+            print(f'Changed test folder path to: {folder_path}')
+            self.updateTestStatus()
 
     def setTestName(self):
-        pass
+        test_name = self.test_name_input.text().strip()
+        if not test_name:
+            test_name = "Test"
+        self.cfg_mngr.setConfigValue(
+            CfgPaths.GENERAL_TEST_NAME.value, test_name)
+        print(f'Changed test name to: {test_name}')
+        self.updateTestStatus()
 
     def connectSensors(self):
-        pass
+        self.sensors_connection_progressbar.setValue(50)
+        self.test_mngr.checkConnection()
+        self.sensors_connection_progressbar.setValue(100)
+        self.getSensorInformation()
+        self.sensors_connection_progressbar.setValue(0)
+        self.updateTestStatus()
 
     # UI section loaders
 
@@ -133,7 +152,7 @@ class MainUI(QtWidgets.QWidget):
         self.stop_button = self.createQPushButton(
             'Stop test', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.stopTest)
         self.tare_button = self.createQPushButton(
-            'Tare test', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.tareSensors)
+            'Tare sensors', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.tareSensors)
         self.calibration_button = self.createQPushButton(
             'Calibrate sensors', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.calibrateSensors)
         self.close_button = self.createQPushButton(
@@ -283,27 +302,43 @@ class MainUI(QtWidgets.QWidget):
         self.config_path.setText(self.cfg_mngr.getCurrentFilePath())
         test_folder = self.cfg_mngr.getConfigValue(
             CfgPaths.GENERAL_TEST_FOLDER.value)
+        test_folder_exists = os.path.exists(test_folder)
         test_name = self.cfg_mngr.getConfigValue(
             CfgPaths.GENERAL_TEST_NAME.value)
         if test_folder is not None:
             self.test_folder_path.setText(test_folder)
-        if test_folder is None:
-            status_text = 'Provide a test folder!'
+        if not test_folder_exists:
+            status_text = 'Invalid test folder!'
         if test_name is not None:
             self.test_name_input.setText(test_name)
         if test_name is None:
             if status_text != '':
                 status_text = status_text + '\n'
             status_text = status_text + 'Provide a test name!'
+        if not self.test_mngr.sensors_connected:
+            if status_text != '':
+                status_text = status_text + '\n'
+            status_text = status_text + 'Connect sensors!'
 
+        self.status_label.setParent(None)
         if status_text == '':
-            self.status_label.setParent(None)
             self.status_label = self.createLabelBox(
                 'Requirements OK', QssLabels.STATUS_LABEL_OK)
             self.status_vbox_layout.addWidget(self.status_label)
+            self.setControlPanelButtons(True)
             return
-        self.status_label.setText(status_text)
-        self.status_label.setObjectName(QssLabels.STATUS_LABEL_WARN.value)
+        self.status_label = self.createLabelBox(
+            status_text, QssLabels.STATUS_LABEL_WARN)
+        self.status_vbox_layout.addWidget(self.status_label)
+        self.setControlPanelButtons(False)
+
+    def setControlPanelButtons(self, enable: bool = False) -> None:
+        if not enable:
+            self.stop_button.setEnabled(enable)
+            self.tare_button.setEnabled(enable)
+        self.start_button.setEnabled(enable)
+        self.calibration_button.setEnabled(enable)
+        pass
 
     def getSensorInformation(self):
         self.setSensorBox(self.vbox_platform1,
@@ -315,8 +350,10 @@ class MainUI(QtWidgets.QWidget):
 
     def setSensorBox(self, vbox_layout: QtWidgets.QVBoxLayout, sensor_dict: dict, update_fn=None):
         # Clear layout
-        for widget in vbox_layout.findChildren(QtWidgets.QWidget):
-            widget.setParent(None)
+        for i in reversed(range(vbox_layout.count())):
+            widget = vbox_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
         # Add new widgets
         for sensor_id, sensor_list in sensor_dict.items():
             checkbox = self.createSensorQCheckBox(
