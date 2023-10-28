@@ -23,7 +23,7 @@ class TaoboticsIMU:
         except (Exception):
             print(f'Could not connect to serial {self.serial}')
             return False
-        return True
+        return (self.handler.getState() == mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking)
 
     def disconnnect(self) -> None:
         self.setHandler()
