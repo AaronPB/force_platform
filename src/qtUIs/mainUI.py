@@ -330,7 +330,7 @@ class MainUI(QtWidgets.QWidget):
         self.status_label.setParent(None)
         if status_text == '':
             self.status_label = self.createLabelBox(
-                'Requirements OK', QssLabels.STATUS_LABEL_OK)
+                'Ready to start test', QssLabels.STATUS_LABEL_OK)
             self.status_vbox_layout.addWidget(self.status_label)
             self.setControlPanelButtons(True)
             return

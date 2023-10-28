@@ -18,12 +18,13 @@ class SensorGroup:
         self.sensors[sensor_id] = sensor
 
     def checkConnections(self) -> bool:
+        results = False
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
             results = list(executor.map(
                 lambda sensor: sensor.connect(), sensors_list))
             executor.map(lambda sensor: sensor.disconnect(), sensors_list)
-            return any(results)
+        return any(results)
 
     def start(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:

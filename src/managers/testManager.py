@@ -92,8 +92,9 @@ class TestManager:
 
     # Test methods
     def checkConnection(self) -> bool:
-        self.sensors_connected = any(
-            handler.checkConnections() for handler in self.sensor_group_list)
+        connection_results_list = [
+            handler.checkConnections() for handler in self.sensor_group_list]
+        self.sensors_connected = any(connection_results_list)
         return self.sensors_connected
 
     def testStart(self) -> None:
