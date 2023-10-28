@@ -25,7 +25,7 @@ class TaoboticsIMU:
             return False
         return (self.handler.getState() == mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking)
 
-    def disconnnect(self) -> None:
+    def disconnect(self) -> None:
         self.setHandler()
 
     def getValue(self):

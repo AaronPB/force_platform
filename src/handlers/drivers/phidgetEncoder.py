@@ -15,7 +15,7 @@ class PhidgetEncoder:
         self.mutex = threading.Lock()
         self.value = None
 
-    def onPositionChange(self, positionChange):
+    def onPositionChange(self, handler: Encoder, positionChange):
         self.mutex.acquire()
         self.value = positionChange
         self.mutex.release()
@@ -30,7 +30,7 @@ class PhidgetEncoder:
             return False
         return True
 
-    def disconnnect(self) -> None:
+    def disconnect(self) -> None:
         try:
             self.handler.close()
         except (PhidgetException):

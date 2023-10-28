@@ -15,7 +15,7 @@ class PhidgetLoadCell:
         self.mutex = threading.Lock()
         self.value = None
 
-    def onVoltageRatioChange(self, voltageRatio):
+    def onVoltageRatioChange(self, handler: VoltageRatioInput, voltageRatio):
         self.mutex.acquire()
         self.value = voltageRatio
         self.mutex.release()
@@ -30,7 +30,7 @@ class PhidgetLoadCell:
             return False
         return True
 
-    def disconnnect(self) -> None:
+    def disconnect(self) -> None:
         try:
             self.handler.close()
         except (PhidgetException):
