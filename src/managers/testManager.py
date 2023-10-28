@@ -53,7 +53,7 @@ class TestManager:
     # Sensor setters and getters
 
     def setSensorRead(self, sensor_group: SensorGroup, config_section: CfgPaths, index: int, read: bool) -> None:
-        group_ids = sensor_group.getGroupInfo().keys()
+        group_ids = list(sensor_group.getGroupInfo().keys())
         sensor_id = group_ids[index]
         sensor_group.setSensorRead(sensor_id, read)
         self.config_mngr.setConfigValue(
@@ -69,7 +69,7 @@ class TestManager:
 
     def setOthersSensorRead(self, index: int, read: bool) -> None:
         ptr = self.sensor_group_encoders.getGroupSize()
-        if index <= ptr:
+        if index < ptr:
             self.setSensorRead(self.sensor_group_encoders,
                                CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION, index, read)
             return
@@ -86,7 +86,7 @@ class TestManager:
         encoder_dict = self.sensor_group_encoders.getGroupInfo()
         imu_dict = self.sensor_group_imus.getGroupInfo()
         return {**encoder_dict, **imu_dict}
-    
+
     def getSensorConnected(self) -> bool:
         return self.sensors_connected
 

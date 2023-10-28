@@ -19,13 +19,13 @@ QPushButton {
     background-color: #326295;
 }
 
-QPushButton#cp_btn {
-    padding: 15px;
-}
-
-QPushButton:disabled#cp_btn {
+QPushButton:disabled {
     background-color: gray;
     color: darkslategray;
+}
+
+QPushButton#cp_btn {
+    padding: 15px;
 }
 
 QProgressBar {

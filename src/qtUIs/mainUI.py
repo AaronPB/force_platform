@@ -60,11 +60,14 @@ class MainUI(QtWidgets.QWidget):
         return button
 
     def createSensorQCheckBox(self, text: str, qss_object: QssLabels = None,
-                              enabled: bool = True) -> QtWidgets.QCheckBox:
+                              enabled: bool = True, change_fn=None, index=0) -> QtWidgets.QCheckBox:
         checkbox = QtWidgets.QCheckBox(text)
         if qss_object is not None:
             checkbox.setObjectName(qss_object.value)
         checkbox.setEnabled(enabled)
+        if change_fn is not None:
+            checkbox.stateChanged.connect(
+                lambda state, index=index: change_fn(index, state == 2))
         return checkbox
 
     # UI buttons click connectors
@@ -111,12 +114,14 @@ class MainUI(QtWidgets.QWidget):
         self.updateTestStatus()
 
     def connectSensors(self):
+        self.sensors_connect_button.setEnabled(False)
         self.sensors_connection_progressbar.setValue(50)
         self.test_mngr.checkConnection()
         self.sensors_connection_progressbar.setValue(100)
         self.getSensorInformation()
         self.sensors_connection_progressbar.setValue(0)
         self.updateTestStatus()
+        self.sensors_connect_button.setEnabled(True)
 
     # UI section loaders
 
@@ -342,21 +347,23 @@ class MainUI(QtWidgets.QWidget):
 
     def getSensorInformation(self):
         self.setSensorBox(self.vbox_platform1,
-                          self.test_mngr.getP1SensorStatus())
+                          self.test_mngr.getP1SensorStatus(), self.test_mngr.setP1SensorRead)
         self.setSensorBox(self.vbox_platform2,
-                          self.test_mngr.getP2SensorStatus())
+                          self.test_mngr.getP2SensorStatus(), self.test_mngr.setP2SensorRead)
         self.setSensorBox(self.vbox_external,
-                          self.test_mngr.getOthersSensorStatus())
+                          self.test_mngr.getOthersSensorStatus(), self.test_mngr.setOthersSensorRead)
 
-    def setSensorBox(self, vbox_layout: QtWidgets.QVBoxLayout, sensor_dict: dict, update_fn=None):
+    def setSensorBox(self, vbox_layout: QtWidgets.QVBoxLayout, sensor_dict: dict, update_fn):
         # Clear layout
         for i in reversed(range(vbox_layout.count())):
             widget = vbox_layout.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
         # Add new widgets
+        index = 0
         for sensor_id, sensor_list in sensor_dict.items():
             checkbox = self.createSensorQCheckBox(
-                sensor_list[0] + ' (' + sensor_list[1] + ')', sensor_list[2].value)
+                sensor_list[0] + ' (' + sensor_list[1] + ')', sensor_list[2].value, change_fn=update_fn, index=index)
             checkbox.setChecked(sensor_list[3])
             vbox_layout.addWidget(checkbox)
+            index += 1
