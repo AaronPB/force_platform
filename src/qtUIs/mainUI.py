@@ -6,6 +6,7 @@ from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
+from src.qtUIs.widgets.matplotlibWidgets import *
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -282,24 +283,43 @@ class MainUI(QtWidgets.QWidget):
 
         return tab_widget
 
+    # TODO WIP
     def loadTabPlatformPlots(self) -> QtWidgets.QWidget:
         tab_widget = QtWidgets.QWidget()
-        # TODO
+        grid_general_layout = QtWidgets.QGridLayout()
+        tab_widget.setLayout(grid_general_layout)
+
+        grid_general_layout.addWidget(PlotPlatformForcesWidget(), 0, 0)
+        grid_general_layout.addWidget(PlotPlatformForcesWidget(), 0, 1)
+
         return tab_widget
 
     def loadTabCOPPlots(self) -> QtWidgets.QWidget:
         tab_widget = QtWidgets.QWidget()
-        # TODO
+        grid_general_layout = QtWidgets.QGridLayout()
+        tab_widget.setLayout(grid_general_layout)
+
+        grid_general_layout.addWidget(PlotPlatformCOPWidget(), 0, 0)
+        grid_general_layout.addWidget(PlotPlatformCOPWidget(), 0, 1)
+
         return tab_widget
 
     def loadTabEncoderPlots(self) -> QtWidgets.QWidget:
         tab_widget = QtWidgets.QWidget()
-        # TODO
+        vbox_general_layout = QtWidgets.QVBoxLayout()
+        tab_widget.setLayout(vbox_general_layout)
+
+        vbox_general_layout.addWidget(PlotEncoderWidget())
+
         return tab_widget
 
     def loadTabIMUPlots(self) -> QtWidgets.QWidget:
         tab_widget = QtWidgets.QWidget()
-        # TODO
+        vbox_general_layout = QtWidgets.QVBoxLayout()
+        tab_widget.setLayout(vbox_general_layout)
+
+        vbox_general_layout.addWidget(PlotIMUWidget())
+
         return tab_widget
 
     # Functions to load information
