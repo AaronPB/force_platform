@@ -46,6 +46,9 @@ class SensorGroup:
             return
         self.sensors[sensor_id].setRead(read)
 
+    def getGroupName(self) -> str:
+        return self.group_name
+    
     def getGroupInfo(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():

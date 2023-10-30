@@ -6,6 +6,7 @@ from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
+from src.managers.testDataManager import TestDataManager
 from src.qtUIs.widgets.matplotlibWidgets import *
 from PySide6 import QtWidgets, QtGui, QtCore
 
@@ -23,6 +24,7 @@ class MainUI(QtWidgets.QWidget):
     def initManagers(self) -> None:
         self.cfg_mngr = ConfigManager()
         self.test_mngr = TestManager(self.cfg_mngr)
+        self.data_mngr = TestDataManager(self.test_mngr)
 
     def initUI(self) -> None:
         self.setWindowTitle('Force platform reader')
@@ -289,8 +291,8 @@ class MainUI(QtWidgets.QWidget):
         grid_general_layout = QtWidgets.QGridLayout()
         tab_widget.setLayout(grid_general_layout)
 
-        grid_general_layout.addWidget(PlotPlatformForcesWidget(), 0, 0)
-        grid_general_layout.addWidget(PlotPlatformForcesWidget(), 0, 1)
+        grid_general_layout.addWidget(self.data_mngr.forces_p1_widget, 0, 0)
+        grid_general_layout.addWidget(self.data_mngr.forces_p2_widget, 0, 1)
 
         return tab_widget
 
@@ -299,8 +301,8 @@ class MainUI(QtWidgets.QWidget):
         grid_general_layout = QtWidgets.QGridLayout()
         tab_widget.setLayout(grid_general_layout)
 
-        grid_general_layout.addWidget(PlotPlatformCOPWidget(), 0, 0)
-        grid_general_layout.addWidget(PlotPlatformCOPWidget(), 0, 1)
+        grid_general_layout.addWidget(self.data_mngr.cop_p1_widget, 0, 0)
+        grid_general_layout.addWidget(self.data_mngr.cop_p2_widget, 0, 1)
 
         return tab_widget
 
@@ -309,7 +311,7 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout = QtWidgets.QVBoxLayout()
         tab_widget.setLayout(vbox_general_layout)
 
-        vbox_general_layout.addWidget(PlotEncoderWidget())
+        vbox_general_layout.addWidget(self.data_mngr.encoders_widget)
 
         return tab_widget
 
@@ -318,7 +320,7 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout = QtWidgets.QVBoxLayout()
         tab_widget.setLayout(vbox_general_layout)
 
-        vbox_general_layout.addWidget(PlotIMUWidget())
+        vbox_general_layout.addWidget(self.data_mngr.imu_angles_widget)
 
         return tab_widget
 

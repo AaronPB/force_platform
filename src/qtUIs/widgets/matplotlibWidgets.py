@@ -8,7 +8,7 @@ from src.handlers.sensorGroup import SensorGroup
 
 
 class PlotPlatformForcesWidget(QtWidgets.QWidget):
-    def __init__(self, sensor_group: SensorGroup = None):
+    def __init__(self, group_name: str):
         super(PlotPlatformForcesWidget, self).__init__()
 
         self.figure = Figure()
@@ -16,7 +16,7 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         self.setLayout(QtWidgets.QVBoxLayout())
         self.layout().addWidget(self.canvas)
 
-        self.sensor_group = sensor_group
+        self.group_name = group_name
 
         self.ax1 = self.figure.add_subplot(311)
         self.ax2 = self.figure.add_subplot(312, sharex=self.ax1)
@@ -26,7 +26,7 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
 
     def setup(self):
         # TODO set name of sensor group
-        self.ax1.set_title('Forces - Platform x')
+        self.ax1.set_title(f'Forces - {self.group_name}')
         self.ax1.set_ylabel('Forces Z (kg)')
         self.ax2.set_ylabel('Forces X (kg)')
         self.ax3.set_ylabel('Forces Y (kg)')
@@ -51,7 +51,7 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
 
 
 class PlotPlatformCOPWidget(QtWidgets.QWidget):
-    def __init__(self, sensor_group: SensorGroup = None):
+    def __init__(self, group_name: str):
         super(PlotPlatformCOPWidget, self).__init__()
 
         self.figure = Figure()
@@ -59,7 +59,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.setLayout(QtWidgets.QVBoxLayout())
         self.layout().addWidget(self.canvas)
 
-        self.sensor_group = sensor_group
+        self.group_name = group_name
 
         self.ax = self.figure.add_subplot()
 
@@ -67,7 +67,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
 
     def setup(self):
         # TODO set name of sensor group
-        self.ax.set_title('COP - Platform x')
+        self.ax.set_title(f'COP - {self.group_name}')
         self.ax.set_xlabel('Medio-Lateral Motion (mm)')
         self.ax.set_ylabel('Anterior-Posterior Motion (mm)')
         self.ax.grid(True)
@@ -102,7 +102,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
 
 
 class PlotEncoderWidget(QtWidgets.QWidget):
-    def __init__(self, sensor_group: SensorGroup = None):
+    def __init__(self, group_name: str, group_size: int):
         super(PlotEncoderWidget, self).__init__()
 
         self.figure = Figure()
@@ -110,14 +110,14 @@ class PlotEncoderWidget(QtWidgets.QWidget):
         self.setLayout(QtWidgets.QVBoxLayout())
         self.layout().addWidget(self.canvas)
 
-        self.sensor_group = sensor_group
+        self.group_name = group_name
+        self.group_size = group_size
         self.subplots = []
 
         self.setup()
 
     def setup(self):
-        # TODO get total amount of sensors in group
-        self.createSubplots()
+        self.createSubplots(self.group_size)
         self.canvas.draw()
 
     def createSubplots(self, total_subplots: int = 4):
@@ -146,7 +146,7 @@ class PlotEncoderWidget(QtWidgets.QWidget):
 
 
 class PlotIMUWidget(QtWidgets.QWidget):
-    def __init__(self, sensor_group: SensorGroup = None):
+    def __init__(self, group_name: str, group_size: int):
         super(PlotIMUWidget, self).__init__()
 
         self.figure = Figure()
@@ -154,14 +154,15 @@ class PlotIMUWidget(QtWidgets.QWidget):
         self.setLayout(QtWidgets.QVBoxLayout())
         self.layout().addWidget(self.canvas)
 
-        self.sensor_group = sensor_group
+        self.group_name = group_name
+        self.group_size = group_size
         self.subplots = []
 
         self.setup()
 
     def setup(self):
         # TODO get total amount of sensors in group
-        self.createSubplots()
+        self.createSubplots(self.group_size)
         self.canvas.draw()
 
     def createSubplots(self, total_subplots: int = 4):
