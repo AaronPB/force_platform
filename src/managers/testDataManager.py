@@ -29,15 +29,15 @@ class TestDataManager:
         # WIP
         time_len = len(timestamp_list)
         if index == 1:
-            self.forces_p1_widget.update(timestamp_list, self.getForcesTotal(
+            self.forces_p1_widget.update(timestamp_list, self.getPlaftormForces(
                 self.test_mngr.sensor_group_platform1, time_len))
-            self.forces_p2_widget.update(timestamp_list, self.getForcesTotal(
+            self.forces_p2_widget.update(timestamp_list, self.getPlaftormForces(
                 self.test_mngr.sensor_group_platform2, time_len))
             return
         if index == 2:
-            self.cop_p1_widget.update(timestamp_list, self.getStabilograms(
+            self.cop_p1_widget.update(self.getStabilograms(
                 self.test_mngr.sensor_group_platform1, time_len))
-            self.cop_p2_widget.update(timestamp_list, self.getStabilograms(
+            self.cop_p2_widget.update(self.getStabilograms(
                 self.test_mngr.sensor_group_platform2, time_len))
             return
         if index == 3:
@@ -50,18 +50,21 @@ class TestDataManager:
             return
 
     def getPlaftormForces(self, sensor_group: SensorGroup, time_len: int) -> dict:
-        platform_data_dict = self.getCalibratedData(sensor_group)
+        platform_data_dict = self.getSensorData(sensor_group)
         if not platform_data_dict:
+            print('A')
             return None
-        if len(platform_data_dict) != time_len:
-            return None
+        # if len(platform_data_dict) != time_len:
+        #     print('B')
+        #     return None
         if any(len(data) != time_len for data in platform_data_dict.values()):
+            print('C')
             return None
         return platform_data_dict
 
     def getStabilograms(self, sensor_group: SensorGroup, time_len: int) -> list:
         data_list = []
-        platform_data_dict = self.getCalibratedData(sensor_group)
+        platform_data_dict = self.getSensorData(sensor_group)
         if len(platform_data_dict) != 12:
             return None
         if any(len(data) != time_len for data in platform_data_dict.values()):
@@ -91,7 +94,7 @@ class TestDataManager:
         return [relcop_x, relcop_y]
 
     def getEncoderData(self, sensor_group: SensorGroup, time_len: int) -> dict:
-        encoder_data_dict = self.getCalibratedData(sensor_group)
+        encoder_data_dict = self.getSensorData(sensor_group)
         if not encoder_data_dict:
             return None
         if any(len(data) != time_len for data in encoder_data_dict.values()):
@@ -103,27 +106,16 @@ class TestDataManager:
         # TODO Transform to Euler data
         return data_dict
 
-    def getRawData(self, sensor_group: SensorGroup) -> dict:
-        raw_data_dict = {}
+    def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
+        data_dict = {}
         sensor_group_info = sensor_group.getGroupInfo()
-        sensor_group_values = sensor_group.getGroupValues()
+        sensor_group_values = sensor_group.getGroupCalibValues()
+        if raw_data:
+            sensor_group_values = sensor_group.getGroupValues()
         for sensor_id, values in sensor_group_values.items():
             sensor_name = sensor_group_info[sensor_id][0]
-            raw_data_dict[sensor_name] = values
-        return raw_data_dict
-
-    def getCalibratedData(self, sensor_group: SensorGroup) -> dict:
-        calib_data_dict = {}
-        sensor_group_info = sensor_group.getGroupInfo()
-        sensor_group_values = sensor_group.getGroupValues()
-        sensor_group_calibparams = sensor_group.getGroupCalibrationParams()
-        for sensor_id, values in sensor_group_values.items():
-            sensor_name = sensor_group_info[sensor_id][0]
-            calib_params = sensor_group_calibparams[sensor_id]
-            slope, intercept = calib_params[0], calib_params[1]
-            calib_values = [slope * value + intercept for value in values]
-            calib_data_dict[sensor_name] = calib_values
-        return calib_data_dict
+            data_dict[sensor_name] = values
+        return data_dict
 
     def saveDataToCSV(self, timestamp_list: list):
         # Create dataframe with all updaters returns

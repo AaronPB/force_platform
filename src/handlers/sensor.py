@@ -40,6 +40,9 @@ class Sensor:
     def setRead(self, read: bool) -> None:
         self.params[SParams.READ.value] = read
 
+    def setIntercept(self, intercept: float) -> None:
+        self.params[SParams.CALIBRATION_SECTION.value][SParams.SLOPE.value] = intercept
+
     def getName(self) -> str:
         return self.params[SParams.NAME.value]
 
@@ -57,13 +60,14 @@ class Sensor:
         return text
 
     def getSlopeIntercept(self) -> list:
-        slope = self.params[SParams.CALIBRATION_SECTION.value][SParams.SLOPE.value]
-        intercept = self.params[SParams.CALIBRATION_SECTION.value][SParams.INTERCEPT.value]
-        if slope is None:
-            slope = 1
-        if intercept is None:
-            intercept = 0
+        calib_params = self.params[SParams.CALIBRATION_SECTION.value]
+        slope = calib_params.get(SParams.SLOPE.value, 1)
+        intercept = calib_params.get(SParams.INTERCEPT.value, 0)
         return [slope, intercept]
 
     def getValues(self) -> list:
         return self.values
+
+    def getCalibValues(self) -> list:
+        calib_params = self.getSlopeIntercept()
+        return [calib_params[0] * value + calib_params[1] for value in self.values]

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
 
 from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
@@ -16,6 +17,7 @@ class MainUI(QtWidgets.QWidget):
         super().__init__()
         self.images_folder = os.path.join(
             os.path.dirname(__file__), '..', '..', 'images')
+        self.test_times_list = []
         self.initManagers()
         self.initUI()
         self.updateTestStatus()
@@ -25,6 +27,12 @@ class MainUI(QtWidgets.QWidget):
         self.cfg_mngr = ConfigManager()
         self.test_mngr = TestManager(self.cfg_mngr)
         self.data_mngr = TestDataManager(self.test_mngr)
+
+        self.test_timer = QtCore.QTimer(self)
+        self.test_timer.timeout.connect(self.registerSensorData)
+        self.plot_timer = QtCore.QTimer(self)
+        self.test_timer.timeout.connect(self.updateCurrentPlots)
+        self.tare_timer = QtCore.QTimer(self)
 
     def initUI(self) -> None:
         self.setWindowTitle('Force platform reader')
@@ -36,10 +44,10 @@ class MainUI(QtWidgets.QWidget):
 
         # Load UI layouts
         self.cp_container = self.loadControlPanelContainer()
-        tabular_widget = self.loadTabularPanel()
+        self.tabular_widget = self.loadTabularPanel()
 
         self.main_layout.addWidget(self.cp_container)
-        self.main_layout.addWidget(tabular_widget)
+        self.main_layout.addWidget(self.tabular_widget)
 
         self.setLayout(self.main_layout)
         self.show()
@@ -76,10 +84,25 @@ class MainUI(QtWidgets.QWidget):
     # UI buttons click connectors
 
     def startTest(self):
-        pass
+        self.test_times_list = []
+        # self.data_mngr.setupPlotWidgets()
+        self.start_button.setEnabled(False)
+        self.calibration_button.setEnabled(False)
+        self.test_mngr.testStart()
+        self.tare_button.setEnabled(True)
+        self.stop_button.setEnabled(True)
+
+        self.test_timer.start(self.cfg_mngr.getConfigValue(
+            CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100))
+        self.plot_timer.start(500)
 
     def stopTest(self):
-        pass
+        self.tare_button.setEnabled(False)
+        self.stop_button.setEnabled(False)
+        self.test_timer.stop()
+        self.test_mngr.testStop()
+        self.start_button.setEnabled(True)
+        self.calibration_button.setEnabled(True)
 
     def tareSensors(self):
         pass
@@ -391,3 +414,16 @@ class MainUI(QtWidgets.QWidget):
             checkbox.setChecked(sensor_list[3])
             vbox_layout.addWidget(checkbox)
             index += 1
+
+    # Test process functions
+
+    def registerSensorData(self) -> None:
+        self.test_times_list.append(round(time.time()*1000))
+        self.test_mngr.testRegisterValues()
+
+    def updateCurrentPlots(self) -> None:
+        current_index = self.tabular_widget.currentIndex()
+        if current_index == 0:
+            return
+        self.data_mngr.updatePlotWidgetDraw(
+            current_index, self.test_times_list)

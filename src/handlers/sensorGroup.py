@@ -48,7 +48,7 @@ class SensorGroup:
 
     def getGroupName(self) -> str:
         return self.group_name
-    
+
     def getGroupInfo(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
@@ -63,6 +63,12 @@ class SensorGroup:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             group_dict[sensor_id] = sensor.getValues()
+        return group_dict
+
+    def getGroupCalibValues(self) -> dict:
+        group_dict = {}
+        for sensor_id, sensor in self.sensors.items():
+            group_dict[sensor_id] = sensor.getCalibValues()
         return group_dict
 
     def getGroupCalibrationParams(self) -> dict:

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import time
-
 from src.managers.configManager import ConfigManager
 from src.handlers import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
@@ -101,8 +99,7 @@ class TestManager:
         [handler.start() for handler in self.sensor_group_list]
 
     def testRegisterValues(self) -> None:
-        # TODO
-        pass
+        [handler.register() for handler in self.sensor_group_list]
 
     def testStop(self) -> None:
         [handler.stop() for handler in self.sensor_group_list]
