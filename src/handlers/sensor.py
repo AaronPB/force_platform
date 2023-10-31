@@ -41,7 +41,7 @@ class Sensor:
         self.params[SParams.READ.value] = read
 
     def setIntercept(self, intercept: float) -> None:
-        self.params[SParams.CALIBRATION_SECTION.value][SParams.SLOPE.value] = intercept
+        self.params[SParams.CALIBRATION_SECTION.value][SParams.INTERCEPT.value] = intercept
 
     def getName(self) -> str:
         return self.params[SParams.NAME.value]
