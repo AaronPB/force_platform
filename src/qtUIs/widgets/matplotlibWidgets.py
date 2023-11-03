@@ -83,6 +83,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.layout().addWidget(self.canvas)
 
         self.group_name = group_name
+        self.last_indexes = 20
 
         self.ax = self.figure.add_subplot()
 
@@ -94,7 +95,11 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.ax.set_xlabel("Medio-Lateral Motion (mm)")
         self.ax.set_ylabel("Anterior-Posterior Motion (mm)")
         self.ax.grid(True)
-        self.ax.plot(0, 0)
+        (self.line_total,) = self.ax.plot(0, 0, label="Recorded values", color="blue")
+        (self.line_last,) = self.ax.plot(
+            0, 0, label=f"Last {self.last_indexes} values", color="red"
+        )
+        self.ax.legend()
 
         # Platform rectangle patch (mm)
         x_len = 600
@@ -112,22 +117,14 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
 
         self.canvas.draw()
 
-    def update(self, cop_list: list = None):
-        if cop_list is None:
-            return
-        last_indexes = 100
-        cop_x = np.array(cop_list[0])
-        cop_y = np.array(cop_list[1])
-
-        self.ax.clear()
-        self.ax.plot(cop_x, cop_y, label="Recorded values")
-        self.ax.plot(
-            cop_x[-last_indexes],
-            cop_y[-last_indexes],
-            label=f"Last {last_indexes} values",
+    def update(self, cop_x_np: np.ndarray, cop_y_np: np.ndarray):
+        self.line_total.set_data(cop_x_np, cop_y_np)
+        self.line_total.set_data(
+            cop_x_np[-self.last_indexes], cop_y_np[-self.last_indexes]
         )
+        self.circle.set_center(cop_x_np[-1], cop_y_np[-1])
 
-        self.circle.set_center(cop_x[-1], cop_y[-1])
+        self.canvas.draw()
 
     def clear(self):
         self.setup()
