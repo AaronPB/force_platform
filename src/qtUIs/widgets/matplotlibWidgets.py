@@ -160,10 +160,8 @@ class PlotEncoderWidget(QtWidgets.QWidget):
             ax.set_ylabel("Angles (deg)")
             self.subplots.append(ax)
 
-    def update(self, timestamp_list: list):
+    def update(self, times_np: np.ndarray, encoders_dict: dict):
         # TODO
-        np_time = np.array(timestamp_list)
-        np_time_incr = np.diff(np_time)
 
         pass
 
@@ -202,10 +200,8 @@ class PlotIMUWidget(QtWidgets.QWidget):
             ax.set_ylabel("Angles (deg)")
             self.subplots.append(ax)
 
-    def update(self, timestamp_list: list):
+    def update(self, times_np: np.ndarray, imus_dict: dict):
         # TODO
-        np_time = np.array(timestamp_list)
-        np_time_incr = np.diff(np_time)
 
         pass
 

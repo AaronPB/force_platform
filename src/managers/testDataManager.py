@@ -158,18 +158,38 @@ class TestDataManager:
         relcop_y = cop_y - np.mean(cop_y)
         return relcop_x, relcop_y
 
-    def getEncoderData(self, sensor_group: SensorGroup, time_len: int) -> dict:
-        encoder_data_dict = self.getSensorData(sensor_group)
-        if not encoder_data_dict:
-            return None
-        if any(len(data) != time_len for data in encoder_data_dict.values()):
-            return None
-        return encoder_data_dict
+    def updateEncoders(self) -> None:
+        # Get data
+        time_list = self.test_mngr.getTestTimes().copy()
+        encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
+        # Get arrays for plots
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        encoder_data_np = {}
+        for key, values in encoder_data_dict.items():
+            encoder_data_np[key] = np.array(values)
+        # Update plots with values
+        self.encoders_widget.update(times_np, encoder_data_np)
 
-    def getIMUAngles(self, sensor_group: SensorGroup, time_len: int) -> dict:
-        data_dict = {}
+    def updateIMUAngles(self) -> None:
+        # Get data
+        time_list = self.test_mngr.getTestTimes().copy()
+        imu_data_dict = self.getSensorData(self.test_mngr.sensor_group_imus)
+        # Get arrays for plots
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        imu_data_np = {}
+        for key, values in imu_data_dict.items():
+            imu_data_np[key] = self.getAngles(times_np.size, values)
+        # Update plots with values
+        self.encoders_widget.update(times_np, imu_data_np)
+
+    def getAngles(self, array_len: int, data_dict: dict) -> list:
+        ankle_angles_np = np.zeros(array_len)
+        knee_angles_np = np.zeros(array_len)
+        hip_angles_np = np.zeros(array_len)
+
         # TODO Transform to Euler data
-        return data_dict
+
+        return [ankle_angles_np, knee_angles_np, hip_angles_np]
 
     def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
         data_dict = {}
