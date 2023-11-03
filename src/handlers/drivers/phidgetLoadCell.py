@@ -24,18 +24,20 @@ class PhidgetLoadCell:
         try:
             self.handler.openWaitForAttachment(wait_ms)
             self.handler.setDataInterval(interval_ms)
-        except (PhidgetException):
+        except PhidgetException:
             print(
-                f'Could not connect to serial {self.handler.getDeviceSerialNumber()}, channel {self.handler.getChannel()}')
+                f"Could not connect to serial {self.handler.getDeviceSerialNumber()}, channel {self.handler.getChannel()}"
+            )
             return False
         return True
 
     def disconnect(self) -> None:
         try:
             self.handler.close()
-        except (PhidgetException):
+        except PhidgetException:
             print(
-                f'Could not disconnect serial {self.handler.getDeviceSerialNumber()}, channel {self.handler.getChannel()}')
+                f"Could not disconnect serial {self.handler.getDeviceSerialNumber()}, channel {self.handler.getChannel()}"
+            )
 
     def getValue(self):
         self.mutex.acquire()

@@ -12,7 +12,7 @@ class TaoboticsIMU:
         self.setHandler()
 
     def setHandler(self):
-        if hasattr(self, 'handler'):
+        if hasattr(self, "handler"):
             del self.handler
         self.handler = mrpt.hwdrivers.CTaoboticsIMU()
         self.handler.setSerialPort(self.serial)
@@ -20,16 +20,22 @@ class TaoboticsIMU:
     def connect(self, wait_ms: int = 2000, interval_ms: int = 8) -> bool:
         try:
             self.handler.initialize()
-        except (Exception):
-            print(f'Could not connect to serial {self.serial}')
+        except Exception:
+            print(f"Could not connect to serial {self.serial}")
             return False
-        return (self.handler.getState() == mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking)
+        return (
+            self.handler.getState()
+            == mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking
+        )
 
     def disconnect(self) -> None:
         self.setHandler()
 
     def getValue(self):
-        if self.handler.getState() != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking:
+        if (
+            self.handler.getState()
+            != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking
+        ):
             return []
 
         self.handler.doProcess()
