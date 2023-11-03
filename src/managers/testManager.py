@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from src.managers.configManager import ConfigManager
 from src.handlers import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
@@ -15,64 +17,123 @@ class TestManager:
         # Global values
         self.config_mngr = config_mngr
         self.sensors_connected = False
+        self.test_times = []
 
         # Required config keys for each sensor group
-        required_keys_loadcells = [SParams.NAME, SParams.READ, SParams.SERIAL,
-                                   SParams.CHANNEL, SParams.CALIBRATION_SECTION]
-        required_keys_encoders = [SParams.NAME, SParams.READ, SParams.SERIAL,
-                                  SParams.CHANNEL, SParams.CALIBRATION_SECTION, SParams.INITIAL_POS]
+        required_keys_loadcells = [
+            SParams.NAME,
+            SParams.READ,
+            SParams.SERIAL,
+            SParams.CHANNEL,
+            SParams.CALIBRATION_SECTION,
+        ]
+        required_keys_encoders = [
+            SParams.NAME,
+            SParams.READ,
+            SParams.SERIAL,
+            SParams.CHANNEL,
+            SParams.CALIBRATION_SECTION,
+            SParams.INITIAL_POS,
+        ]
         required_keys_taobotics = [SParams.NAME, SParams.READ, SParams.SERIAL]
 
         # Sensor group handlers
         self.sensor_group_platform1 = self.setSensorGroup(
-            'Platform 1', CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION,
-            required_keys_loadcells, SDrivers.PHIDGET_LOADCELL_DRIVER)
+            "Platform 1",
+            CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION,
+            required_keys_loadcells,
+            SDrivers.PHIDGET_LOADCELL_DRIVER,
+        )
         self.sensor_group_platform2 = self.setSensorGroup(
-            'Platform 2', CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION,
-            required_keys_loadcells, SDrivers.PHIDGET_LOADCELL_DRIVER)
+            "Platform 2",
+            CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION,
+            required_keys_loadcells,
+            SDrivers.PHIDGET_LOADCELL_DRIVER,
+        )
         self.sensor_group_encoders = self.setSensorGroup(
-            'Barbell encoders', CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION,
-            required_keys_encoders, SDrivers.PHIDGET_ENCODER_DRIVER)
+            "Barbell encoders",
+            CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION,
+            required_keys_encoders,
+            SDrivers.PHIDGET_ENCODER_DRIVER,
+        )
         self.sensor_group_imus = self.setSensorGroup(
-            'Body IMUs', CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION,
-            required_keys_taobotics, SDrivers.TAOBOTICS_IMU_DRIVER)
-        self.sensor_group_list = [self.sensor_group_platform1, self.sensor_group_platform2,
-                                  self.sensor_group_encoders, self.sensor_group_imus]
+            "Body IMUs",
+            CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION,
+            required_keys_taobotics,
+            SDrivers.TAOBOTICS_IMU_DRIVER,
+        )
+        self.sensor_group_list = [
+            self.sensor_group_platform1,
+            self.sensor_group_platform2,
+            self.sensor_group_encoders,
+            self.sensor_group_imus,
+        ]
 
-    def setSensorGroup(self, group_name: str, config_section: CfgPaths, required_keys: list, sensor_driver: SDrivers) -> SensorGroup:
+    def setSensorGroup(
+        self,
+        group_name: str,
+        config_section: CfgPaths,
+        required_keys: list,
+        sensor_driver: SDrivers,
+    ) -> SensorGroup:
         sensor_group = SensorGroup(group_name)
         for sensor_id in self.config_mngr.getConfigValue(config_section.value):
             sensor_params = self.config_mngr.getConfigValue(
-                config_section.value + '.' + sensor_id)
+                config_section.value + "." + sensor_id
+            )
             sensor_group.addSensor(
-                sensor_id, sensor_params, required_keys, sensor_driver)
+                sensor_id, sensor_params, required_keys, sensor_driver
+            )
         return sensor_group
 
     # Sensor setters and getters
 
-    def setSensorRead(self, sensor_group: SensorGroup, config_section: CfgPaths, index: int, read: bool) -> None:
+    def setSensorRead(
+        self,
+        sensor_group: SensorGroup,
+        config_section: CfgPaths,
+        index: int,
+        read: bool,
+    ) -> None:
         group_ids = list(sensor_group.getGroupInfo().keys())
         sensor_id = group_ids[index]
         sensor_group.setSensorRead(sensor_id, read)
         self.config_mngr.setConfigValue(
-            config_section.value + '.' + sensor_id + '.' + SParams.READ.value, read)
+            config_section.value + "." + sensor_id + "." + SParams.READ.value, read
+        )
 
     def setP1SensorRead(self, index: int, read: bool) -> None:
-        self.setSensorRead(self.sensor_group_platform1,
-                           CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION, index, read)
+        self.setSensorRead(
+            self.sensor_group_platform1,
+            CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION,
+            index,
+            read,
+        )
 
     def setP2SensorRead(self, index: int, read: bool) -> None:
-        self.setSensorRead(self.sensor_group_platform2,
-                           CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION, index, read)
+        self.setSensorRead(
+            self.sensor_group_platform2,
+            CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION,
+            index,
+            read,
+        )
 
     def setOthersSensorRead(self, index: int, read: bool) -> None:
         ptr = self.sensor_group_encoders.getGroupSize()
         if index < ptr:
-            self.setSensorRead(self.sensor_group_encoders,
-                               CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION, index, read)
+            self.setSensorRead(
+                self.sensor_group_encoders,
+                CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION,
+                index,
+                read,
+            )
             return
-        self.setSensorRead(self.sensor_group_imus,
-                           CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION, index-ptr, read)
+        self.setSensorRead(
+            self.sensor_group_imus,
+            CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION,
+            index - ptr,
+            read,
+        )
 
     def getP1SensorStatus(self) -> dict:
         return self.sensor_group_platform1.getGroupInfo()
@@ -88,17 +149,24 @@ class TestManager:
     def getSensorConnected(self) -> bool:
         return self.sensors_connected
 
+    def getTestTimes(self) -> list:
+        return self.test_times
+
     # Test methods
     def checkConnection(self) -> bool:
         connection_results_list = [
-            handler.checkConnections() for handler in self.sensor_group_list]
+            handler.checkConnections() for handler in self.sensor_group_list
+        ]
         self.sensors_connected = any(connection_results_list)
         return self.sensors_connected
 
     def testStart(self) -> None:
+        self.test_times = []
+        [handler.clearSensorValues() for handler in self.sensor_group_list]
         [handler.start() for handler in self.sensor_group_list]
 
     def testRegisterValues(self) -> None:
+        self.test_times.append(round(time.time() * 1000))
         [handler.register() for handler in self.sensor_group_list]
 
     def testStop(self) -> None:

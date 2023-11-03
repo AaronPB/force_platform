@@ -11,7 +11,13 @@ class SensorGroup:
         self.group_name = group_name
         self.sensors = {}
 
-    def addSensor(self, sensor_id: str, sensor_params: dict, required_config_keys: list, sensor_driver: SDrivers) -> None:
+    def addSensor(
+        self,
+        sensor_id: str,
+        sensor_params: dict,
+        required_config_keys: list,
+        sensor_driver: SDrivers,
+    ) -> None:
         if not all(key.value in sensor_params.keys() for key in required_config_keys):
             return
         sensor = Sensor(sensor_id, sensor_params, sensor_driver)
@@ -21,8 +27,7 @@ class SensorGroup:
         results = False
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
-            results = list(executor.map(
-                lambda sensor: sensor.connect(), sensors_list))
+            results = list(executor.map(lambda sensor: sensor.connect(), sensors_list))
             executor.map(lambda sensor: sensor.disconnect(), sensors_list)
         return any(results)
 
@@ -46,6 +51,9 @@ class SensorGroup:
             return
         self.sensors[sensor_id].setRead(read)
 
+    def clearSensorValues(self) -> None:
+        [sensor.clearValues() for sensor in self.sensors.values()]
+
     def getGroupName(self) -> str:
         return self.group_name
 
@@ -53,7 +61,11 @@ class SensorGroup:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             group_dict[sensor_id] = [
-                sensor.getName(), sensor.getProperties(), sensor.getStatus(), sensor.getIsReadable()]
+                sensor.getName(),
+                sensor.getProperties(),
+                sensor.getStatus(),
+                sensor.getIsReadable(),
+            ]
         return group_dict
 
     def getGroupSize(self) -> int:

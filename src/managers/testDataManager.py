@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 from src.qtUIs.widgets.matplotlibWidgets import *
 from src.managers.testManager import TestManager
@@ -7,6 +9,11 @@ class TestDataManager:
     def __init__(self, test_manager: TestManager):
         self.test_mngr = test_manager
         self.setupPlotWidgets()
+        self.time_list = []
+        self.data_platform1 = {}
+        self.data_platform2 = {}
+        self.data_encoders = {}
+        self.data_imus = {}
 
     def setupPlotWidgets(self):
         p1_group_name = self.test_mngr.sensor_group_platform1.getGroupName()
@@ -21,46 +28,42 @@ class TestDataManager:
         self.cop_p1_widget = PlotPlatformCOPWidget(p1_group_name)
         self.cop_p2_widget = PlotPlatformCOPWidget(p2_group_name)
         self.encoders_widget = PlotEncoderWidget(
-            encoders_group_name, encoders_group_size)
-        self.imu_angles_widget = PlotIMUWidget(
-            imus_group_name, imus_group_size)
+            encoders_group_name, encoders_group_size
+        )
+        self.imu_angles_widget = PlotIMUWidget(imus_group_name, imus_group_size)
 
-    def updatePlotWidgetDraw(self, index, timestamp_list: list):
-        # WIP
-        time_len = len(timestamp_list)
+    def updatePlotWidgetDraw(self, index, timestamp_list: list = None):
+        time_len = 100
         if index == 1:
-            self.forces_p1_widget.update(timestamp_list, self.getPlaftormForces(
-                self.test_mngr.sensor_group_platform1, time_len))
-            self.forces_p2_widget.update(timestamp_list, self.getPlaftormForces(
-                self.test_mngr.sensor_group_platform2, time_len))
+            self.updatePlatformForces()
             return
         if index == 2:
-            self.cop_p1_widget.update(self.getStabilograms(
-                self.test_mngr.sensor_group_platform1, time_len))
-            self.cop_p2_widget.update(self.getStabilograms(
-                self.test_mngr.sensor_group_platform2, time_len))
+            self.cop_p1_widget.update(
+                self.getStabilograms(self.test_mngr.sensor_group_platform1, time_len)
+            )
+            self.cop_p2_widget.update(
+                self.getStabilograms(self.test_mngr.sensor_group_platform2, time_len)
+            )
             return
         if index == 3:
-            self.encoders_widget.update(timestamp_list, self.getEncoderData(
-                self.test_mngr.sensor_group_encoders, time_len))
+            self.encoders_widget.update(
+                timestamp_list,
+                self.getEncoderData(self.test_mngr.sensor_group_encoders, time_len),
+            )
             return
         if index == 4:
             self.imu_angles_widget.update(
-                timestamp_list, self.getIMUAngles(self.test_mngr.sensor_group_imus, time_len))
+                timestamp_list,
+                self.getIMUAngles(self.test_mngr.sensor_group_imus, time_len),
+            )
             return
 
-    def getPlaftormForces(self, sensor_group: SensorGroup, time_len: int) -> dict:
-        platform_data_dict = self.getSensorData(sensor_group)
-        if not platform_data_dict:
-            print('A')
-            return None
-        # if len(platform_data_dict) != time_len:
-        #     print('B')
-        #     return None
-        if any(len(data) != time_len for data in platform_data_dict.values()):
-            print('C')
-            return None
-        return platform_data_dict
+    def updatePlatformForces(self) -> dict:
+        time_list = self.test_mngr.getTestTimes().copy()
+        data_dict_platform1 = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        data_dict_platform2 = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        self.forces_p1_widget.update(time_list, data_dict_platform1)
+        self.forces_p2_widget.update(time_list, data_dict_platform2)
 
     def getStabilograms(self, sensor_group: SensorGroup, time_len: int) -> list:
         data_list = []
@@ -72,7 +75,7 @@ class TestDataManager:
         # Initial values
         lx = 508  # (mm) x distance between sensors
         ly = 308  # (mm) y distance between sensors
-        h = 20    # (mm) z distance between sensors and upper platform
+        h = 20  # (mm) z distance between sensors and upper platform
         # Create list [fx1, ..., fx4, fy1, ..., fy4, fz1, ..., fz4]
         forces_list = []
         for values in platform_data_dict.values():
@@ -82,13 +85,14 @@ class TestDataManager:
         fx = forces_np[:, 0:4].sum(axis=1)
         fy = forces_np[:, 4:8].sum(axis=1)
         fz = forces_np[:, 8:12].sum(axis=1)
-        mx = ly/2 * (-forces_np[:, 0:4].sum(axis=1))
-        my = lx/2 * (-forces_np[:, 0:4].sum(axis=1))
-        mz = ly/2 * (-forces_np[:, 4:8].sum(axis=1)) + \
-            lx/2 * (forces_np[:, 8:12].sum(axis=1))
+        mx = ly / 2 * (-forces_np[:, 0:4].sum(axis=1))
+        my = lx / 2 * (-forces_np[:, 0:4].sum(axis=1))
+        mz = ly / 2 * (-forces_np[:, 4:8].sum(axis=1)) + lx / 2 * (
+            forces_np[:, 8:12].sum(axis=1)
+        )
         # Get COP and relative COP
-        cop_x = (-h * fx - my)/fz
-        cop_y = (-h * fy + mx)/fz
+        cop_x = (-h * fx - my) / fz
+        cop_y = (-h * fy + mx) / fz
         relcop_x = cop_x - np.mean(cop_x)
         relcop_y = cop_y - np.mean(cop_y)
         return [relcop_x, relcop_y]

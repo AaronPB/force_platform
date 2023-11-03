@@ -6,12 +6,16 @@ from src.enums.sensorDrivers import SensorDrivers as SDrivers
 
 
 class Sensor:
-    def __init__(self, sensor_id: str, sensor_params: dict, sensor_driver: SDrivers) -> None:
+    def __init__(
+        self, sensor_id: str, sensor_params: dict, sensor_driver: SDrivers
+    ) -> None:
         self.id = sensor_id
         self.params = sensor_params
         self.status = SStatus.IGNORED
         self.driver = sensor_driver.value(
-            self.params[SParams.SERIAL.value], self.params.get(SParams.CHANNEL.value, None))
+            self.params[SParams.SERIAL.value],
+            self.params.get(SParams.CHANNEL.value, None),
+        )
         self.values = []
 
     def connect(self) -> bool:
@@ -41,7 +45,12 @@ class Sensor:
         self.params[SParams.READ.value] = read
 
     def setIntercept(self, intercept: float) -> None:
-        self.params[SParams.CALIBRATION_SECTION.value][SParams.INTERCEPT.value] = intercept
+        self.params[SParams.CALIBRATION_SECTION.value][
+            SParams.INTERCEPT.value
+        ] = intercept
+
+    def clearValues(self) -> None:
+        self.values.clear()
 
     def getName(self) -> str:
         return self.params[SParams.NAME.value]
@@ -53,10 +62,11 @@ class Sensor:
         return self.params[SParams.READ.value]
 
     def getProperties(self) -> str:
-        text = ' - '
+        text = " - "
         for property in self.params[SParams.PROPERTIES_SECTION.value]:
-            text = text + \
-                self.params[SParams.PROPERTIES_SECTION.value][property] + ' - '
+            text = (
+                text + self.params[SParams.PROPERTIES_SECTION.value][property] + " - "
+            )
         return text
 
     def getSlopeIntercept(self) -> list:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import time
+import threading
 
 from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
@@ -9,6 +9,7 @@ from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.testDataManager import TestDataManager
 from src.qtUIs.widgets.matplotlibWidgets import *
+from src.qtUIs.threads.plotterThread import PlotterThread
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -16,12 +17,14 @@ class MainUI(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.images_folder = os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images')
-        self.test_times_list = []
+            os.path.dirname(__file__), "..", "..", "images"
+        )
         self.initManagers()
         self.initUI()
         self.updateTestStatus()
         self.getSensorInformation()
+
+        self.plot_thread = PlotterThread(self.tabular_widget, self.data_mngr, 500)
 
     def initManagers(self) -> None:
         self.cfg_mngr = ConfigManager()
@@ -29,15 +32,12 @@ class MainUI(QtWidgets.QWidget):
         self.data_mngr = TestDataManager(self.test_mngr)
 
         self.test_timer = QtCore.QTimer(self)
-        self.test_timer.timeout.connect(self.registerSensorData)
-        self.plot_timer = QtCore.QTimer(self)
-        self.test_timer.timeout.connect(self.updateCurrentPlots)
+        self.test_timer.timeout.connect(self.test_mngr.testRegisterValues)
         self.tare_timer = QtCore.QTimer(self)
 
     def initUI(self) -> None:
-        self.setWindowTitle('Force platform reader')
-        self.setWindowIcon(QtGui.QIcon(
-            os.path.join(self.images_folder, 'logo.ico')))
+        self.setWindowTitle("Force platform reader")
+        self.setWindowIcon(QtGui.QIcon(os.path.join(self.images_folder, "logo.ico")))
         self.setGeometry(100, 100, 1920, 1080)
 
         self.main_layout = QtWidgets.QHBoxLayout()
@@ -54,14 +54,21 @@ class MainUI(QtWidgets.QWidget):
 
     # UI generic widgets setup methods
 
-    def createLabelBox(self, text: str, qss_object: QssLabels = None) -> QtWidgets.QLabel:
+    def createLabelBox(
+        self, text: str, qss_object: QssLabels = None
+    ) -> QtWidgets.QLabel:
         label = QtWidgets.QLabel(text)
         if qss_object is not None:
             label.setObjectName(qss_object.value)
         return label
 
-    def createQPushButton(self, title: str, qss_object: QssLabels = None,
-                          enabled: bool = False, connect_fn=None) -> QtWidgets.QPushButton:
+    def createQPushButton(
+        self,
+        title: str,
+        qss_object: QssLabels = None,
+        enabled: bool = False,
+        connect_fn=None,
+    ) -> QtWidgets.QPushButton:
         button = QtWidgets.QPushButton(title)
         if qss_object is not None:
             button.setObjectName(qss_object.value)
@@ -70,36 +77,45 @@ class MainUI(QtWidgets.QWidget):
             button.clicked.connect(connect_fn)
         return button
 
-    def createSensorQCheckBox(self, text: str, qss_object: QssLabels = None,
-                              enabled: bool = True, change_fn=None, index=0) -> QtWidgets.QCheckBox:
+    def createSensorQCheckBox(
+        self,
+        text: str,
+        qss_object: QssLabels = None,
+        enabled: bool = True,
+        change_fn=None,
+        index=0,
+    ) -> QtWidgets.QCheckBox:
         checkbox = QtWidgets.QCheckBox(text)
         if qss_object is not None:
             checkbox.setObjectName(qss_object.value)
         checkbox.setEnabled(enabled)
         if change_fn is not None:
             checkbox.stateChanged.connect(
-                lambda state, index=index: change_fn(index, state == 2))
+                lambda state, index=index: change_fn(index, state == 2)
+            )
         return checkbox
 
     # UI buttons click connectors
 
     def startTest(self):
-        self.test_times_list = []
-        # self.data_mngr.setupPlotWidgets()
         self.start_button.setEnabled(False)
         self.calibration_button.setEnabled(False)
         self.test_mngr.testStart()
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
-        self.test_timer.start(self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100))
-        self.plot_timer.start(500)
+        self.test_timer.start(
+            self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100)
+        )
+
+        self.plot_thread.start()
 
     def stopTest(self):
         self.tare_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.test_timer.stop()
+        if self.plot_thread.isRunning():
+            self.plot_thread.stopTimer()
         self.test_mngr.testStop()
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
@@ -114,7 +130,8 @@ class MainUI(QtWidgets.QWidget):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
         config_file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Select file', '', 'yaml file (*.yaml)', options=options)
+            self, "Select file", "", "yaml file (*.yaml)", options=options
+        )
         if config_file_path:
             self.cfg_mngr.loadConfigFile(config_file_path)
         self.initManagers()
@@ -125,20 +142,21 @@ class MainUI(QtWidgets.QWidget):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(
-            self, 'Select folder', options=options)
+            self, "Select folder", options=options
+        )
         if folder_path:
             self.cfg_mngr.setConfigValue(
-                CfgPaths.GENERAL_TEST_FOLDER.value, folder_path)
-            print(f'Changed test folder path to: {folder_path}')
+                CfgPaths.GENERAL_TEST_FOLDER.value, folder_path
+            )
+            print(f"Changed test folder path to: {folder_path}")
             self.updateTestStatus()
 
     def setTestName(self):
         test_name = self.test_name_input.text().strip()
         if not test_name:
             test_name = "Test"
-        self.cfg_mngr.setConfigValue(
-            CfgPaths.GENERAL_TEST_NAME.value, test_name)
-        print(f'Changed test name to: {test_name}')
+        self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_NAME.value, test_name)
+        print(f"Changed test name to: {test_name}")
         self.updateTestStatus()
 
     def connectSensors(self):
@@ -162,41 +180,51 @@ class MainUI(QtWidgets.QWidget):
         container.setFixedWidth(250)
         # Top icon
         image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap(os.path.join(self.images_folder, 'logo.ico'))
+        pixmap = QtGui.QPixmap(os.path.join(self.images_folder, "logo.ico"))
         image.setPixmap(pixmap.scaled(150, 150, QtCore.Qt.KeepAspectRatio))
         image.setAlignment(QtCore.Qt.AlignCenter)
         # Title label
         software_title = self.createLabelBox(
-            'Force Platform Reader', QssLabels.TITLE_LABEL)
+            "Force Platform Reader", QssLabels.TITLE_LABEL
+        )
         software_title.setAlignment(QtCore.Qt.AlignCenter)
         # Status label
-        status_group_box = QtWidgets.QGroupBox('Status Information')
+        status_group_box = QtWidgets.QGroupBox("Status Information")
         self.status_vbox_layout = QtWidgets.QVBoxLayout()
         status_group_box.setLayout(self.status_vbox_layout)
         self.status_label = self.createLabelBox(
-            'Loading ...', QssLabels.STATUS_LABEL_WARN)
+            "Loading ...", QssLabels.STATUS_LABEL_WARN
+        )
         self.status_vbox_layout.addWidget(self.status_label)
         # Buttons
-        buttons_group_box = QtWidgets.QGroupBox('Control Panel')
+        buttons_group_box = QtWidgets.QGroupBox("Control Panel")
         buttons_vbox_layout = QtWidgets.QVBoxLayout()
         buttons_group_box.setLayout(buttons_vbox_layout)
         self.start_button = self.createQPushButton(
-            'Start test', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.startTest)
+            "Start test", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.startTest
+        )
         self.stop_button = self.createQPushButton(
-            'Stop test', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.stopTest)
+            "Stop test", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.stopTest
+        )
         self.tare_button = self.createQPushButton(
-            'Tare sensors', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.tareSensors)
+            "Tare sensors", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.tareSensors
+        )
         self.calibration_button = self.createQPushButton(
-            'Calibrate sensors', QssLabels.CONTROL_PANEL_BTN, connect_fn=self.calibrateSensors)
+            "Calibrate sensors",
+            QssLabels.CONTROL_PANEL_BTN,
+            connect_fn=self.calibrateSensors,
+        )
         self.close_button = self.createQPushButton(
-            'Close', QssLabels.CONTROL_PANEL_BTN, enabled=True, connect_fn=self.close)
+            "Close", QssLabels.CONTROL_PANEL_BTN, enabled=True, connect_fn=self.close
+        )
         buttons_vbox_layout.addWidget(self.start_button)
         buttons_vbox_layout.addWidget(self.tare_button)
         buttons_vbox_layout.addWidget(self.stop_button)
         buttons_vbox_layout.addWidget(self.calibration_button)
         # Author label
         author_label = self.createLabelBox(
-            '© github.AaronPB', QssLabels.AUTHOR_COPYRIGHT_LABEL)
+            "© github.AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
+        )
 
         # Build layout
         vbox_layout.addWidget(image)
@@ -207,23 +235,21 @@ class MainUI(QtWidgets.QWidget):
         vbox_layout.addWidget(buttons_group_box)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addWidget(self.close_button)
-        vbox_layout.addItem(QtWidgets.QSpacerItem(
-            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding))
+        vbox_layout.addItem(
+            QtWidgets.QSpacerItem(
+                20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+            )
+        )
         vbox_layout.addWidget(author_label)
         return container
 
     def loadTabularPanel(self) -> QtWidgets.QTabWidget:
         tabular_panel = QtWidgets.QTabWidget()
-        tabular_panel.addTab(self.loadTabSettings(),
-                             'Settings and sensor information')
-        tabular_panel.addTab(self.loadTabPlatformPlots(),
-                             'Platform plots')
-        tabular_panel.addTab(self.loadTabCOPPlots(),
-                             'COP plots')
-        tabular_panel.addTab(self.loadTabEncoderPlots(),
-                             'Encoder plots')
-        tabular_panel.addTab(self.loadTabIMUPlots(),
-                             'IMU plots')
+        tabular_panel.addTab(self.loadTabSettings(), "Settings and sensor information")
+        tabular_panel.addTab(self.loadTabPlatformPlots(), "Platform plots")
+        tabular_panel.addTab(self.loadTabCOPPlots(), "COP plots")
+        tabular_panel.addTab(self.loadTabEncoderPlots(), "Encoder plots")
+        tabular_panel.addTab(self.loadTabIMUPlots(), "IMU plots")
         return tabular_panel
 
     def loadTabSettings(self) -> QtWidgets.QWidget:
@@ -233,26 +259,29 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # File management
-        settings_group_box = QtWidgets.QGroupBox('File settings')
+        settings_group_box = QtWidgets.QGroupBox("File settings")
         settings_grid_layout = QtWidgets.QGridLayout()
         settings_group_box.setLayout(settings_grid_layout)
         settings_grid_layout.setAlignment(QtCore.Qt.AlignTop)
         # - Config file
-        config_label = self.createLabelBox('Configuration file:')
+        config_label = self.createLabelBox("Configuration file:")
         config_button = self.createQPushButton(
-            'Select config file', enabled=True, connect_fn=self.setConfigFile)
+            "Select config file", enabled=True, connect_fn=self.setConfigFile
+        )
         self.config_path = QtWidgets.QLineEdit(self)
         self.config_path.setReadOnly(True)
         # - Test folder
-        test_folder_label = self.createLabelBox('Test folder path:')
+        test_folder_label = self.createLabelBox("Test folder path:")
         test_folder_button = self.createQPushButton(
-            'Select folder', enabled=True, connect_fn=self.setTestFolder)
+            "Select folder", enabled=True, connect_fn=self.setTestFolder
+        )
         self.test_folder_path = QtWidgets.QLineEdit(self)
         self.test_folder_path.setReadOnly(True)
         # - Test name
-        test_name_label = self.createLabelBox('Test name:')
+        test_name_label = self.createLabelBox("Test name:")
         test_name_button = self.createQPushButton(
-            'Save name', enabled=True, connect_fn=self.setTestName)
+            "Save name", enabled=True, connect_fn=self.setTestName
+        )
         self.test_name_input = QtWidgets.QLineEdit(self)
         # Build grid layout
         settings_grid_layout.addWidget(config_label, 0, 0)
@@ -266,24 +295,24 @@ class MainUI(QtWidgets.QWidget):
         settings_grid_layout.addWidget(test_name_button, 2, 2)
 
         # Sensor table information
-        sensors_group_box = QtWidgets.QGroupBox('Sensor information')
+        sensors_group_box = QtWidgets.QGroupBox("Sensor information")
         sensors_vbox_layout = QtWidgets.QVBoxLayout()
         sensors_group_box.setLayout(sensors_vbox_layout)
         sensors_vbox_layout.setAlignment(QtCore.Qt.AlignTop)
         # - Connection button and progress bar
         connect_grid_layout = QtWidgets.QGridLayout()
         self.sensors_connect_button = self.createQPushButton(
-            'Connect selected sensors', enabled=True, connect_fn=self.connectSensors)
+            "Connect selected sensors", enabled=True, connect_fn=self.connectSensors
+        )
         self.sensors_connection_progressbar = QtWidgets.QProgressBar()
         self.sensors_connection_progressbar.setValue(0)
         connect_grid_layout.addWidget(self.sensors_connect_button, 0, 0)
-        connect_grid_layout.addWidget(
-            self.sensors_connection_progressbar, 0, 1)
+        connect_grid_layout.addWidget(self.sensors_connection_progressbar, 0, 1)
         # - Sensors grid
         sensors_grid_layout = QtWidgets.QGridLayout()
-        group_box_platform1 = QtWidgets.QGroupBox('Platform 1')
-        group_box_platform2 = QtWidgets.QGroupBox('Platform 2')
-        group_box_external = QtWidgets.QGroupBox('External Sensors')
+        group_box_platform1 = QtWidgets.QGroupBox("Platform 1")
+        group_box_platform2 = QtWidgets.QGroupBox("Platform 2")
+        group_box_external = QtWidgets.QGroupBox("External Sensors")
         self.vbox_platform1 = QtWidgets.QVBoxLayout()
         self.vbox_platform2 = QtWidgets.QVBoxLayout()
         self.vbox_external = QtWidgets.QVBoxLayout()
@@ -350,37 +379,37 @@ class MainUI(QtWidgets.QWidget):
     # Functions to load information
 
     def updateTestStatus(self) -> None:
-        status_text = ''
+        status_text = ""
         self.config_path.setText(self.cfg_mngr.getCurrentFilePath())
-        test_folder = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_FOLDER.value)
+        test_folder = self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_FOLDER.value)
         test_folder_exists = os.path.exists(test_folder)
-        test_name = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_NAME.value)
+        test_name = self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_NAME.value)
         if test_folder is not None:
             self.test_folder_path.setText(test_folder)
         if not test_folder_exists:
-            status_text = 'Invalid test folder!'
+            status_text = "Invalid test folder!"
         if test_name is not None:
             self.test_name_input.setText(test_name)
         if test_name is None:
-            if status_text != '':
-                status_text = status_text + '\n'
-            status_text = status_text + 'Provide a test name!'
+            if status_text != "":
+                status_text = status_text + "\n"
+            status_text = status_text + "Provide a test name!"
         if not self.test_mngr.sensors_connected:
-            if status_text != '':
-                status_text = status_text + '\n'
-            status_text = status_text + 'Connect sensors!'
+            if status_text != "":
+                status_text = status_text + "\n"
+            status_text = status_text + "Connect sensors!"
 
         self.status_label.setParent(None)
-        if status_text == '':
+        if status_text == "":
             self.status_label = self.createLabelBox(
-                'Ready to start test', QssLabels.STATUS_LABEL_OK)
+                "Ready to start test", QssLabels.STATUS_LABEL_OK
+            )
             self.status_vbox_layout.addWidget(self.status_label)
             self.setControlPanelButtons(True)
             return
         self.status_label = self.createLabelBox(
-            status_text, QssLabels.STATUS_LABEL_WARN)
+            status_text, QssLabels.STATUS_LABEL_WARN
+        )
         self.status_vbox_layout.addWidget(self.status_label)
         self.setControlPanelButtons(False)
 
@@ -393,14 +422,25 @@ class MainUI(QtWidgets.QWidget):
         pass
 
     def getSensorInformation(self):
-        self.setSensorBox(self.vbox_platform1,
-                          self.test_mngr.getP1SensorStatus(), self.test_mngr.setP1SensorRead)
-        self.setSensorBox(self.vbox_platform2,
-                          self.test_mngr.getP2SensorStatus(), self.test_mngr.setP2SensorRead)
-        self.setSensorBox(self.vbox_external,
-                          self.test_mngr.getOthersSensorStatus(), self.test_mngr.setOthersSensorRead)
+        self.setSensorBox(
+            self.vbox_platform1,
+            self.test_mngr.getP1SensorStatus(),
+            self.test_mngr.setP1SensorRead,
+        )
+        self.setSensorBox(
+            self.vbox_platform2,
+            self.test_mngr.getP2SensorStatus(),
+            self.test_mngr.setP2SensorRead,
+        )
+        self.setSensorBox(
+            self.vbox_external,
+            self.test_mngr.getOthersSensorStatus(),
+            self.test_mngr.setOthersSensorRead,
+        )
 
-    def setSensorBox(self, vbox_layout: QtWidgets.QVBoxLayout, sensor_dict: dict, update_fn):
+    def setSensorBox(
+        self, vbox_layout: QtWidgets.QVBoxLayout, sensor_dict: dict, update_fn
+    ):
         # Clear layout
         for i in reversed(range(vbox_layout.count())):
             widget = vbox_layout.itemAt(i).widget()
@@ -410,20 +450,11 @@ class MainUI(QtWidgets.QWidget):
         index = 0
         for sensor_id, sensor_list in sensor_dict.items():
             checkbox = self.createSensorQCheckBox(
-                sensor_list[0] + ' (' + sensor_list[1] + ')', sensor_list[2].value, change_fn=update_fn, index=index)
+                sensor_list[0] + " (" + sensor_list[1] + ")",
+                sensor_list[2].value,
+                change_fn=update_fn,
+                index=index,
+            )
             checkbox.setChecked(sensor_list[3])
             vbox_layout.addWidget(checkbox)
             index += 1
-
-    # Test process functions
-
-    def registerSensorData(self) -> None:
-        self.test_times_list.append(round(time.time()*1000))
-        self.test_mngr.testRegisterValues()
-
-    def updateCurrentPlots(self) -> None:
-        current_index = self.tabular_widget.currentIndex()
-        if current_index == 0:
-            return
-        self.data_mngr.updatePlotWidgetDraw(
-            current_index, self.test_times_list)
