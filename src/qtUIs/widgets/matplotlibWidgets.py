@@ -29,7 +29,7 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         self.setup()
 
     def setup(self):
-        self.no_lines_defined = False
+        self.lines_defined = False
         self.ax1.set_title(f"Forces - {self.group_name}")
         self.ax1.set_ylabel("Forces Z (kg)")
         self.ax2.set_ylabel("Forces X (kg)")
@@ -44,74 +44,24 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         for name in names:
             (line,) = ax.plot(0, 0, label=name)
             lines_ax.append(line)
-        (line,) = ax.plot(0, 0, label="Sum forces")
         lines_ax.append(line)
         ax.legend()
-        self.no_lines_defined = True
+        self.lines_defined = True
 
-    def update(self, timestamp_list: list, forces_data: dict = None):
-        if forces_data is None:
-            return
-        fx_keys = [key for key in forces_data.keys() if "LoadCell_X" in key]
-        fy_keys = [key for key in forces_data.keys() if "LoadCell_Y" in key]
-        fz_keys = [key for key in forces_data.keys() if "LoadCell_Z" in key]
+    def update(
+        self, times_np: np.ndarray, forces_x: dict, forces_y: dict, forces_z: dict
+    ):
+        if not self.lines_defined:
+            self.defineLines(self.ax1, self.lines_ax1, list(forces_z.keys()))
+            self.defineLines(self.ax2, self.lines_ax2, list(forces_x.keys()))
+            self.defineLines(self.ax3, self.lines_ax3, list(forces_y.keys()))
 
-        if not self.no_lines_defined:
-            self.defineLines(self.ax1, self.lines_ax1, fz_keys)
-            self.defineLines(self.ax2, self.lines_ax2, fx_keys)
-            self.defineLines(self.ax3, self.lines_ax3, fy_keys)
-
-        # Invert signs when label is 1 or 4
-        fx_values = [
-            np.array(forces_data[key]) * -1
-            if "1" in key or "4" in key
-            else np.array(forces_data[key])
-            for key in fx_keys
-        ]
-        # Invert signs when label is 1 or 2
-        fy_values = [
-            np.array(forces_data[key]) * -1
-            if "1" in key or "2" in key
-            else np.array(forces_data[key])
-            for key in fy_keys
-        ]
-        fz_values = [np.array(forces_data[key]) for key in fz_keys]
-
-        fx_values_np = np.array(fx_values)
-        fy_values_np = np.array(fy_values)
-        fz_values_np = np.array(fz_values)
-
-        # Get resultant forces
-        fx_sum = fy_sum = fz_sum = np.zeros(len(timestamp_list))
-        if fx_values_np.size != 0:
-            fx_sum = np.sum(fx_values_np, axis=0)
-        if fy_values_np.size != 0:
-            fy_sum = np.sum(fy_values_np, axis=0)
-        if fz_values_np.size != 0:
-            fz_sum = np.sum(fz_values_np, axis=0)
-
-        time_incr_np = timestamp_list
-        time_incr_np = np.array(
-            [(t - timestamp_list[0]) / 1000 for t in timestamp_list]
-        )
-
-        i = 0
-        for values in fz_values:
-            self.lines_ax1[i].set_data(time_incr_np, values)
-            i += 1
-        self.lines_ax1[i].set_data(time_incr_np, fz_sum)
-
-        i = 0
-        for values in fx_values:
-            self.lines_ax2[i].set_data(time_incr_np, values)
-            i += 1
-        self.lines_ax2[i].set_data(time_incr_np, fx_sum)
-
-        i = 0
-        for values in fy_values:
-            self.lines_ax3[i].set_data(time_incr_np, values)
-            i += 1
-        self.lines_ax3[i].set_data(time_incr_np, fy_sum)
+        for i, values_np in enumerate(forces_z.values()):
+            self.lines_ax1[i].set_data(times_np, values_np)
+        for i, values_np in enumerate(forces_x.values()):
+            self.lines_ax2[i].set_data(times_np, values_np)
+        for i, values_np in enumerate(forces_y.values()):
+            self.lines_ax3[i].set_data(times_np, values_np)
 
         for ax in [self.ax1, self.ax2, self.ax3]:
             ax.relim()

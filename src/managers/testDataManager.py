@@ -58,12 +58,50 @@ class TestDataManager:
             )
             return
 
-    def updatePlatformForces(self) -> dict:
+    def updatePlatformForces(self) -> None:
+        # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        data_dict_platform1 = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        data_dict_platform2 = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        self.forces_p1_widget.update(time_list, data_dict_platform1)
-        self.forces_p2_widget.update(time_list, data_dict_platform2)
+        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        # Get arrays for plots
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
+            times_np.size, p1_data_dict
+        )
+        forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
+            times_np.size, p2_data_dict
+        )
+        # Update plots with values
+        self.forces_p1_widget.update(times_np, forces_x_p1, forces_y_p1, forces_z_p1)
+        self.forces_p2_widget.update(times_np, forces_x_p2, forces_y_p2, forces_z_p2)
+
+    def getForces(self, default_len: int, data_dict: dict):
+        sum_key = "Sum forces"
+        forces_x = {sum_key: np.zeros(default_len)}
+        forces_y = {sum_key: np.zeros(default_len)}
+        forces_z = {sum_key: np.zeros(default_len)}
+
+        for key, values in data_dict.items():
+            values_np = np.array(values)
+            if "LoadCell_Z" in key:
+                forces_z[key] = values_np
+                forces_z[sum_key] += values_np
+            if "LoadCell_X" in key:
+                sign = 1
+                if "1" in key or "4" in key:
+                    sign = -1
+                forces_x[key] = values_np * sign
+                forces_x[sum_key] += forces_x[key]
+            if "LoadCell_Y" in key:
+                sign = 1
+                if "1" in key or "2" in key:
+                    sign = -1
+                forces_y[key] = values_np * sign
+                forces_y[sum_key] += forces_y[key]
+
+        # TODO update sum
+
+        return forces_x, forces_y, forces_z
 
     def getStabilograms(self, sensor_group: SensorGroup, time_len: int) -> list:
         data_list = []
@@ -112,10 +150,10 @@ class TestDataManager:
 
     def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
         data_dict = {}
-        sensor_group_info = sensor_group.getGroupInfo()
-        sensor_group_values = sensor_group.getGroupCalibValues()
+        sensor_group_info = sensor_group.getGroupInfo().copy()
+        sensor_group_values = sensor_group.getGroupCalibValues().copy()
         if raw_data:
-            sensor_group_values = sensor_group.getGroupValues()
+            sensor_group_values = sensor_group.getGroupValues().copy()
         for sensor_id, values in sensor_group_values.items():
             sensor_name = sensor_group_info[sensor_id][0]
             data_dict[sensor_name] = values
