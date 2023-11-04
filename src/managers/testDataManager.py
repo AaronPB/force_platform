@@ -228,47 +228,24 @@ class TestDataManager:
             data_dict[sensor_name] = values
         return data_dict
 
-    def getCalibDataFrame(self) -> pd.DataFrame:
-        # Create dataframe with all updaters returns
-        p1_loadcells_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        p2_loadcells_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
-        encoders_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
-        imus_raw_dict = self.getSensorData(
-            self.test_mngr.sensor_group_imus, raw_data=True
+    def getDataFrame(self, raw_data: bool = False) -> pd.DataFrame:
+        p1_loadcells_dict = self.getSensorData(
+            self.test_mngr.sensor_group_platform1, raw_data
         )
+        p2_loadcells_dict = self.getSensorData(
+            self.test_mngr.sensor_group_platform2, raw_data
+        )
+        encoders_dict = self.getSensorData(
+            self.test_mngr.sensor_group_encoders, raw_data
+        )
+        imus_dict = self.getSensorData(self.test_mngr.sensor_group_imus, True)
         merged_calib_data = {
             **p1_loadcells_dict,
             **p2_loadcells_dict,
             **encoders_dict,
-            **imus_raw_dict,
+            **imus_dict,
         }
-        calib_df = pd.DataFrame(merged_calib_data)
+        df = pd.DataFrame(merged_calib_data)
         # Format dataframes values to 0.000000e+00
-        calib_df.iloc[:, 1:] = calib_df.iloc[:, 1:].applymap(
-            lambda x: "{:.6e}".format(x)
-        )
-        return calib_df
-
-    def getRawDataFrame(self) -> pd.DataFrame:
-        p1_loadcells_raw_dict = self.getSensorData(
-            self.test_mngr.sensor_group_platform1, raw_data=True
-        )
-        p2_loadcells_raw_dict = self.getSensorData(
-            self.test_mngr.sensor_group_platform2, raw_data=True
-        )
-        encoders_raw_dict = self.getSensorData(
-            self.test_mngr.sensor_group_encoders, raw_data=True
-        )
-        imus_raw_dict = self.getSensorData(
-            self.test_mngr.sensor_group_imus, raw_data=True
-        )
-        merged_raw_data = {
-            **p1_loadcells_raw_dict,
-            **p2_loadcells_raw_dict,
-            **encoders_raw_dict,
-            **imus_raw_dict,
-        }
-        raw_df = pd.DataFrame(merged_raw_data)
-        # Format dataframes values to 0.000000e+00
-        raw_df.iloc[:, 1:] = raw_df.iloc[:, 1:].applymap(lambda x: "{:.6e}".format(x))
-        return raw_df
+        df.iloc[:, 1:] = df.iloc[:, 1:].applymap(lambda x: "{:.6e}".format(x))
+        return df
