@@ -53,10 +53,17 @@ class TestDataManager:
             return
 
     def updatePlatformForces(self, last_values: int = None) -> None:
+        # Check if active
+        p1_group_active = self.test_mngr.sensor_group_platform1.getGroupIsActive()
+        p2_group_active = self.test_mngr.sensor_group_platform2.getGroupIsActive()
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        p1_data_dict = {}
+        p2_data_dict = {}
+        if p1_group_active:
+            p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        if p2_group_active:
+            p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
         if last_values:
@@ -100,12 +107,19 @@ class TestDataManager:
         return forces_x, forces_y, forces_z
 
     def updateStabilograms(self, last_values: int = None) -> None:
+        # Check if active
+        p1_group_active = self.test_mngr.sensor_group_platform1.getGroupIsActive()
+        p2_group_active = self.test_mngr.sensor_group_platform2.getGroupIsActive()
         # Get data
         time_len = last_values
         if not time_len:
             time_len = len(self.test_mngr.getTestTimes().copy())
-        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        p1_data_dict = {}
+        p2_data_dict = {}
+        if p1_group_active:
+            p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        if p2_group_active:
+            p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         p1_size = len(p1_data_dict)
         p2_size = len(p2_data_dict)
         # Get arrays for plots
@@ -164,6 +178,9 @@ class TestDataManager:
         return relcop_x, relcop_y
 
     def updateEncoders(self, last_values: int = None) -> None:
+        # Check if active
+        if not self.test_mngr.sensor_group_encoders.getGroupIsActive():
+            return
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
         encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
@@ -181,9 +198,14 @@ class TestDataManager:
         self.encoders_widget.update(times_np, encoder_data_np)
 
     def updateIMUAngles(self, last_values: int = None) -> None:
+        # Check if active
+        if not self.test_mngr.sensor_group_imus.getGroupIsActive():
+            return
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        imu_data_dict = self.getSensorData(self.test_mngr.sensor_group_imus)
+        imu_data_dict = self.getSensorData(
+            self.test_mngr.sensor_group_imus, raw_data=True
+        )
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
         if last_values:
@@ -193,7 +215,7 @@ class TestDataManager:
         for key, values in imu_data_dict.items():
             imu_data_np[key] = self.getAngles(time_len, values)
         # Update plots with values
-        self.encoders_widget.update(times_np, imu_data_np)
+        self.imu_angles_widget.update(times_np, imu_data_np)
 
     def getAngles(
         self, array_len: int, data_dict: dict, last_values: int = None
@@ -209,9 +231,11 @@ class TestDataManager:
     def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
         data_dict = {}
         sensor_group_info = sensor_group.getGroupInfo().copy()
-        sensor_group_values = sensor_group.getGroupCalibValues().copy()
+        sensor_group_values = {}
         if raw_data:
             sensor_group_values = sensor_group.getGroupValues().copy()
+        else:
+            sensor_group_values = sensor_group.getGroupCalibValues().copy()
         for sensor_id, values in sensor_group_values.items():
             sensor_name = sensor_group_info[sensor_id][0]
             data_dict[sensor_name] = values

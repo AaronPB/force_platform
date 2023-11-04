@@ -203,14 +203,14 @@ class PlotIMUWidget(QtWidgets.QWidget):
         for i, encoder_name in enumerate(imu_names):
             ax = self.figure.add_subplot(math.ceil(imus_len / 2), 2, i + 1)
             ax.grid(True)
-            (line_ankle,) = ax.plot(0, 0, label="X")
-            (line_knee,) = ax.plot(0, 0, label="Y")
-            (line_hip,) = ax.plot(0, 0, label="Z")
+            (line_x,) = ax.plot(0, 0, label="X", color="red")
+            (line_y,) = ax.plot(0, 0, label="Y", color="blue")
+            (line_z,) = ax.plot(0, 0, label="Z", color="green")
             ax.set_title(encoder_name)
             # ax.set_xlabel('Time(s)')
             ax.set_ylabel("Angle (degrees)")
             ax.legend()
-            self.subplots_lines.append([line_ankle, line_knee, line_hip])
+            self.subplots_lines.append([line_x, line_y, line_z])
             self.subplots_ax.append(ax)
         self.subplots_set = real_set
 

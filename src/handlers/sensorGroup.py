@@ -9,6 +9,7 @@ from src.handlers.sensor import Sensor
 class SensorGroup:
     def __init__(self, group_name: str) -> None:
         self.group_name = group_name
+        self.is_group_active = False
         self.sensors = {}
 
     def addSensor(
@@ -34,7 +35,8 @@ class SensorGroup:
     def start(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
-            executor.map(lambda sensor: sensor.connect(), sensors_list)
+            results = list(executor.map(lambda sensor: sensor.connect(), sensors_list))
+            self.is_group_active = any(results)
 
     def register(self) -> None:
         [sensor.registerValue() for sensor in self.sensors.values()]
@@ -43,6 +45,7 @@ class SensorGroup:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
             executor.map(lambda sensor: sensor.disconnect(), sensors_list)
+        self.is_group_active = False
 
     # Setters and getters
 
@@ -70,6 +73,9 @@ class SensorGroup:
 
     def getGroupSize(self) -> int:
         return len(self.sensors)
+
+    def getGroupIsActive(self) -> bool:
+        return self.is_group_active
 
     def getGroupValues(self) -> dict:
         group_dict = {}
