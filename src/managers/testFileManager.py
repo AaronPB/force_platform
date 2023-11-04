@@ -40,9 +40,10 @@ class TestFileManager:
     # Setters and getters
 
     def setFileName(self, name: str) -> None:
-        self.file_name = self.checkDuplicatedName(name)
+        name = self.checkDuplicatedName(name)
         if name == self.file_name:
             return
+        self.file_name = name
         self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_NAME.value, self.file_name)
 
     def setFilePath(self, path: str, check_name: bool = True):
@@ -70,7 +71,7 @@ class TestFileManager:
         df.to_csv(total_path, index=False)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
-        print(f"Test file saves in {self.file_path} ({str(round(file_size, 2))} MB)")
+        print(f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)")
 
     def saveDataToBinary(self, df: pd.DataFrame):
         if not self.getPathExists():
@@ -80,4 +81,4 @@ class TestFileManager:
         df.to_pickle(total_path, index=False)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
-        print(f"Test file saves in {self.file_path} ({str(round(file_size, 2))} MB)")
+        print(f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)")

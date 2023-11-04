@@ -229,6 +229,7 @@ class TestDataManager:
         return data_dict
 
     def getDataFrame(self, raw_data: bool = False) -> pd.DataFrame:
+        timestamp_dict = {"timestamp": self.test_mngr.getTestTimes().copy()}
         p1_loadcells_dict = self.getSensorData(
             self.test_mngr.sensor_group_platform1, raw_data
         )
@@ -240,6 +241,7 @@ class TestDataManager:
         )
         imus_dict = self.getSensorData(self.test_mngr.sensor_group_imus, True)
         merged_data = {
+            **timestamp_dict,
             **p1_loadcells_dict,
             **p2_loadcells_dict,
             **encoders_dict,

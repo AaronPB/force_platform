@@ -118,8 +118,9 @@ class MainUI(QtWidgets.QWidget):
         self.test_timer.stop()
         if self.plot_thread.isRunning():
             self.plot_thread.stopTimer()
+        dataframe = self.data_mngr.getDataFrame()
         self.test_mngr.testStop()
-        self.file_mngr.saveDataToCSV(self.data_mngr.getDataFrame())
+        self.file_mngr.saveDataToCSV(dataframe)
 
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
