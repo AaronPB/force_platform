@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pandas as pd
 from src.qtUIs.widgets.matplotlibWidgets import (
     PlotPlatformForcesWidget,
     PlotPlatformCOPWidget,
@@ -53,17 +54,10 @@ class TestDataManager:
             return
 
     def updatePlatformForces(self, last_values: int = None) -> None:
-        # Check if active
-        p1_group_active = self.test_mngr.sensor_group_platform1.getGroupIsActive()
-        p2_group_active = self.test_mngr.sensor_group_platform2.getGroupIsActive()
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        p1_data_dict = {}
-        p2_data_dict = {}
-        if p1_group_active:
-            p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        if p2_group_active:
-            p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
         if last_values:
@@ -107,19 +101,12 @@ class TestDataManager:
         return forces_x, forces_y, forces_z
 
     def updateStabilograms(self, last_values: int = None) -> None:
-        # Check if active
-        p1_group_active = self.test_mngr.sensor_group_platform1.getGroupIsActive()
-        p2_group_active = self.test_mngr.sensor_group_platform2.getGroupIsActive()
         # Get data
         time_len = last_values
         if not time_len:
             time_len = len(self.test_mngr.getTestTimes().copy())
-        p1_data_dict = {}
-        p2_data_dict = {}
-        if p1_group_active:
-            p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        if p2_group_active:
-            p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         p1_size = len(p1_data_dict)
         p2_size = len(p2_data_dict)
         # Get arrays for plots
@@ -178,12 +165,11 @@ class TestDataManager:
         return relcop_x, relcop_y
 
     def updateEncoders(self, last_values: int = None) -> None:
-        # Check if active
-        if not self.test_mngr.sensor_group_encoders.getGroupIsActive():
-            return
         # Get data
-        time_list = self.test_mngr.getTestTimes().copy()
         encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
+        if not encoder_data_dict:
+            return
+        time_list = self.test_mngr.getTestTimes().copy()
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
         if last_values:
@@ -198,14 +184,13 @@ class TestDataManager:
         self.encoders_widget.update(times_np, encoder_data_np)
 
     def updateIMUAngles(self, last_values: int = None) -> None:
-        # Check if active
-        if not self.test_mngr.sensor_group_imus.getGroupIsActive():
-            return
         # Get data
-        time_list = self.test_mngr.getTestTimes().copy()
         imu_data_dict = self.getSensorData(
             self.test_mngr.sensor_group_imus, raw_data=True
         )
+        if not imu_data_dict:
+            return
+        time_list = self.test_mngr.getTestTimes().copy()
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
         if last_values:
@@ -230,6 +215,8 @@ class TestDataManager:
 
     def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
         data_dict = {}
+        if not sensor_group.getGroupIsActive():
+            return data_dict
         sensor_group_info = sensor_group.getGroupInfo().copy()
         sensor_group_values = {}
         if raw_data:
@@ -241,6 +228,47 @@ class TestDataManager:
             data_dict[sensor_name] = values
         return data_dict
 
-    def saveDataToCSV(self, timestamp_list: list):
+    def getCalibDataFrame(self) -> pd.DataFrame:
         # Create dataframe with all updaters returns
-        pass
+        p1_loadcells_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
+        p2_loadcells_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        encoders_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
+        imus_raw_dict = self.getSensorData(
+            self.test_mngr.sensor_group_imus, raw_data=True
+        )
+        merged_calib_data = {
+            **p1_loadcells_dict,
+            **p2_loadcells_dict,
+            **encoders_dict,
+            **imus_raw_dict,
+        }
+        calib_df = pd.DataFrame(merged_calib_data)
+        # Format dataframes values to 0.000000e+00
+        calib_df.iloc[:, 1:] = calib_df.iloc[:, 1:].applymap(
+            lambda x: "{:.6e}".format(x)
+        )
+        return calib_df
+
+    def getRawDataFrame(self) -> pd.DataFrame:
+        p1_loadcells_raw_dict = self.getSensorData(
+            self.test_mngr.sensor_group_platform1, raw_data=True
+        )
+        p2_loadcells_raw_dict = self.getSensorData(
+            self.test_mngr.sensor_group_platform2, raw_data=True
+        )
+        encoders_raw_dict = self.getSensorData(
+            self.test_mngr.sensor_group_encoders, raw_data=True
+        )
+        imus_raw_dict = self.getSensorData(
+            self.test_mngr.sensor_group_imus, raw_data=True
+        )
+        merged_raw_data = {
+            **p1_loadcells_raw_dict,
+            **p2_loadcells_raw_dict,
+            **encoders_raw_dict,
+            **imus_raw_dict,
+        }
+        raw_df = pd.DataFrame(merged_raw_data)
+        # Format dataframes values to 0.000000e+00
+        raw_df.iloc[:, 1:] = raw_df.iloc[:, 1:].applymap(lambda x: "{:.6e}".format(x))
+        return raw_df
