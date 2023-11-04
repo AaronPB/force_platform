@@ -239,13 +239,13 @@ class TestDataManager:
             self.test_mngr.sensor_group_encoders, raw_data
         )
         imus_dict = self.getSensorData(self.test_mngr.sensor_group_imus, True)
-        merged_calib_data = {
+        merged_data = {
             **p1_loadcells_dict,
             **p2_loadcells_dict,
             **encoders_dict,
             **imus_dict,
         }
-        df = pd.DataFrame(merged_calib_data)
+        df = pd.DataFrame(merged_data)
         # Format dataframes values to 0.000000e+00
         df.iloc[:, 1:] = df.iloc[:, 1:].applymap(lambda x: "{:.6e}".format(x))
         return df
