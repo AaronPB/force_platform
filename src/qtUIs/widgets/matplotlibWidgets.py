@@ -4,7 +4,6 @@ import math
 from PySide6 import QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from src.handlers.sensorGroup import SensorGroup
 
 
 class PlotPlatformForcesWidget(QtWidgets.QWidget):

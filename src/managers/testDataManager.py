@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from src.qtUIs.widgets.matplotlibWidgets import *
+from src.qtUIs.widgets.matplotlibWidgets import (
+    PlotPlatformForcesWidget,
+    PlotPlatformCOPWidget,
+    PlotEncoderWidget,
+    PlotIMUWidget,
+)
 from src.managers.testManager import TestManager
+from src.handlers.sensorGroup import SensorGroup
 
 
 class TestDataManager:
