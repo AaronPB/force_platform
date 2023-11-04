@@ -6,6 +6,7 @@ from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
+from src.managers.testFileManager import TestFileManager
 from src.managers.testDataManager import TestDataManager
 from src.qtUIs.widgets.matplotlibWidgets import *
 from src.qtUIs.threads.plotterThread import PlotterThread
@@ -27,6 +28,7 @@ class MainUI(QtWidgets.QWidget):
 
     def initManagers(self) -> None:
         self.cfg_mngr = ConfigManager()
+        self.file_mngr = TestFileManager(self.cfg_mngr)
         self.test_mngr = TestManager(self.cfg_mngr)
         self.data_mngr = TestDataManager(self.test_mngr)
 
@@ -117,6 +119,8 @@ class MainUI(QtWidgets.QWidget):
         if self.plot_thread.isRunning():
             self.plot_thread.stopTimer()
         self.test_mngr.testStop()
+        self.file_mngr.saveDataToCSV(self.data_mngr.getDataFrame())
+
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
         self.sensors_connect_button.setEnabled(True)
@@ -146,9 +150,7 @@ class MainUI(QtWidgets.QWidget):
             self, "Select folder", options=options
         )
         if folder_path:
-            self.cfg_mngr.setConfigValue(
-                CfgPaths.GENERAL_TEST_FOLDER.value, folder_path
-            )
+            self.file_mngr.setFilePath(folder_path)
             print(f"Changed test folder path to: {folder_path}")
             self.updateTestStatus()
 
@@ -156,8 +158,8 @@ class MainUI(QtWidgets.QWidget):
         test_name = self.test_name_input.text().strip()
         if not test_name:
             test_name = "Test"
-        self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_NAME.value, test_name)
-        print(f"Changed test name to: {test_name}")
+        self.file_mngr.setFileName(test_name)
+        print(f"Changed test name to: {self.file_mngr.getFileName()}")
         self.updateTestStatus()
 
     def connectSensors(self):
@@ -382,19 +384,10 @@ class MainUI(QtWidgets.QWidget):
     def updateTestStatus(self) -> None:
         status_text = ""
         self.config_path.setText(self.cfg_mngr.getCurrentFilePath())
-        test_folder = self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_FOLDER.value)
-        test_folder_exists = os.path.exists(test_folder)
-        test_name = self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_NAME.value)
-        if test_folder is not None:
-            self.test_folder_path.setText(test_folder)
-        if not test_folder_exists:
+        self.test_folder_path.setText(self.file_mngr.getFilePath())
+        self.test_name_input.setText(self.file_mngr.getFileName())
+        if not self.file_mngr.getPathExists():
             status_text = "Invalid test folder!"
-        if test_name is not None:
-            self.test_name_input.setText(test_name)
-        if test_name is None:
-            if status_text != "":
-                status_text = status_text + "\n"
-            status_text = status_text + "Provide a test name!"
         if not self.test_mngr.sensors_connected:
             if status_text != "":
                 status_text = status_text + "\n"
