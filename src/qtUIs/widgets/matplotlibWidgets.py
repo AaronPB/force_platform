@@ -120,9 +120,9 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
     def update(self, cop_x_np: np.ndarray, cop_y_np: np.ndarray):
         self.line_total.set_data(cop_x_np, cop_y_np)
         self.line_total.set_data(
-            cop_x_np[-self.last_indexes], cop_y_np[-self.last_indexes]
+            cop_x_np[-self.last_indexes :], cop_y_np[-self.last_indexes :]
         )
-        self.circle.set_center(cop_x_np[-1], cop_y_np[-1])
+        self.circle.set_center(cop_x_np[-1:], cop_y_np[-1:])
 
         self.canvas.draw()
 
@@ -157,7 +157,7 @@ class PlotEncoderWidget(QtWidgets.QWidget):
             ax.grid(True)
             ax.set_title("Encoder n")
             # ax.set_xlabel('Time(s)')
-            ax.set_ylabel("Angles (deg)")
+            ax.set_ylabel("Distance (mm)")
             self.subplots.append(ax)
 
     def update(self, times_np: np.ndarray, encoders_dict: dict):
