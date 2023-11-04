@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import threading
 
 from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
@@ -99,6 +98,7 @@ class MainUI(QtWidgets.QWidget):
 
     def startTest(self):
         self.start_button.setEnabled(False)
+        self.sensors_connect_button.setEnabled(False)
         self.calibration_button.setEnabled(False)
         self.test_mngr.testStart()
         self.tare_button.setEnabled(True)
@@ -119,6 +119,7 @@ class MainUI(QtWidgets.QWidget):
         self.test_mngr.testStop()
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
+        self.sensors_connect_button.setEnabled(True)
 
     def tareSensors(self):
         pass
