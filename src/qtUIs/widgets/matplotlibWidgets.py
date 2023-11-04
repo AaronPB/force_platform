@@ -117,7 +117,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
 
     def update(self, cop_x_np: np.ndarray, cop_y_np: np.ndarray):
         self.line_total.set_data(cop_x_np, cop_y_np)
-        self.line_total.set_data(
+        self.line_last.set_data(
             cop_x_np[-self.last_indexes :], cop_y_np[-self.last_indexes :]
         )
         self.circle.set_center(cop_x_np[-1:], cop_y_np[-1:])
@@ -139,29 +139,39 @@ class PlotEncoderWidget(QtWidgets.QWidget):
 
         self.group_name = group_name
         self.group_size = group_size
-        self.subplots = []
+        self.subplots_lines = []
+        self.subplots_ax = []
 
         self.setup()
 
     def setup(self):
-        self.createSubplots(self.group_size)
+        self.figure.clear()
+        self.createSubplots(
+            ["Encoder " + str(i) for i in range(1, self.group_size + 1)]
+        )
         self.canvas.draw()
 
-    def createSubplots(self, total_subplots: int = 4):
-        # TODO iterate over group sensor info
-        for i in range(total_subplots):
-            ax = self.figure.add_subplot(math.ceil(total_subplots / 2), 2, i + 1)
-            ax.plot(0, 0)
+    def createSubplots(self, encoder_names: list, real_set: bool = False):
+        encoders_len = len(encoder_names)
+        for i, encoder_name in enumerate(encoder_names):
+            ax = self.figure.add_subplot(math.ceil(encoders_len / 2), 2, i + 1)
             ax.grid(True)
-            ax.set_title("Encoder n")
+            (line,) = ax.plot(0, 0)
+            ax.set_title(encoder_name)
             # ax.set_xlabel('Time(s)')
             ax.set_ylabel("Distance (mm)")
-            self.subplots.append(ax)
+            self.subplots_lines.append(line)
+            self.subplots_ax.append(ax)
+        self.subplots_set = real_set
 
     def update(self, times_np: np.ndarray, encoders_dict: dict):
-        # TODO
+        if not self.subplots_set:
+            self.createSubplots(list(encoders_dict.keys()), True)
 
-        pass
+        for line, values_np in zip(self.subplots_lines, encoders_dict.values()):
+            line.set_data(times_np, values_np)
+
+        self.canvas.draw()
 
     def clear(self):
         self.setup()
@@ -178,30 +188,42 @@ class PlotIMUWidget(QtWidgets.QWidget):
 
         self.group_name = group_name
         self.group_size = group_size
-        self.subplots = []
+        self.subplots_lines = []
+        self.subplots_ax = []
 
         self.setup()
 
     def setup(self):
-        # TODO get total amount of sensors in group
-        self.createSubplots(self.group_size)
+        self.figure.clear()
+        self.createSubplots(["IMU " + str(i) for i in range(1, self.group_size + 1)])
         self.canvas.draw()
 
-    def createSubplots(self, total_subplots: int = 4):
-        # TODO iterate over group sensor info
-        for i in range(total_subplots):
-            ax = self.figure.add_subplot(math.ceil(total_subplots / 2), 2, i + 1)
-            ax.plot(0, 0)
+    def createSubplots(self, imu_names: list, real_set: bool = False):
+        imus_len = len(imu_names)
+        for i, encoder_name in enumerate(imu_names):
+            ax = self.figure.add_subplot(math.ceil(imus_len / 2), 2, i + 1)
             ax.grid(True)
-            ax.set_title("IMU n")
+            (line_ankle,) = ax.plot(0, 0, label="X")
+            (line_knee,) = ax.plot(0, 0, label="Y")
+            (line_hip,) = ax.plot(0, 0, label="Z")
+            ax.set_title(encoder_name)
             # ax.set_xlabel('Time(s)')
-            ax.set_ylabel("Angles (deg)")
-            self.subplots.append(ax)
+            ax.set_ylabel("Angle (degrees)")
+            ax.legend()
+            self.subplots_lines.append([line_ankle, line_knee, line_hip])
+            self.subplots_ax.append(ax)
+        self.subplots_set = real_set
 
     def update(self, times_np: np.ndarray, imus_dict: dict):
-        # TODO
+        if not self.subplots_set:
+            self.createSubplots(list(imus_dict.keys()), True)
 
-        pass
+        for line, values_np in zip(self.subplots_lines, imus_dict.values()):
+            line[0].set_data(times_np, values_np[0])
+            line[1].set_data(times_np, values_np[1])
+            line[2].set_data(times_np, values_np[2])
+
+        self.canvas.draw()
 
     def clear(self):
         self.setup()

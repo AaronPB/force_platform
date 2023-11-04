@@ -38,8 +38,7 @@ class TestDataManager:
         )
         self.imu_angles_widget = PlotIMUWidget(imus_group_name, imus_group_size)
 
-    def updatePlotWidgetDraw(self, index, timestamp_list: list = None):
-        time_len = 100
+    def updatePlotWidgetDraw(self, index: int) -> None:
         if index == 1:
             self.updatePlatformForces(1000)
             return
@@ -47,16 +46,10 @@ class TestDataManager:
             self.updateStabilograms(2000)
             return
         if index == 3:
-            self.encoders_widget.update(
-                timestamp_list,
-                self.getEncoderData(self.test_mngr.sensor_group_encoders, time_len),
-            )
+            self.updateEncoders(1000)
             return
         if index == 4:
-            self.imu_angles_widget.update(
-                timestamp_list,
-                self.getIMUAngles(self.test_mngr.sensor_group_imus, time_len),
-            )
+            self.updateIMUAngles(1000)
             return
 
     def updatePlatformForces(self, last_values: int = None) -> None:
@@ -170,38 +163,48 @@ class TestDataManager:
         relcop_y = cop_y - np.mean(cop_y)
         return relcop_x, relcop_y
 
-    def updateEncoders(self) -> None:
+    def updateEncoders(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
         encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        if last_values:
+            times_np = times_np[-last_values:]
         encoder_data_np = {}
         for key, values in encoder_data_dict.items():
-            encoder_data_np[key] = np.array(values)
+            values_np = np.array(values)
+            if last_values:
+                values_np = values_np[-last_values:]
+            encoder_data_np[key] = values_np
         # Update plots with values
         self.encoders_widget.update(times_np, encoder_data_np)
 
-    def updateIMUAngles(self) -> None:
+    def updateIMUAngles(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
         imu_data_dict = self.getSensorData(self.test_mngr.sensor_group_imus)
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        if last_values:
+            times_np = times_np[-last_values:]
+        time_len = times_np.size
         imu_data_np = {}
         for key, values in imu_data_dict.items():
-            imu_data_np[key] = self.getAngles(times_np.size, values)
+            imu_data_np[key] = self.getAngles(time_len, values)
         # Update plots with values
         self.encoders_widget.update(times_np, imu_data_np)
 
-    def getAngles(self, array_len: int, data_dict: dict) -> list:
-        ankle_angles_np = np.zeros(array_len)
-        knee_angles_np = np.zeros(array_len)
-        hip_angles_np = np.zeros(array_len)
+    def getAngles(
+        self, array_len: int, data_dict: dict, last_values: int = None
+    ) -> list:
+        x_angles_np = np.zeros(array_len)
+        y_angles_np = np.zeros(array_len)
+        z_angles_np = np.zeros(array_len)
 
         # TODO Transform to Euler data
 
-        return [ankle_angles_np, knee_angles_np, hip_angles_np]
+        return [x_angles_np, y_angles_np, z_angles_np]
 
     def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
         data_dict = {}
