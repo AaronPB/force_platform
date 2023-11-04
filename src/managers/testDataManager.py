@@ -35,10 +35,10 @@ class TestDataManager:
     def updatePlotWidgetDraw(self, index, timestamp_list: list = None):
         time_len = 100
         if index == 1:
-            self.updatePlatformForces()
+            self.updatePlatformForces(1000)
             return
         if index == 2:
-            self.updateStabilograms()
+            self.updateStabilograms(2000)
             return
         if index == 3:
             self.encoders_widget.update(
@@ -53,24 +53,26 @@ class TestDataManager:
             )
             return
 
-    def updatePlatformForces(self) -> None:
+    def updatePlatformForces(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
         p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        if last_values:
+            times_np = times_np[-last_values:]
         forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-            times_np.size, p1_data_dict
+            times_np.size, p1_data_dict, last_values
         )
         forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-            times_np.size, p2_data_dict
+            times_np.size, p2_data_dict, last_values
         )
         # Update plots with values
         self.forces_p1_widget.update(times_np, forces_x_p1, forces_y_p1, forces_z_p1)
         self.forces_p2_widget.update(times_np, forces_x_p2, forces_y_p2, forces_z_p2)
 
-    def getForces(self, array_len: int, data_dict: dict):
+    def getForces(self, array_len: int, data_dict: dict, last_values: int = None):
         sum_key = "Sum forces"
         forces_x = {sum_key: np.zeros(array_len)}
         forces_y = {sum_key: np.zeros(array_len)}
@@ -78,6 +80,8 @@ class TestDataManager:
 
         for key, values in data_dict.items():
             values_np = np.array(values)
+            if last_values:
+                values_np = values_np[-last_values:]
             if "LoadCell_Z" in key:
                 forces_z[key] = values_np
                 forces_z[sum_key] += values_np
@@ -96,9 +100,11 @@ class TestDataManager:
 
         return forces_x, forces_y, forces_z
 
-    def updateStabilograms(self) -> None:
+    def updateStabilograms(self, last_values: int = None) -> None:
         # Get data
-        time_len = len(self.test_mngr.getTestTimes().copy())
+        time_len = last_values
+        if not time_len:
+            time_len = len(self.test_mngr.getTestTimes().copy())
         p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         p1_size = len(p1_data_dict)
@@ -106,14 +112,14 @@ class TestDataManager:
         # Get arrays for plots
         if p1_size == 12:
             forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-                time_len, p1_data_dict
+                time_len, p1_data_dict, last_values
             )
             cop_x_p1, cop_y_p1 = self.getCOP(
                 time_len, forces_x_p1, forces_y_p1, forces_z_p1
             )
         if p2_size == 12:
             forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-                time_len, p2_data_dict
+                time_len, p2_data_dict, last_values
             )
 
             cop_x_p2, cop_y_p2 = self.getCOP(

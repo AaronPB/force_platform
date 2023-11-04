@@ -37,7 +37,6 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         self.ax3.set_xlabel("Time (s)")
         for ax in [self.ax1, self.ax2, self.ax3]:
             ax.grid(True)
-            ax.plot(0, 0)
         self.canvas.draw()
 
     def defineLines(self, ax, lines_ax: list, names: list):
