@@ -52,6 +52,9 @@ class TestFileManager:
         if check_name:
             self.setFileName(self.file_name)
 
+    def checkFileName(self) -> None:
+        self.setFileName(self.file_name)
+
     def getFileName(self) -> str:
         return self.file_name
 
@@ -63,11 +66,12 @@ class TestFileManager:
 
     # File saving methods
 
-    def saveDataToCSV(self, df: pd.DataFrame):
+    def saveDataToCSV(self, df: pd.DataFrame, name_suffix: str = ""):
         if not self.getPathExists():
             print("The file path does not exist!")
             return
-        total_path = os.path.join(self.file_path, self.file_name + ".csv")
+        file_name = self.file_name + name_suffix
+        total_path = os.path.join(self.file_path, file_name + ".csv")
         df.to_csv(total_path, index=False)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
