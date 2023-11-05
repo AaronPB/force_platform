@@ -12,15 +12,21 @@ class CalibrationUI(QtWidgets.QWidget):
         self,
         stacked_widget: QtWidgets.QStackedWidget,
         config_manager: ConfigManager,
-        logo_path: str,
+        logo_image_path: str,
+        platform_image_path: str,
     ):
         super().__init__()
         self.stacked_widget = stacked_widget
         self.cfg_mngr = config_manager
-        self.logo_path = logo_path
+        self.logo_img_path = logo_image_path
+        self.platform_img_path = platform_image_path
 
         self.initManagers()
         self.initUI()
+        self.getSensorInformation()
+
+    def updateUI(self) -> None:
+        self.initManagers()
         self.getSensorInformation()
 
     def initManagers(self) -> None:
@@ -103,11 +109,20 @@ class CalibrationUI(QtWidgets.QWidget):
         container = QtWidgets.QWidget()
         container.setLayout(vbox_layout)
         # container.setFixedWidth(600)
-        # Top icon
-        image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap(self.logo_path)
-        image.setPixmap(pixmap)
-        image.setAlignment(QtCore.Qt.AlignCenter)
+        # Top images grid
+        imgs_grid_layout = QtWidgets.QGridLayout()
+        image_logo = QtWidgets.QLabel(self)
+        image_platform = QtWidgets.QLabel(self)
+        pixmap_logo = QtGui.QPixmap(self.logo_img_path)
+        pixmap_platform = QtGui.QPixmap(self.platform_img_path)
+        image_logo.setPixmap(pixmap_logo)
+        image_logo.setAlignment(QtCore.Qt.AlignCenter)
+        image_platform.setPixmap(
+            pixmap_platform.scaled(300, 300, QtCore.Qt.KeepAspectRatio)
+        )
+        image_platform.setAlignment(QtCore.Qt.AlignCenter)
+        imgs_grid_layout.addWidget(image_logo, 0, 0)
+        imgs_grid_layout.addWidget(image_platform, 0, 1)
         # Buttons
         self.close_button = self.createQPushButton(
             "Return to main window",
@@ -121,7 +136,7 @@ class CalibrationUI(QtWidgets.QWidget):
         )
 
         # Build layout
-        vbox_layout.addWidget(image)
+        vbox_layout.addLayout(imgs_grid_layout)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addWidget(self.loadSensorContainer())
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
@@ -195,7 +210,7 @@ class CalibrationUI(QtWidgets.QWidget):
         # Add new widgets
         for index, sensor_list in enumerate(sensor_dict.values()):
             button = self.createSensorQPushButton(
-                sensor_list[0] + "\n(" + sensor_list[1] + ")",
+                sensor_list[0] + " (" + sensor_list[1] + ")",
                 sensor_list[2],
                 connect_fn=update_fn,
                 index=index,

@@ -21,15 +21,23 @@ class MainMenu(QtWidgets.QMainWindow):
         self.setGeometry(100, 100, 1920, 1080)
 
         stacked_widget = QtWidgets.QStackedWidget()
-        logo_path = os.path.join(self.images_folder, "mainUI_logo.svg")
+        logo_image_path = os.path.join(self.images_folder, "mainUI_logo.svg")
+        platform_image_path = os.path.join(self.images_folder, "platform1.png")
         config_manager = ConfigManager()
 
         # Define UIs and connect signals
-        self.mainUI = MainUI(stacked_widget, config_manager, logo_path)
-        self.calibrationUI = CalibrationUI(stacked_widget, config_manager, logo_path)
+        self.mainUI = MainUI(stacked_widget, config_manager, logo_image_path)
+        self.calibrationUI = CalibrationUI(
+            stacked_widget, config_manager, logo_image_path, platform_image_path
+        )
         self.mainUI.close_menu.connect(self.close)
+        stacked_widget.currentChanged.connect(self.stackChangeHandler)
 
         # Set stacked widgets
         stacked_widget.addWidget(self.mainUI)
         stacked_widget.addWidget(self.calibrationUI)
         self.setCentralWidget(stacked_widget)
+
+    def stackChangeHandler(self, index: int) -> None:
+        if index == 1:
+            self.calibrationUI.updateUI()
