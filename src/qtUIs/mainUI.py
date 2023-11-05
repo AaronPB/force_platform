@@ -216,14 +216,9 @@ class MainUI(QtWidgets.QWidget):
         container.setFixedWidth(250)
         # Top icon
         image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap(os.path.join(self.images_folder, "logo.ico"))
-        image.setPixmap(pixmap.scaled(150, 150, QtCore.Qt.KeepAspectRatio))
+        pixmap = QtGui.QPixmap(os.path.join(self.images_folder, "mainUI_logo.svg"))
+        image.setPixmap(pixmap)
         image.setAlignment(QtCore.Qt.AlignCenter)
-        # Title label
-        software_title = self.createLabelBox(
-            "Force Platform Reader", QssLabels.TITLE_LABEL
-        )
-        software_title.setAlignment(QtCore.Qt.AlignCenter)
         # Status label
         status_group_box = QtWidgets.QGroupBox("Status Information")
         self.status_vbox_layout = QtWidgets.QVBoxLayout()
@@ -264,7 +259,6 @@ class MainUI(QtWidgets.QWidget):
 
         # Build layout
         vbox_layout.addWidget(image)
-        vbox_layout.addWidget(software_title)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addWidget(status_group_box)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
