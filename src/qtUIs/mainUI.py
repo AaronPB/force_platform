@@ -17,12 +17,12 @@ class MainUI(QtWidgets.QWidget):
         self,
         stacked_widget: QtWidgets.QStackedWidget,
         config_manager: ConfigManager,
-        logo_path: str,
+        logo_image_path: str,
     ):
         super().__init__()
         self.stacked_widget = stacked_widget
         self.cfg_mngr = config_manager
-        self.logo_path = logo_path
+        self.logo_img_path = logo_image_path
 
         self.initManagers()
         self.initUI()
@@ -97,6 +97,7 @@ class MainUI(QtWidgets.QWidget):
 
     # UI buttons click connectors
 
+    @QtCore.Slot
     def startTest(self):
         # Update file name in case
         self.file_mngr.checkFileName()
@@ -116,6 +117,7 @@ class MainUI(QtWidgets.QWidget):
 
         self.plot_thread.start()
 
+    @QtCore.Slot
     def stopTest(self):
         self.tare_button.setEnabled(False)
         self.stop_button.setEnabled(False)
@@ -134,6 +136,7 @@ class MainUI(QtWidgets.QWidget):
         self.calibration_button.setEnabled(True)
         self.sensors_connect_button.setEnabled(True)
 
+    @QtCore.Slot
     def tareSensors(self):
         self.stop_button.setEnabled(False)
         self.tare_button.setEnabled(False)
@@ -160,9 +163,11 @@ class MainUI(QtWidgets.QWidget):
         self.stop_button.setEnabled(True)
         self.tare_button.setEnabled(True)
 
+    @QtCore.Slot
     def calibrateSensors(self):
         self.stacked_widget.setCurrentIndex(1)
 
+    @QtCore.Slot
     def setConfigFile(self) -> None:
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
@@ -175,6 +180,7 @@ class MainUI(QtWidgets.QWidget):
         self.getSensorInformation()
         self.updateTestStatus()
 
+    @QtCore.Slot
     def setTestFolder(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
@@ -186,6 +192,7 @@ class MainUI(QtWidgets.QWidget):
             print(f"Changed test folder path to: {folder_path}")
             self.updateTestStatus()
 
+    @QtCore.Slot
     def setTestName(self):
         test_name = self.test_name_input.text().strip()
         if not test_name:
@@ -194,6 +201,7 @@ class MainUI(QtWidgets.QWidget):
         print(f"Changed test name to: {self.file_mngr.getFileName()}")
         self.updateTestStatus()
 
+    @QtCore.Slot
     def connectSensors(self):
         self.sensors_connect_button.setEnabled(False)
         self.sensors_connection_progressbar.setValue(50)
@@ -215,7 +223,7 @@ class MainUI(QtWidgets.QWidget):
         container.setFixedWidth(250)
         # Top icon
         image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap(self.logo_path)
+        pixmap = QtGui.QPixmap(self.logo_img_path)
         image.setPixmap(pixmap)
         image.setAlignment(QtCore.Qt.AlignCenter)
         # Status label
