@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.managers.configManager import ConfigManager
@@ -15,12 +13,17 @@ from PySide6 import QtWidgets, QtGui, QtCore
 class MainUI(QtWidgets.QWidget):
     close_menu = QtCore.Signal()
 
-    def __init__(self, stacked_widget: QtWidgets.QStackedWidget):
+    def __init__(
+        self,
+        stacked_widget: QtWidgets.QStackedWidget,
+        config_manager: ConfigManager,
+        logo_path: str,
+    ):
         super().__init__()
         self.stacked_widget = stacked_widget
-        self.images_folder = os.path.join(
-            os.path.dirname(__file__), "..", "..", "images"
-        )
+        self.cfg_mngr = config_manager
+        self.logo_path = logo_path
+
         self.initManagers()
         self.initUI()
         self.updateTestStatus()
@@ -29,7 +32,6 @@ class MainUI(QtWidgets.QWidget):
         self.plot_thread = PlotterThread(self.tabular_widget, self.data_mngr, 500)
 
     def initManagers(self) -> None:
-        self.cfg_mngr = ConfigManager()
         self.file_mngr = TestFileManager(self.cfg_mngr)
         self.test_mngr = TestManager(self.cfg_mngr)
         self.data_mngr = TestDataManager(self.test_mngr)
@@ -213,7 +215,7 @@ class MainUI(QtWidgets.QWidget):
         container.setFixedWidth(250)
         # Top icon
         image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap(os.path.join(self.images_folder, "mainUI_logo.svg"))
+        pixmap = QtGui.QPixmap(self.logo_path)
         image.setPixmap(pixmap)
         image.setAlignment(QtCore.Qt.AlignCenter)
         # Status label
@@ -240,6 +242,7 @@ class MainUI(QtWidgets.QWidget):
         self.calibration_button = self.createQPushButton(
             "Calibrate sensors",
             QssLabels.CONTROL_PANEL_BTN,
+            enabled=True,
             connect_fn=self.calibrateSensors,
         )
         self.close_button = self.createQPushButton(
@@ -251,7 +254,6 @@ class MainUI(QtWidgets.QWidget):
         buttons_vbox_layout.addWidget(self.start_button)
         buttons_vbox_layout.addWidget(self.tare_button)
         buttons_vbox_layout.addWidget(self.stop_button)
-        buttons_vbox_layout.addWidget(self.calibration_button)
         # Author label
         author_label = self.createLabelBox(
             "© github.AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
@@ -264,6 +266,7 @@ class MainUI(QtWidgets.QWidget):
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addWidget(buttons_group_box)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_layout.addWidget(self.calibration_button)
         vbox_layout.addWidget(self.close_button)
         vbox_layout.addItem(
             QtWidgets.QSpacerItem(
@@ -439,8 +442,6 @@ class MainUI(QtWidgets.QWidget):
             self.stop_button.setEnabled(enable)
             self.tare_button.setEnabled(enable)
         self.start_button.setEnabled(enable)
-        self.calibration_button.setEnabled(enable)
-        pass
 
     def getSensorInformation(self):
         self.setSensorBox(
@@ -469,7 +470,7 @@ class MainUI(QtWidgets.QWidget):
                 widget.deleteLater()
         # Add new widgets
         index = 0
-        for sensor_id, sensor_list in sensor_dict.items():
+        for index, sensor_list in enumerate(sensor_dict.values()):
             checkbox = self.createSensorQCheckBox(
                 sensor_list[0] + " (" + sensor_list[1] + ")",
                 sensor_list[2].value,
@@ -478,4 +479,3 @@ class MainUI(QtWidgets.QWidget):
             )
             checkbox.setChecked(sensor_list[3])
             vbox_layout.addWidget(checkbox)
-            index += 1
