@@ -13,8 +13,11 @@ from PySide6 import QtWidgets, QtGui, QtCore
 
 
 class MainUI(QtWidgets.QWidget):
-    def __init__(self):
+    close_menu = QtCore.Signal()
+
+    def __init__(self, stacked_widget: QtWidgets.QStackedWidget):
         super().__init__()
+        self.stacked_widget = stacked_widget
         self.images_folder = os.path.join(
             os.path.dirname(__file__), "..", "..", "images"
         )
@@ -36,10 +39,6 @@ class MainUI(QtWidgets.QWidget):
         self.tare_timer = QtCore.QTimer(self)
 
     def initUI(self) -> None:
-        self.setWindowTitle("Force platform reader")
-        self.setWindowIcon(QtGui.QIcon(os.path.join(self.images_folder, "logo.ico")))
-        self.setGeometry(100, 100, 1920, 1080)
-
         self.main_layout = QtWidgets.QHBoxLayout()
 
         # Load UI layouts
@@ -50,7 +49,6 @@ class MainUI(QtWidgets.QWidget):
         self.main_layout.addWidget(self.tabular_widget)
 
         self.setLayout(self.main_layout)
-        self.show()
 
     # UI generic widgets setup methods
 
@@ -161,7 +159,7 @@ class MainUI(QtWidgets.QWidget):
         self.tare_button.setEnabled(True)
 
     def calibrateSensors(self):
-        pass
+        self.stacked_widget.setCurrentIndex(1)
 
     def setConfigFile(self) -> None:
         options = QtWidgets.QFileDialog.Options()
@@ -245,7 +243,10 @@ class MainUI(QtWidgets.QWidget):
             connect_fn=self.calibrateSensors,
         )
         self.close_button = self.createQPushButton(
-            "Close", QssLabels.CONTROL_PANEL_BTN, enabled=True, connect_fn=self.close
+            "Close",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=True,
+            connect_fn=self.close_menu.emit,
         )
         buttons_vbox_layout.addWidget(self.start_button)
         buttons_vbox_layout.addWidget(self.tare_button)
