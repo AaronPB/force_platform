@@ -228,6 +228,24 @@ class TestDataManager:
             data_dict[sensor_name] = values
         return data_dict
 
+    def getGroupMeanValues(self, sensor_group: SensorGroup, last_values: int) -> dict:
+        mean_dict = {}
+        if not sensor_group.getGroupIsActive():
+            return mean_dict
+        sensor_group_values = sensor_group.getGroupCalibValues().copy()
+        for sensor_id, values in sensor_group_values.items():
+            mean_dict[sensor_id] = np.mean(values[-int(last_values) :])
+        return mean_dict
+
+    def tareSensors(self, value_range: int) -> None:
+        for sensor_group in [
+            self.test_mngr.sensor_group_platform1,
+            self.test_mngr.sensor_group_platform2,
+            self.test_mngr.sensor_group_encoders,
+        ]:
+            mean_dict = self.getGroupMeanValues(sensor_group, value_range)
+            sensor_group.tareSensors(mean_dict)
+
     def getDataFrame(self, raw_data: bool = False) -> pd.DataFrame:
         timestamp_dict = {"timestamp": self.test_mngr.getTestTimes().copy()}
         p1_loadcells_dict = self.getSensorData(

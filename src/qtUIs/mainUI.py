@@ -127,7 +127,30 @@ class MainUI(QtWidgets.QWidget):
         self.sensors_connect_button.setEnabled(True)
 
     def tareSensors(self):
-        pass
+        self.stop_button.setEnabled(False)
+        self.tare_button.setEnabled(False)
+
+        tare_time_ms = self.cfg_mngr.getConfigValue(
+            CfgPaths.GENERAL_TARE_DURATION_MS.value, 3000
+        )
+        tare_interval_ms = self.cfg_mngr.getConfigValue(
+            CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100
+        )
+
+        self.tare_timer.start()
+        QtCore.QTimer.singleShot(tare_time_ms, self.tare_timer.stop)
+
+        while self.tare_timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+
+        tare_range = tare_time_ms / tare_interval_ms
+        if tare_range < 0:
+            tare_range = 30
+
+        self.data_mngr.tareSensors(int(tare_range))
+
+        self.stop_button.setEnabled(True)
+        self.tare_button.setEnabled(True)
 
     def calibrateSensors(self):
         pass
