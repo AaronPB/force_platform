@@ -8,7 +8,6 @@ from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.testFileManager import TestFileManager
 from src.managers.testDataManager import TestDataManager
-from src.qtUIs.widgets.matplotlibWidgets import *
 from src.qtUIs.threads.plotterThread import PlotterThread
 from PySide6 import QtWidgets, QtGui, QtCore
 
