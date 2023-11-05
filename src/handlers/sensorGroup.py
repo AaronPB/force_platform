@@ -58,7 +58,7 @@ class SensorGroup:
         for sensor_id, mean in mean_dict.items():
             sensor = self.sensors.get(sensor_id)
             current_params = sensor.getSlopeIntercept()
-            sensor.setIntercept(current_params[1] - mean)
+            sensor.setIntercept(float(current_params[1] - mean))
 
     def clearSensorValues(self) -> None:
         [sensor.clearValues() for sensor in self.sensors.values()]

@@ -171,3 +171,5 @@ class TestManager:
 
     def testStop(self) -> None:
         [handler.stop() for handler in self.sensor_group_list]
+        # Save modified intercepts in config
+        self.config_mngr.saveConfig()
