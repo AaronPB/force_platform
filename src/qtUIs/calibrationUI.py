@@ -87,7 +87,7 @@ class CalibrationUI(QtWidgets.QWidget):
 
     # UI buttons click connectors
 
-    @QtCore.Slot
+    @QtCore.Slot()
     def connectSensors(self):
         self.sensors_connect_button.setEnabled(False)
         self.sensors_connection_progressbar.setValue(50)
@@ -98,7 +98,7 @@ class CalibrationUI(QtWidgets.QWidget):
         # self.updateTestStatus()
         self.sensors_connect_button.setEnabled(True)
 
-    @QtCore.Slot
+    @QtCore.Slot()
     def goToMainUI(self):
         self.stacked_widget.setCurrentIndex(0)
 
