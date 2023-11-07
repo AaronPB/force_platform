@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from PySide6 import QtWidgets, QtGui, QtCore
+from src.enums.qssLabels import QssLabels
 from src.managers.calibrationManager import CalibrationManager
+from src.qtUIs.widgets.matplotlibWidgets import PlotRegressionWidget
 
 
 class CalibrationPanelWidget(QtWidgets.QWidget):
@@ -10,6 +12,31 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.calib_mngr = calib_mngr
 
         self.setLayout(self.loadLayout())
+
+    # UI generic widgets setup methods
+
+    def createLabelBox(
+        self, text: str, qss_object: QssLabels = None
+    ) -> QtWidgets.QLabel:
+        label = QtWidgets.QLabel(text)
+        if qss_object is not None:
+            label.setObjectName(qss_object.value)
+        return label
+
+    def createQPushButton(
+        self,
+        title: str,
+        qss_object: QssLabels = None,
+        enabled: bool = False,
+        connect_fn=None,
+    ) -> QtWidgets.QPushButton:
+        button = QtWidgets.QPushButton(title)
+        if qss_object is not None:
+            button.setObjectName(qss_object.value)
+        button.setEnabled(enabled)
+        if connect_fn is not None:
+            button.clicked.connect(connect_fn)
+        return button
 
     def loadLayout(self) -> QtWidgets.QVBoxLayout:
         main_layout = QtWidgets.QVBoxLayout()
@@ -20,7 +47,9 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.vbox_sensor_info_layout = QtWidgets.QVBoxLayout()
         self.vbox_sensor_info_layout.setAlignment(QtCore.Qt.AlignTop)
         group_box_sensor_info.setLayout(self.vbox_sensor_info_layout)
-        self.sensor_info_label = QtWidgets.QLabel("Select an available sensor")
+        self.sensor_info_label = self.createLabelBox(
+            "Select an available sensor", QssLabels.STATUS_LABEL_WARN
+        )
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
 
         # Calibration info
@@ -46,13 +75,15 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.calib_results_widget = QtWidgets.QTableWidget()
         self.calib_results_widget.setRowCount(3)
         self.calib_results_widget.setColumnCount(1)
-        self.calib_results_list = []
         self.calib_results_widget.setVerticalHeaderLabels(
             ["Scope (m)", "Intercept (b)", "Score (r2)"]
         )
         self.calib_results_widget.horizontalHeader().setVisible(False)
         self.calib_results_widget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.Stretch
+        )
+        self.calib_results_widget.setMaximumHeight(
+            self.calib_results_widget.verticalHeader().length() + 6
         )
         self.scope_result_label = QtWidgets.QLabel("0")
         self.intercept_result_label = QtWidgets.QLabel("0")
@@ -61,16 +92,36 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.calib_results_widget.setCellWidget(1, 0, self.intercept_result_label)
         self.calib_results_widget.setCellWidget(2, 0, self.score_result_label)
 
-        # - TODO PlotWidget to plot measurements
+        # - PlotWidget to plot measurements
+        self.plot_widget = PlotRegressionWidget()
 
         # - Build calibration layout
         vbox_calibration_layout.addWidget(self.data_tree_widget)
         vbox_calibration_layout.addWidget(self.calib_results_widget)
+        vbox_calibration_layout.addWidget(self.plot_widget)
+
+        # Measure section
+        grid_measure_layout = QtWidgets.QGridLayout()
+        self.auto_measure_button = self.createQPushButton(
+            "Measure with sensor", enabled=False
+        )
+        self.manual_measure_button = self.createQPushButton(
+            "Measure with value", enabled=False
+        )
+        self.test_value_input = QtWidgets.QLineEdit()
+        self.test_value_input.setPlaceholderText(
+            "Enter calibration value: (example) 14.67"
+        )
+        self.test_value_input.setDisabled(True)
+        grid_measure_layout.addWidget(self.auto_measure_button, 0, 0)
+        grid_measure_layout.addWidget(self.manual_measure_button, 0, 1)
+        grid_measure_layout.addWidget(self.test_value_input, 0, 2)
 
         # Build main layout
         main_layout.addWidget(group_box_sensor_info)
         main_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         main_layout.addWidget(group_box_calibration)
+        main_layout.addLayout(grid_measure_layout)
 
         return main_layout
 

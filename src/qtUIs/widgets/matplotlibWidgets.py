@@ -227,3 +227,42 @@ class PlotIMUWidget(QtWidgets.QWidget):
 
     def clear(self):
         self.setup()
+
+
+class PlotRegressionWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super(PlotRegressionWidget, self).__init__()
+
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.setLayout(QtWidgets.QVBoxLayout())
+        self.layout().addWidget(self.canvas)
+
+        self.ax = self.figure.add_subplot()
+
+        self.setup()
+
+    def setup(self):
+        self.ax.clear()
+        self.ax.set_xlabel("Sensor values")
+        self.ax.set_ylabel("Test values")
+        self.ax.grid(True)
+        (self.line_plot,) = self.ax.plot(0, 0, label="Linear regression", color="blue")
+        self.line_scatter = self.ax.scatter(0, 0, label="Measurements", color="red")
+        self.ax.legend()
+
+        self.canvas.draw()
+
+    def update(
+        self,
+        sensor_values_np: np.ndarray,
+        test_values_np: np.ndarray,
+        calib_values_np: np.ndarray,
+    ):
+        self.line_plot.set_data(sensor_values_np, test_values_np)
+        self.line_scatter.set_data(calib_values_np, test_values_np)
+
+        self.canvas.draw()
+
+    def clear(self):
+        self.setup()
