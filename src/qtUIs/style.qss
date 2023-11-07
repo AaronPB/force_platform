@@ -3,6 +3,12 @@
     font-size: 16px;
 }
 
+QLabel#status_info {
+    background-color: #326295;
+    color: white;
+    padding: 15px;
+}
+
 QLabel#status_ok {
     background-color: green;
     color: white;
@@ -26,6 +32,17 @@ QPushButton:disabled {
 
 QPushButton#cp_btn {
     padding: 15px;
+}
+
+QPushButton#critical_cp_btn {
+    background-color: red;
+    color: darkred;
+    padding: 15px;
+}
+
+QPushButton:disabled#critical_cp_btn {
+    background-color: gray;
+    color: darkslategray;
 }
 
 QProgressBar {

@@ -71,6 +71,23 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
                 column, QtCore.Qt.AlignCenter
             )
 
+        # - Measure control buttons
+        grid_measure_btns_layout = QtWidgets.QGridLayout()
+        self.auto_measure_button = self.createQPushButton(
+            "Measure with sensor", enabled=False
+        )
+        self.manual_measure_button = self.createQPushButton(
+            "Measure with value", enabled=False
+        )
+        self.test_value_input = QtWidgets.QLineEdit()
+        self.test_value_input.setPlaceholderText(
+            "Enter calibration value: (example) 14.67"
+        )
+        self.test_value_input.setDisabled(True)
+        grid_measure_btns_layout.addWidget(self.auto_measure_button, 0, 0)
+        grid_measure_btns_layout.addWidget(self.manual_measure_button, 0, 1)
+        grid_measure_btns_layout.addWidget(self.test_value_input, 0, 2)
+
         # - TableWidget for results
         self.calib_results_widget = QtWidgets.QTableWidget()
         self.calib_results_widget.setRowCount(3)
@@ -97,31 +114,33 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
         # - Build calibration layout
         vbox_calibration_layout.addWidget(self.data_tree_widget)
+        vbox_calibration_layout.addLayout(grid_measure_btns_layout)
         vbox_calibration_layout.addWidget(self.calib_results_widget)
         vbox_calibration_layout.addWidget(self.plot_widget)
 
-        # Measure section
-        grid_measure_layout = QtWidgets.QGridLayout()
-        self.auto_measure_button = self.createQPushButton(
-            "Measure with sensor", enabled=False
+        # Results handler buttons
+        grid_results_btns_layout = QtWidgets.QGridLayout()
+        self.save_button = self.createQPushButton(
+            "Save results", QssLabels.CONTROL_PANEL_BTN, enabled=False
         )
-        self.manual_measure_button = self.createQPushButton(
-            "Measure with value", enabled=False
+        self.clear_button = self.createQPushButton(
+            "Clear calibration test",
+            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
+            enabled=False,
         )
-        self.test_value_input = QtWidgets.QLineEdit()
-        self.test_value_input.setPlaceholderText(
-            "Enter calibration value: (example) 14.67"
-        )
-        self.test_value_input.setDisabled(True)
-        grid_measure_layout.addWidget(self.auto_measure_button, 0, 0)
-        grid_measure_layout.addWidget(self.manual_measure_button, 0, 1)
-        grid_measure_layout.addWidget(self.test_value_input, 0, 2)
+        grid_results_btns_layout.addWidget(self.save_button, 0, 0)
+        grid_results_btns_layout.addWidget(self.clear_button, 0, 2)
 
         # Build main layout
         main_layout.addWidget(group_box_sensor_info)
-        main_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        main_layout.addItem(QtWidgets.QSpacerItem(10, 10))
         main_layout.addWidget(group_box_calibration)
-        main_layout.addLayout(grid_measure_layout)
+        main_layout.addItem(
+            QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+            )
+        )
+        main_layout.addLayout(grid_results_btns_layout)
 
         return main_layout
 

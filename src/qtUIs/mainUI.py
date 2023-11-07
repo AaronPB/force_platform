@@ -255,7 +255,7 @@ class MainUI(QtWidgets.QWidget):
         )
         self.close_button = self.createQPushButton(
             "Close",
-            QssLabels.CONTROL_PANEL_BTN,
+            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=True,
             connect_fn=self.close_menu.emit,
         )
@@ -275,12 +275,13 @@ class MainUI(QtWidgets.QWidget):
         vbox_layout.addWidget(buttons_group_box)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addWidget(self.calibration_button)
-        vbox_layout.addWidget(self.close_button)
         vbox_layout.addItem(
             QtWidgets.QSpacerItem(
                 20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
             )
         )
+        vbox_layout.addWidget(self.close_button)
+        vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addWidget(author_label)
         return container
 

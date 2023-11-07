@@ -250,6 +250,7 @@ class PlotRegressionWidget(QtWidgets.QWidget):
         (self.line_plot,) = self.ax.plot(0, 0, label="Linear regression", color="blue")
         self.line_scatter = self.ax.scatter(0, 0, label="Measurements", color="red")
         self.ax.legend()
+        self.figure.set_figheight(4)
 
         self.canvas.draw()
 
