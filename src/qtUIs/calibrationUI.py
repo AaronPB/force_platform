@@ -4,6 +4,7 @@ from src.enums.qssLabels import QssLabels
 from src.enums.sensorStatus import SensorStatus as SStatus
 from src.managers.configManager import ConfigManager
 from src.managers.calibrationManager import CalibrationManager
+from src.qtUIs.widgets.calibrationPanelWidget import CalibrationPanelWidget
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -38,10 +39,9 @@ class CalibrationUI(QtWidgets.QWidget):
 
         # Load UI layouts
         self.settings_panel = self.loadInfoPanel()
-        self.calibration_widget = self.loadEmptyCalibWidget()
 
         self.main_layout.addWidget(self.settings_panel)
-        self.main_layout.addWidget(QtWidgets.QTabWidget())
+        self.main_layout.addWidget(CalibrationPanelWidget(self.calib_mngr))
 
         self.setLayout(self.main_layout)
 
@@ -183,9 +183,6 @@ class CalibrationUI(QtWidgets.QWidget):
         sensors_vbox_layout.addLayout(sensors_grid_layout)
 
         return sensors_group_box
-
-    def loadEmptyCalibWidget(self) -> QtWidgets.QWidget:
-        return QtWidgets.QWidget()
 
     # Functions to load information
 
