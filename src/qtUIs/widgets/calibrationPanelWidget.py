@@ -58,18 +58,15 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         vbox_calibration_layout.setAlignment(QtCore.Qt.AlignTop)
         group_box_calibration.setLayout(vbox_calibration_layout)
 
-        # - TreeWidget for measurements
-        self.data_tree_widget = QtWidgets.QTreeWidget()
-        self.data_tree_widget.setHeaderLabels(
+        # - Measurements TableWidget
+        self.measurements_widget = QtWidgets.QTableWidget(0, 4)
+        self.measurements_widget.setHorizontalHeaderLabels(
             ["Test value", "Sensor mean", "Sensor STD", "Num. of measurements"]
         )
-        self.data_tree_widget.header().setSectionResizeMode(
+        self.measurements_widget.verticalHeader().setVisible(False)
+        self.measurements_widget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.Stretch
         )
-        for column in range(self.data_tree_widget.columnCount()):
-            self.data_tree_widget.headerItem().setTextAlignment(
-                column, QtCore.Qt.AlignCenter
-            )
 
         # - Measure control buttons
         grid_measure_btns_layout = QtWidgets.QGridLayout()
@@ -88,10 +85,8 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         grid_measure_btns_layout.addWidget(self.manual_measure_button, 0, 1)
         grid_measure_btns_layout.addWidget(self.test_value_input, 0, 2)
 
-        # - TableWidget for results
-        self.calib_results_widget = QtWidgets.QTableWidget()
-        self.calib_results_widget.setRowCount(3)
-        self.calib_results_widget.setColumnCount(1)
+        # -  Results TableWidget
+        self.calib_results_widget = QtWidgets.QTableWidget(3, 1)
         self.calib_results_widget.setVerticalHeaderLabels(
             ["Scope (m)", "Intercept (b)", "Score (r2)"]
         )
@@ -113,7 +108,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.plot_widget = PlotRegressionWidget()
 
         # - Build calibration layout
-        vbox_calibration_layout.addWidget(self.data_tree_widget)
+        vbox_calibration_layout.addWidget(self.measurements_widget)
         vbox_calibration_layout.addLayout(grid_measure_btns_layout)
         vbox_calibration_layout.addWidget(self.calib_results_widget)
         vbox_calibration_layout.addWidget(self.plot_widget)
