@@ -83,6 +83,9 @@ class CalibrationManager:
     def getP2SensorStatus(self) -> dict:
         return self.sensor_group_platform2.getGroupInfo()
 
+    def refSensorConnected(self) -> bool:
+        return self.reference_sensor is not None
+
     # Calibration functions
 
     def getValues(self):

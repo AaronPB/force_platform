@@ -103,6 +103,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             "Enter calibration value: (example) 14.67"
         )
         self.test_value_input.setDisabled(True)
+        self.test_value_input.textChanged.connect(self.onTextChanged)
         grid_measure_btns_layout.addWidget(self.auto_measure_button, 0, 0)
         grid_measure_btns_layout.addWidget(self.manual_measure_button, 0, 1)
         grid_measure_btns_layout.addWidget(self.test_value_input, 0, 2)
@@ -150,6 +151,14 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     # UI buttons click connectors
 
     @QtCore.Slot()
+    def onTextChanged(self):
+        try:
+            float(self.test_value_input.text())
+            self.manual_measure_button.setEnabled(True)
+        except ValueError:
+            self.manual_measure_button.setEnabled(False)
+
+    @QtCore.Slot()
     def recordData(self):
         pass
 
@@ -187,6 +196,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             print("Could not load desired sensor!")
             return
         self.updateSensorInformation(sensor_info[0], sensor_info[1])
+        self.enableButtons(True)
 
     def updateSensorInformation(self, name: str, properties: str):
         self.sensor_info_label.setParent(None)
@@ -194,6 +204,14 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             f"Name: {name}\nProperties: {properties}", QssLabels.STATUS_LABEL_INFO
         )
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
+
+    def enableButtons(self, enable: bool = False):
+        if not enable:
+            self.save_button.setEnabled(enable)
+        if self.calib_mngr.refSensorConnected():
+            self.auto_measure_button.setEnabled(enable)
+        self.test_value_input.setEnabled(enable)
+        self.clear_button.setEnabled(enable)
 
     def addMeasurementRow(
         self,
