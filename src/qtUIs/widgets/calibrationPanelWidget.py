@@ -11,6 +11,9 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         super(CalibrationPanelWidget, self).__init__()
         self.calib_mngr = calib_mngr
 
+        self.recording_timer = QtCore.QTimer(self)
+        self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
+
         self.setLayout(self.loadLayout())
 
     # UI generic widgets setup methods
@@ -57,9 +60,20 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
 
         group_box_general_buttons = QtWidgets.QGroupBox("Manage results")
-        self.hbox_buttons_layout = QtWidgets.QVBoxLayout()
-        self.hbox_buttons_layout.setAlignment(QtCore.Qt.AlignBottom)
-        group_box_general_buttons.setLayout(self.hbox_buttons_layout)
+        self.grid_buttons_layout = QtWidgets.QGridLayout()
+        group_box_general_buttons.setLayout(self.grid_buttons_layout)
+        self.generate_results_button = self.createQPushButton(
+            "Make linear regression",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=False,
+            connect_fn=self.generateResults,
+        )
+        self.remove_row_button = self.createQPushButton(
+            "Remove selected measure row",
+            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
+            enabled=False,
+            connect_fn=self.removeRow,
+        )
         self.save_button = self.createQPushButton(
             "Save results", QssLabels.CONTROL_PANEL_BTN, enabled=False
         )
@@ -68,8 +82,10 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=False,
         )
-        self.hbox_buttons_layout.addWidget(self.save_button)
-        self.hbox_buttons_layout.addWidget(self.clear_button)
+        self.grid_buttons_layout.addWidget(self.generate_results_button, 0, 0)
+        self.grid_buttons_layout.addWidget(self.remove_row_button, 0, 1)
+        self.grid_buttons_layout.addWidget(self.save_button, 1, 0)
+        self.grid_buttons_layout.addWidget(self.clear_button, 1, 1)
 
         hbox_info_layout.addWidget(group_box_sensor_info)
         hbox_info_layout.addWidget(group_box_general_buttons)
@@ -93,10 +109,10 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         # - Measure control buttons
         grid_measure_btns_layout = QtWidgets.QGridLayout()
         self.auto_measure_button = self.createQPushButton(
-            "Measure with sensor", enabled=False
+            "Measure with sensor", enabled=False, connect_fn=self.recordDataWithSensor
         )
         self.manual_measure_button = self.createQPushButton(
-            "Measure with value", enabled=False
+            "Measure with value", enabled=False, connect_fn=self.recordData
         )
         self.test_value_input = QtWidgets.QLineEdit()
         self.test_value_input.setPlaceholderText(
@@ -160,21 +176,38 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def recordData(self):
-        pass
+        test_value = float(self.test_value_input.text())
+        self.enableButtons(False)
+        self.calib_mngr.startRecording()
+        self.recording_timer.start(self.calib_mngr.getCalibTestInterval())
+        QtCore.QTimer.singleShot(
+            self.calib_mngr.getCalibDuration(), self.recording_timer.stop
+        )
+        while self.recording_timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+        self.calib_mngr.stopRecording()
+        values = self.calib_mngr.getValues(test_value)
+        self.addMeasurementRow(values[0], values[1], values[2], values[3])
+        # TODO update plot
+        self.enableButtons(True)
 
     @QtCore.Slot()
-    def recordDataWithCalib(self):
+    def recordDataWithSensor(self):
         pass
 
     @QtCore.Slot()
     def removeRow(self):
+        self.enableButtons(False)
         selected_row = self.measurements_widget.currentRow()
         if selected_row >= 0:
             self.measurements_widget.removeRow(selected_row)
+            self.calib_mngr.removeValueSet(selected_row)
+        self.enableButtons(True)
 
     @QtCore.Slot()
     def generateResults(self):
-        pass
+        results = self.calib_mngr.getRegressionResults()
+        self.updateResultsTable(results[0], results[1], results[2])
 
     @QtCore.Slot()
     def saveResults(self):
@@ -208,9 +241,17 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     def enableButtons(self, enable: bool = False):
         if not enable:
             self.save_button.setEnabled(enable)
+            self.auto_measure_button.setEnabled(enable)
+            self.remove_row_button.setEnabled(enable)
+            self.generate_results_button.setEnabled(enable)
         if self.calib_mngr.refSensorConnected():
             self.auto_measure_button.setEnabled(enable)
+        if self.measurements_widget.rowCount() > 0:
+            self.remove_row_button.setEnabled(enable)
+        if self.measurements_widget.rowCount() > 1:
+            self.generate_results_button.setEnabled(enable)
         self.test_value_input.setEnabled(enable)
+        self.manual_measure_button.setEnabled(enable)
         self.clear_button.setEnabled(enable)
 
     def addMeasurementRow(

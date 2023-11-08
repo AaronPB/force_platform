@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import time
+import numpy as np
+from sklearn.linear_model import LinearRegression
 
 from src.managers.configManager import ConfigManager
 from src.handlers import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SensorParams as SParams
+from src.enums.sensorStatus import SensorStatus as SStatus
 from src.enums.sensorDrivers import SensorDrivers as SDrivers
 
 
@@ -15,6 +17,9 @@ class CalibrationManager:
         self.config_mngr = config_mngr
         self.sensors_connected = False
         self.calib_sensor = None
+        self.sensor_values = []
+        self.test_values = []
+        self.calib_results = []
         self.reference_sensor = None
 
         # Required config keys
@@ -83,13 +88,70 @@ class CalibrationManager:
     def getP2SensorStatus(self) -> dict:
         return self.sensor_group_platform2.getGroupInfo()
 
+    def getCalibDuration(self) -> int:
+        return self.config_mngr.getConfigValue(
+            CfgPaths.GENERAL_CALIBRATION_DURATION_MS.value, 3000
+        )
+
+    def getCalibTestInterval(self) -> int:
+        return self.config_mngr.getConfigValue(
+            CfgPaths.GENERAL_CALIBRATION_INTERVAL_MS.value, 10
+        )
+
     def refSensorConnected(self) -> bool:
-        return self.reference_sensor is not None
+        if self.reference_sensor is None:
+            return False
+        return self.reference_sensor.getStatus() == SStatus.AVAILABLE
 
     # Calibration functions
 
-    def getValues(self):
-        pass
+    def startRecording(self, auto: bool = False):
+        self.add_ref_sensor = False
+        if auto and not self.refSensorConnected():
+            return
+        if auto:
+            self.reference_sensor.clearValues()
+            self.reference_sensor.connect()
+        self.calib_sensor.clearValues()
+        self.calib_sensor.connect()
 
-    def getRegressionResults(self, data: dict):
-        pass
+    def registerValue(self):
+        self.calib_sensor.registerValue()
+        if self.add_ref_sensor:
+            self.reference_sensor.registerValue()
+
+    def stopRecording(self):
+        self.calib_sensor.disconnect()
+        if self.add_ref_sensor:
+            self.reference_sensor.disconnect()
+
+    def getValues(self, test_value: float = None) -> list:
+        if test_value is None and not self.add_ref_sensor:
+            return [-1, -1, -1, -1]
+        if self.add_ref_sensor:
+            ref_values = np.array(self.reference_sensor.getCalibValues())
+            test_value = np.mean(ref_values)
+        values = np.array(self.calib_sensor.getValues())
+        values_mean = np.mean(values)
+        self.sensor_values.append(values_mean)
+        self.test_values.append(test_value)
+        return [test_value, values_mean, np.std(values), len(values)]
+
+    def clearAllValues(self):
+        self.sensor_values.clear()
+        self.test_values.clear()
+        self.calib_results.clear()
+
+    def removeValueSet(self, index: int):
+        self.sensor_values.pop(index)
+        self.test_values.pop(index)
+
+    def getRegressionResults(self) -> list:
+        features = np.array(self.sensor_values).reshape(-1, 1)
+        targets = np.array(self.test_values).reshape(-1, 1)
+        model = LinearRegression().fit(features, targets)
+        self.calib_results.clear()
+        self.calib_results.append(np.array(model.coef_[0]).item())
+        self.calib_results.append(model.intercept_.item())
+        self.calib_results.append(model.score(features, targets))
+        return self.calib_results
