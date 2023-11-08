@@ -44,7 +44,9 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setAlignment(QtCore.Qt.AlignTop)
 
-        # Sensor info
+        # Sensor info and main buttons
+        hbox_info_layout = QtWidgets.QHBoxLayout()
+
         group_box_sensor_info = QtWidgets.QGroupBox("Sensor information")
         self.vbox_sensor_info_layout = QtWidgets.QVBoxLayout()
         self.vbox_sensor_info_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -53,6 +55,24 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             "Select an available sensor", QssLabels.STATUS_LABEL_WARN
         )
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
+
+        group_box_general_buttons = QtWidgets.QGroupBox("Manage results")
+        self.hbox_buttons_layout = QtWidgets.QVBoxLayout()
+        self.hbox_buttons_layout.setAlignment(QtCore.Qt.AlignBottom)
+        group_box_general_buttons.setLayout(self.hbox_buttons_layout)
+        self.save_button = self.createQPushButton(
+            "Save results", QssLabels.CONTROL_PANEL_BTN, enabled=False
+        )
+        self.clear_button = self.createQPushButton(
+            "Clear calibration test",
+            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
+            enabled=False,
+        )
+        self.hbox_buttons_layout.addWidget(self.save_button)
+        self.hbox_buttons_layout.addWidget(self.clear_button)
+
+        hbox_info_layout.addWidget(group_box_sensor_info)
+        hbox_info_layout.addWidget(group_box_general_buttons)
 
         # Calibration info
         group_box_calibration = QtWidgets.QGroupBox("Measurements for calibration")
@@ -90,7 +110,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         # -  Results TableWidget
         self.calib_results_widget = QtWidgets.QTableWidget(3, 1)
         self.calib_results_widget.setVerticalHeaderLabels(
-            ["Scope (m)", "Intercept (b)", "Score (r2)"]
+            ["Slope (m)", "Intercept (b)", "Score (r2)"]
         )
         self.calib_results_widget.horizontalHeader().setVisible(False)
         self.calib_results_widget.horizontalHeader().setSectionResizeMode(
@@ -115,21 +135,8 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         vbox_calibration_layout.addWidget(self.plot_widget)
         vbox_calibration_layout.addWidget(self.calib_results_widget)
 
-        # Results handler buttons
-        grid_results_btns_layout = QtWidgets.QGridLayout()
-        self.save_button = self.createQPushButton(
-            "Save results", QssLabels.CONTROL_PANEL_BTN, enabled=False
-        )
-        self.clear_button = self.createQPushButton(
-            "Clear calibration test",
-            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
-            enabled=False,
-        )
-        grid_results_btns_layout.addWidget(self.save_button, 0, 0)
-        grid_results_btns_layout.addWidget(self.clear_button, 0, 2)
-
         # Build main layout
-        main_layout.addWidget(group_box_sensor_info)
+        main_layout.addLayout(hbox_info_layout)
         main_layout.addItem(QtWidgets.QSpacerItem(10, 10))
         main_layout.addWidget(group_box_calibration)
         main_layout.addItem(
@@ -137,7 +144,6 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
                 20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
             )
         )
-        main_layout.addLayout(grid_results_btns_layout)
 
         return main_layout
 
@@ -185,7 +191,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     def updateSensorInformation(self, name: str, properties: str):
         self.sensor_info_label.setParent(None)
         self.sensor_info_label = self.createLabelBox(
-            f"{name}\n{properties}", QssLabels.STATUS_LABEL_INFO
+            f"Name: {name}\nProperties: {properties}", QssLabels.STATUS_LABEL_INFO
         )
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
 

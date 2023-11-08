@@ -14,7 +14,8 @@ class CalibrationManager:
         # Global values
         self.config_mngr = config_mngr
         self.sensors_connected = False
-        self.test_times = []
+        self.calib_sensor = None
+        self.reference_sensor = None
 
         # Required config keys
         required_keys_loadcells = [
@@ -66,16 +67,26 @@ class CalibrationManager:
 
     # Setters and getters
 
-    def calibrateP1Sensor(self, index: int) -> None:
-        # TODO
-        pass
+    def calibrateP1Sensor(self, index: int) -> list:
+        sensor_list = list(self.sensor_group_platform1.sensors.values())
+        self.calib_sensor = sensor_list[index]
+        return [self.calib_sensor.getName(), self.calib_sensor.getProperties()]
 
     def calibrateP2Sensor(self, index: int) -> None:
-        # TODO
-        pass
+        sensor_list = list(self.sensor_group_platform2.sensors.values())
+        self.calib_sensor = sensor_list[index]
+        return [self.calib_sensor.getName(), self.calib_sensor.getProperties()]
 
     def getP1SensorStatus(self) -> dict:
         return self.sensor_group_platform1.getGroupInfo()
 
     def getP2SensorStatus(self) -> dict:
         return self.sensor_group_platform2.getGroupInfo()
+
+    # Calibration functions
+
+    def getValues(self):
+        pass
+
+    def getRegressionResults(self, data: dict):
+        pass
