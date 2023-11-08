@@ -112,8 +112,8 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         # - Build calibration layout
         vbox_calibration_layout.addWidget(self.measurements_widget)
         vbox_calibration_layout.addLayout(grid_measure_btns_layout)
-        vbox_calibration_layout.addWidget(self.calib_results_widget)
         vbox_calibration_layout.addWidget(self.plot_widget)
+        vbox_calibration_layout.addWidget(self.calib_results_widget)
 
         # Results handler buttons
         grid_results_btns_layout = QtWidgets.QGridLayout()
@@ -184,19 +184,19 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         row_position = self.measurements_widget.rowCount()
         self.measurements_widget.insertRow(row_position)
         self.measurements_widget.setItem(
-            row_position, 0, QtWidgets.QTableWidgetItem(str(test_value))
+            row_position, 0, QtWidgets.QTableWidgetItem("{:.6e}".format(test_value))
         )
         self.measurements_widget.setItem(
-            row_position, 1, QtWidgets.QTableWidgetItem(str(sensor_mean))
+            row_position, 1, QtWidgets.QTableWidgetItem("{:.6e}".format(sensor_mean))
         )
         self.measurements_widget.setItem(
-            row_position, 2, QtWidgets.QTableWidgetItem(str(sensor_std))
+            row_position, 2, QtWidgets.QTableWidgetItem("{:.6e}".format(sensor_std))
         )
         self.measurements_widget.setItem(
             row_position, 3, QtWidgets.QTableWidgetItem(str(measurements))
         )
 
     def updateResultsTable(self, scope: float, intercept: float, score: float):
-        self.scope_result_label.setText(str(scope))
-        self.intercept_result_label.setText(str(intercept))
-        self.score_result_label.setText(str(score))
+        self.scope_result_label.setText("{:.6e}".format(scope))
+        self.intercept_result_label.setText("{:.6e}".format(intercept))
+        self.score_result_label.setText("{:.4f}".format(score))
