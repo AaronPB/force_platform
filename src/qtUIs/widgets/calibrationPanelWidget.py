@@ -38,6 +38,8 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             button.clicked.connect(connect_fn)
         return button
 
+    # UI section loaders
+
     def loadLayout(self) -> QtWidgets.QVBoxLayout:
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -149,7 +151,52 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     def recordDataWithCalib(self):
         pass
 
+    @QtCore.Slot()
+    def removeRow(self):
+        selected_row = self.measurements_widget.currentRow()
+        if selected_row >= 0:
+            self.measurements_widget.removeRow(selected_row)
+
+    @QtCore.Slot()
+    def generateResults(self):
+        pass
+
+    @QtCore.Slot()
+    def saveResults(self):
+        pass
+
+    @QtCore.Slot()
+    def clearValues(self):
+        pass
+
     # Widget functions
 
     def loadSensor(self):
         pass
+
+    def addMeasurementRow(
+        self,
+        test_value: float,
+        sensor_mean: float,
+        sensor_std: float,
+        measurements: int,
+    ):
+        row_position = self.measurements_widget.rowCount()
+        self.measurements_widget.insertRow(row_position)
+        self.measurements_widget.setItem(
+            row_position, 0, QtWidgets.QTableWidgetItem(str(test_value))
+        )
+        self.measurements_widget.setItem(
+            row_position, 1, QtWidgets.QTableWidgetItem(str(sensor_mean))
+        )
+        self.measurements_widget.setItem(
+            row_position, 2, QtWidgets.QTableWidgetItem(str(sensor_std))
+        )
+        self.measurements_widget.setItem(
+            row_position, 3, QtWidgets.QTableWidgetItem(str(measurements))
+        )
+
+    def updateResultsTable(self, scope: float, intercept: float, score: float):
+        self.scope_result_label.setText(str(scope))
+        self.intercept_result_label.setText(str(intercept))
+        self.score_result_label.setText(str(score))
