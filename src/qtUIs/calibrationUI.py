@@ -38,10 +38,11 @@ class CalibrationUI(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QHBoxLayout()
 
         # Load UI layouts
+        self.calib_widget = CalibrationPanelWidget(self.calib_mngr)
         self.settings_panel = self.loadInfoPanel()
 
         self.main_layout.addWidget(self.settings_panel)
-        self.main_layout.addWidget(CalibrationPanelWidget(self.calib_mngr))
+        self.main_layout.addWidget(self.calib_widget)
 
         self.setLayout(self.main_layout)
 
@@ -76,13 +77,16 @@ class CalibrationUI(QtWidgets.QWidget):
         sensor_status: SStatus,
         connect_fn=None,
         index: int = 0,
+        platform: int = 1,
     ) -> QtWidgets.QPushButton:
         button = QtWidgets.QPushButton(title)
         button.setEnabled(False)
         if sensor_status == SStatus.AVAILABLE:
             button.setEnabled(True)
         if connect_fn is not None:
-            button.clicked.connect(lambda index=index: connect_fn(index))
+            button.clicked.connect(
+                lambda index=index, platform=platform: connect_fn(index, platform)
+            )
         return button
 
     # UI buttons click connectors
@@ -190,16 +194,22 @@ class CalibrationUI(QtWidgets.QWidget):
         self.setSensorBox(
             self.vbox_platform1,
             self.calib_mngr.getP1SensorStatus(),
-            self.calib_mngr.calibrateP1Sensor,
+            self.calib_widget.selectPlatformSensor,
+            platform=1,
         )
         self.setSensorBox(
             self.vbox_platform2,
             self.calib_mngr.getP2SensorStatus(),
-            self.calib_mngr.calibrateP2Sensor,
+            self.calib_widget.selectPlatformSensor,
+            platform=2,
         )
 
     def setSensorBox(
-        self, vbox_layout: QtWidgets.QVBoxLayout, sensor_dict: dict, update_fn
+        self,
+        vbox_layout: QtWidgets.QVBoxLayout,
+        sensor_dict: dict,
+        update_fn,
+        platform: int,
     ):
         # Clear layout
         for i in reversed(range(vbox_layout.count())):
@@ -213,5 +223,6 @@ class CalibrationUI(QtWidgets.QWidget):
                 sensor_list[2],
                 connect_fn=update_fn,
                 index=index,
+                platform=platform,
             )
             vbox_layout.addWidget(button)

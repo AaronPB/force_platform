@@ -171,8 +171,23 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
     # Widget functions
 
-    def loadSensor(self):
-        pass
+    def selectPlatformSensor(self, index, platform):
+        sensor_info = ["Name error", "Properties error"]
+        if platform == 1:
+            sensor_info = self.calib_mngr.calibrateP1Sensor(index)
+        if platform == 2:
+            sensor_info = self.calib_mngr.calibrateP2Sensor(index)
+        if sensor_info[0] == "Name error":
+            print("Could not load desired sensor!")
+            return
+        self.updateSensorInformation(sensor_info[0], sensor_info[1])
+
+    def updateSensorInformation(self, name: str, properties: str):
+        self.sensor_info_label.setParent(None)
+        self.sensor_info_label = self.createLabelBox(
+            f"{name}\n{properties}", QssLabels.STATUS_LABEL_INFO
+        )
+        self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
 
     def addMeasurementRow(
         self,
