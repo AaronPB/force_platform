@@ -53,6 +53,19 @@ class TestDataManager:
             self.updateIMUAngles(1000)
             return
 
+    # WIP
+    def checkDataLen(
+        self, times_list: list, data_dict: dict, last_values: int = None
+    ) -> bool:
+        times_len = len(times_list)
+        data_keys = list(data_dict.keys())
+        data_len = len(data_dict[data_keys[0]])
+        if times_len == data_len:
+            return True
+        if last_values is not None and data_len > last_values:
+            return True
+        return False
+
     def updatePlatformForces(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
@@ -72,6 +85,7 @@ class TestDataManager:
         self.forces_p1_widget.update(times_np, forces_x_p1, forces_y_p1, forces_z_p1)
         self.forces_p2_widget.update(times_np, forces_x_p2, forces_y_p2, forces_z_p2)
 
+    # FIXME raise error when array_len and data values does not match
     def getForces(self, array_len: int, data_dict: dict, last_values: int = None):
         sum_key = "Sum forces"
         forces_x = {sum_key: np.zeros(array_len)}
@@ -102,28 +116,29 @@ class TestDataManager:
 
     def updateStabilograms(self, last_values: int = None) -> None:
         # Get data
-        time_len = last_values
-        if not time_len:
-            time_len = len(self.test_mngr.getTestTimes().copy())
+        time_list = self.test_mngr.getTestTimes().copy()
         p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         p1_size = len(p1_data_dict)
         p2_size = len(p2_data_dict)
         # Get arrays for plots
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
+        if last_values:
+            times_np = times_np[-last_values:]
         if p1_size == 12:
             forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-                time_len, p1_data_dict, last_values
+                times_np.size, p1_data_dict, last_values
             )
             cop_x_p1, cop_y_p1 = self.getCOP(
-                time_len, forces_x_p1, forces_y_p1, forces_z_p1
+                times_np.size, forces_x_p1, forces_y_p1, forces_z_p1
             )
         if p2_size == 12:
             forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-                time_len, p2_data_dict, last_values
+                times_np.size, p2_data_dict, last_values
             )
 
             cop_x_p2, cop_y_p2 = self.getCOP(
-                time_len, forces_x_p2, forces_y_p2, forces_z_p2
+                times_np.size, forces_x_p2, forces_y_p2, forces_z_p2
             )
         # Update plots with values
         if p1_size == 12:

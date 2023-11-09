@@ -120,7 +120,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.line_last.set_data(
             cop_x_np[-self.last_indexes :], cop_y_np[-self.last_indexes :]
         )
-        self.circle.set_center(cop_x_np[-1:], cop_y_np[-1:])
+        self.circle.set_center([cop_x_np[-1:], cop_y_np[-1:]])
 
         self.canvas.draw()
 
