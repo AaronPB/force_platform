@@ -236,6 +236,16 @@ class TestDataManager:
             data_dict[sensor_name] = values
         return data_dict
 
+    def getIMUData(self, sensor_data: dict, imu_data_list: list) -> dict:
+        data_dict = {}
+        for key, values in sensor_data.items():
+            for i in range(len(values[0])):
+                new_key = f"{key}_{imu_data_list[i]}"
+                if new_key not in data_dict:
+                    data_dict[new_key] = []
+                data_dict[new_key].extend([value[i] for value in values])
+        return data_dict
+
     def getGroupMeanValues(self, sensor_group: SensorGroup, last_values: int) -> dict:
         mean_dict = {}
         if not sensor_group.getGroupIsActive():
@@ -266,12 +276,25 @@ class TestDataManager:
             self.test_mngr.sensor_group_encoders, raw_data
         )
         imus_dict = self.getSensorData(self.test_mngr.sensor_group_imus, True)
+        imu_data_list = [
+            "q_x",
+            "q_y",
+            "q_z",
+            "q_w",
+            "w_x",
+            "w_y",
+            "w_z",
+            "x_acc",
+            "y_acc",
+            "z_acc",
+        ]
+        imus_strip_dict = self.getIMUData(imus_dict, imu_data_list)
         merged_data = {
             **timestamp_dict,
             **p1_loadcells_dict,
             **p2_loadcells_dict,
             **encoders_dict,
-            **imus_dict,
+            **imus_strip_dict,
         }
         df = pd.DataFrame(merged_data)
         # Format dataframes values to 0.000000e+00
