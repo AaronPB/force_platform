@@ -53,49 +53,56 @@ class TestDataManager:
             self.updateIMUAngles(1000)
             return
 
-    # WIP
-    def checkDataLen(
-        self, times_list: list, data_dict: dict, last_values: int = None
-    ) -> bool:
+    def checkDataLen(self, times_list: list, data_dict: dict, last_values: int = None):
         times_len = len(times_list)
         data_keys = list(data_dict.keys())
         data_len = len(data_dict[data_keys[0]])
         if times_len == data_len:
-            return True
+            if last_values is not None and data_len > last_values:
+                return True, last_values
+            return True, times_len
         if last_values is not None and data_len > last_values:
-            return True
-        return False
+            return True, last_values
+        return False, times_len
 
     def updatePlatformForces(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
         p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        # Check values
+        p1_ready, plot_len = self.checkDataLen(time_list, p1_data_dict, last_values)
+        p2_ready, plot_len = self.checkDataLen(time_list, p2_data_dict, last_values)
+        if not p1_ready and not p2_ready:
+            return
         # Get arrays for plots
-        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
-        if last_values:
-            times_np = times_np[-last_values:]
-        forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-            times_np.size, p1_data_dict, last_values
-        )
-        forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-            times_np.size, p2_data_dict, last_values
-        )
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list[-plot_len:]])
+        if p1_ready:
+            forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
+                p1_data_dict, plot_len
+            )
+            self.forces_p1_widget.update(
+                times_np, forces_x_p1, forces_y_p1, forces_z_p1
+            )
+        if p2_ready:
+            forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
+                p2_data_dict, plot_len
+            )
+            self.forces_p2_widget.update(
+                times_np, forces_x_p2, forces_y_p2, forces_z_p2
+            )
         # Update plots with values
-        self.forces_p1_widget.update(times_np, forces_x_p1, forces_y_p1, forces_z_p1)
-        self.forces_p2_widget.update(times_np, forces_x_p2, forces_y_p2, forces_z_p2)
+        # self.forces_p1_widget.update(times_np, forces_x_p1, forces_y_p1, forces_z_p1)
+        # self.forces_p2_widget.update(times_np, forces_x_p2, forces_y_p2, forces_z_p2)
 
-    # FIXME raise error when array_len and data values does not match
-    def getForces(self, array_len: int, data_dict: dict, last_values: int = None):
+    def getForces(self, data_dict: dict, plot_len: int = None):
         sum_key = "Sum forces"
-        forces_x = {sum_key: np.zeros(array_len)}
-        forces_y = {sum_key: np.zeros(array_len)}
-        forces_z = {sum_key: np.zeros(array_len)}
+        forces_x = {sum_key: np.zeros(plot_len)}
+        forces_y = {sum_key: np.zeros(plot_len)}
+        forces_z = {sum_key: np.zeros(plot_len)}
 
         for key, values in data_dict.items():
-            values_np = np.array(values)
-            if last_values:
-                values_np = values_np[-last_values:]
+            values_np = np.array(values[-plot_len:])
             if "LoadCell_Z" in key:
                 forces_z[key] = values_np
                 forces_z[sum_key] += values_np
@@ -121,46 +128,35 @@ class TestDataManager:
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         p1_size = len(p1_data_dict)
         p2_size = len(p2_data_dict)
+        if p1_size != 12 and p2_size != 12:
+            return
+        # Check values
+        p1_ready, plot_len = self.checkDataLen(time_list, p1_data_dict, last_values)
+        p2_ready, plot_len = self.checkDataLen(time_list, p2_data_dict, last_values)
+        if not p1_ready and not p2_ready:
+            return
         # Get arrays for plots
-        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
-        if last_values:
-            times_np = times_np[-last_values:]
-        if p1_size == 12:
+        if p1_size == 12 and p1_ready:
             forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-                times_np.size, p1_data_dict, last_values
+                p1_data_dict, plot_len
             )
-            cop_x_p1, cop_y_p1 = self.getCOP(
-                times_np.size, forces_x_p1, forces_y_p1, forces_z_p1
-            )
-        if p2_size == 12:
-            forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-                times_np.size, p2_data_dict, last_values
-            )
-
-            cop_x_p2, cop_y_p2 = self.getCOP(
-                times_np.size, forces_x_p2, forces_y_p2, forces_z_p2
-            )
-        # Update plots with values
-        if p1_size == 12:
+            cop_x_p1, cop_y_p1 = self.getCOP(forces_x_p1, forces_y_p1, forces_z_p1)
             self.cop_p1_widget.update(cop_x_p1, cop_y_p1)
-        if p2_size == 12:
+        if p2_size == 12 and p2_ready:
+            forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
+                p2_data_dict, plot_len
+            )
+            cop_x_p2, cop_y_p2 = self.getCOP(forces_x_p2, forces_y_p2, forces_z_p2)
             self.cop_p2_widget.update(cop_x_p2, cop_y_p2)
 
-    def getCOP(self, array_len: int, forces_x: dict, forces_y: dict, forces_z: dict):
-        relcop_x = np.zeros(array_len)
-        relcop_y = np.zeros(array_len)
-        # Initial values
-        lx = 508  # (mm) x distance between sensors
-        ly = 308  # (mm) y distance between sensors
-        h = 20  # (mm) z distance between sensors and upper platform
+    def getCOP(self, forces_x: dict, forces_y: dict, forces_z: dict):
+        # Initial values (distance between sensors and upper platform, in mm)
+        lx, ly, h = 508, 308, 20
         # Create forces np matrixes
         forces_x_np = np.array(list(forces_x.values()))
         forces_y_np = np.array(list(forces_y.values()))
         forces_z_np = np.array(list(forces_z.values()))
         # Operate
-        fx = forces_x_np[0]
-        fy = forces_y_np[0]
-        fz = forces_z_np[0]
         mx = (
             ly
             / 2
@@ -171,13 +167,10 @@ class TestDataManager:
             / 2
             * (-forces_z_np[4] + forces_z_np[1] + forces_z_np[2] + forces_z_np[3])
         )
-
-        # Get COP and relative COP
-        cop_x = (-h * fx - my) / fz
-        cop_y = (-h * fy + mx) / fz
-        relcop_x = cop_x - np.mean(cop_x)
-        relcop_y = cop_y - np.mean(cop_y)
-        return relcop_x, relcop_y
+        # Get COP
+        cop_x = (-h * forces_x_np[0] - my) / forces_z_np[0]
+        cop_y = (-h * forces_y_np[0] + mx) / forces_z_np[0]
+        return cop_x, cop_y
 
     def updateEncoders(self, last_values: int = None) -> None:
         # Get data
