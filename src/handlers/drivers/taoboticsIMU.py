@@ -36,13 +36,13 @@ class TaoboticsIMU:
             self.handler.getState()
             != mrpt.hwdrivers.CGenericSensor.TSensorState.ssWorking
         ):
-            return []
+            return self.value_list
 
         self.handler.doProcess()
         obs_list = self.handler.getObservations()
 
         if obs_list.empty():
-            return []
+            return self.value_list
 
         q_x = q_y = q_z = q_w = -1
         w_x = w_y = w_z = -1
@@ -62,4 +62,6 @@ class TaoboticsIMU:
             y_acc = obs.get(mrpt.obs.TIMUDataIndex.IMU_Y_ACC)
             z_acc = obs.get(mrpt.obs.TIMUDataIndex.IMU_Z_ACC)
 
-        return [q_x, q_y, q_z, q_w, w_x, w_y, w_z, x_acc, y_acc, z_acc]
+        self.value_list = [q_x, q_y, q_z, q_w, w_x, w_y, w_z, x_acc, y_acc, z_acc]
+
+        return self.value_list

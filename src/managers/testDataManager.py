@@ -54,6 +54,8 @@ class TestDataManager:
             return
 
     def checkDataLen(self, times_list: list, data_dict: dict, last_values: int = None):
+        if not data_dict or not times_list:
+            return False, 0
         times_len = len(times_list)
         data_keys = list(data_dict.keys())
         data_len = len(data_dict[data_keys[0]])
@@ -71,22 +73,27 @@ class TestDataManager:
         p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         # Check values
-        p1_ready, plot_len = self.checkDataLen(time_list, p1_data_dict, last_values)
-        p2_ready, plot_len = self.checkDataLen(time_list, p2_data_dict, last_values)
+        p1_ready, plot_len1 = self.checkDataLen(time_list, p1_data_dict, last_values)
+        p2_ready, plot_len2 = self.checkDataLen(time_list, p2_data_dict, last_values)
         if not p1_ready and not p2_ready:
             return
         # Get arrays for plots
-        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list[-plot_len:]])
         if p1_ready:
+            times_np = np.array(
+                [(t - time_list[0]) / 1000 for t in time_list[-plot_len1:]]
+            )
             forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-                p1_data_dict, plot_len
+                p1_data_dict, plot_len1
             )
             self.forces_p1_widget.update(
                 times_np, forces_x_p1, forces_y_p1, forces_z_p1
             )
         if p2_ready:
+            times_np = np.array(
+                [(t - time_list[0]) / 1000 for t in time_list[-plot_len2:]]
+            )
             forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-                p2_data_dict, plot_len
+                p2_data_dict, plot_len2
             )
             self.forces_p2_widget.update(
                 times_np, forces_x_p2, forces_y_p2, forces_z_p2
@@ -131,20 +138,20 @@ class TestDataManager:
         if p1_size != 12 and p2_size != 12:
             return
         # Check values
-        p1_ready, plot_len = self.checkDataLen(time_list, p1_data_dict, last_values)
-        p2_ready, plot_len = self.checkDataLen(time_list, p2_data_dict, last_values)
+        p1_ready, plot_len1 = self.checkDataLen(time_list, p1_data_dict, last_values)
+        p2_ready, plot_len2 = self.checkDataLen(time_list, p2_data_dict, last_values)
         if not p1_ready and not p2_ready:
             return
         # Get arrays for plots
         if p1_size == 12 and p1_ready:
             forces_x_p1, forces_y_p1, forces_z_p1 = self.getForces(
-                p1_data_dict, plot_len
+                p1_data_dict, plot_len1
             )
             cop_x_p1, cop_y_p1 = self.getCOP(forces_x_p1, forces_y_p1, forces_z_p1)
             self.cop_p1_widget.update(cop_x_p1, cop_y_p1)
         if p2_size == 12 and p2_ready:
             forces_x_p2, forces_y_p2, forces_z_p2 = self.getForces(
-                p2_data_dict, plot_len
+                p2_data_dict, plot_len2
             )
             cop_x_p2, cop_y_p2 = self.getCOP(forces_x_p2, forces_y_p2, forces_z_p2)
             self.cop_p2_widget.update(cop_x_p2, cop_y_p2)
@@ -174,19 +181,20 @@ class TestDataManager:
 
     def updateEncoders(self, last_values: int = None) -> None:
         # Get data
-        encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
-        if not encoder_data_dict:
-            return
         time_list = self.test_mngr.getTestTimes().copy()
+        encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
+        encoders_ready, plot_len = self.checkDataLen(
+            time_list, encoder_data_dict, last_values
+        )
+        if not encoders_ready:
+            return
         # Get arrays for plots
-        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
-        if last_values:
-            times_np = times_np[-last_values:]
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list[-plot_len:]])
         encoder_data_np = {}
         for key, values in encoder_data_dict.items():
             values_np = np.array(values)
             if last_values:
-                values_np = values_np[-last_values:]
+                values_np = values_np[-plot_len:]
             encoder_data_np[key] = values_np
         # Update plots with values
         self.encoders_widget.update(times_np, encoder_data_np)
@@ -199,25 +207,27 @@ class TestDataManager:
         if not imu_data_dict:
             return
         time_list = self.test_mngr.getTestTimes().copy()
+        imu_data_list = ["q_x", "q_y", "q_z", "q_w"]
+        imu_data_strip_dict = self.getIMUData(imu_data_dict, imu_data_list)
+        imus_ready, plot_len = self.checkDataLen(
+            time_list, imu_data_strip_dict, last_values
+        )
+        if not imus_ready:
+            return
         # Get arrays for plots
-        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list])
-        if last_values:
-            times_np = times_np[-last_values:]
-        time_len = times_np.size
+        times_np = np.array([(t - time_list[0]) / 1000 for t in time_list[-plot_len:]])
         imu_data_np = {}
-        for key, values in imu_data_dict.items():
-            imu_data_np[key] = self.getAngles(time_len, values)
+        for key, values in imu_data_strip_dict.items():
+            imu_data_np[key] = self.getAngles(plot_len, values)
         # Update plots with values
         self.imu_angles_widget.update(times_np, imu_data_np)
 
-    def getAngles(
-        self, array_len: int, data_dict: dict, last_values: int = None
-    ) -> list:
+    def getAngles(self, array_len: int, quaternions: list) -> list:
         x_angles_np = np.zeros(array_len)
         y_angles_np = np.zeros(array_len)
         z_angles_np = np.zeros(array_len)
 
-        # TODO Transform to Euler data
+        # TODO Transform to Euler data using mrpt
 
         return [x_angles_np, y_angles_np, z_angles_np]
 
@@ -239,8 +249,11 @@ class TestDataManager:
     def getIMUData(self, sensor_data: dict, imu_data_list: list) -> dict:
         data_dict = {}
         for key, values in sensor_data.items():
-            for i in range(len(values[0])):
-                new_key = f"{key}_{imu_data_list[i]}"
+            # FIXME despite not being connected, there will be a list with empty lists...
+            if not values[0]:
+                continue
+            for i, imu_data in enumerate(imu_data_list):
+                new_key = f"{key}_{imu_data}"
                 if new_key not in data_dict:
                     data_dict[new_key] = []
                 data_dict[new_key].extend([value[i] for value in values])
