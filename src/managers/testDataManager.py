@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from mrpt.pymrpt import mrpt
 from src.qtUIs.widgets.matplotlibWidgets import (
     PlotPlatformForcesWidget,
     PlotPlatformCOPWidget,
@@ -207,29 +208,33 @@ class TestDataManager:
         if not imu_data_dict:
             return
         time_list = self.test_mngr.getTestTimes().copy()
-        imu_data_list = ["q_x", "q_y", "q_z", "q_w"]
-        imu_data_strip_dict = self.getIMUData(imu_data_dict, imu_data_list)
-        imus_ready, plot_len = self.checkDataLen(
-            time_list, imu_data_strip_dict, last_values
-        )
+        imus_ready, plot_len = self.checkDataLen(time_list, imu_data_dict, last_values)
         if not imus_ready:
             return
         # Get arrays for plots
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list[-plot_len:]])
         imu_data_np = {}
-        for key, values in imu_data_strip_dict.items():
+        for key, values in imu_data_dict.items():
+            if not values[0]:
+                continue
             imu_data_np[key] = self.getAngles(plot_len, values)
         # Update plots with values
         self.imu_angles_widget.update(times_np, imu_data_np)
 
-    def getAngles(self, array_len: int, quaternions: list) -> list:
-        x_angles_np = np.zeros(array_len)
-        y_angles_np = np.zeros(array_len)
-        z_angles_np = np.zeros(array_len)
+    def getAngles(self, array_len: int, data_list: list) -> list:
+        yaw_list = []
+        pitch_list = []
+        roll_list = []
 
-        # TODO Transform to Euler data using mrpt
+        for data in data_list:
+            # data: qx, qy, qz, qx, w[...], acc[...]
+            quat = mrpt.math.CQuaternion_double_t(data[3], data[0], data[1], data[2])
+            pose = mrpt.poses.CPose3D(quat, 0, 0, 0)
+            yaw_list.append(pose.yaw())
+            pitch_list.append(pose.pitch())
+            roll_list.append(pose.roll())
 
-        return [x_angles_np, y_angles_np, z_angles_np]
+        return [yaw_list, pitch_list, roll_list]
 
     def getSensorData(self, sensor_group: SensorGroup, raw_data: bool = False) -> dict:
         data_dict = {}
