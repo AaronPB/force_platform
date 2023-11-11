@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import math
 import numpy as np
 import pandas as pd
 from mrpt.pymrpt import mrpt
@@ -54,12 +55,11 @@ class TestDataManager:
             self.updateIMUAngles(1000)
             return
 
-    def checkDataLen(self, times_list: list, data_dict: dict, last_values: int = None):
-        if not data_dict or not times_list:
+    def checkDataLen(self, times: list, data: list, last_values: int = None):
+        if not data or not times:
             return False, 0
-        times_len = len(times_list)
-        data_keys = list(data_dict.keys())
-        data_len = len(data_dict[data_keys[0]])
+        times_len = len(times)
+        data_len = len(data)
         if times_len == data_len:
             if last_values is not None and data_len > last_values:
                 return True, last_values
@@ -74,8 +74,12 @@ class TestDataManager:
         p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
         p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
         # Check values
-        p1_ready, plot_len1 = self.checkDataLen(time_list, p1_data_dict, last_values)
-        p2_ready, plot_len2 = self.checkDataLen(time_list, p2_data_dict, last_values)
+        p1_ready, plot_len1 = self.checkDataLen(
+            time_list, next(iter(p1_data_dict.values()), None), last_values
+        )
+        p2_ready, plot_len2 = self.checkDataLen(
+            time_list, next(iter(p2_data_dict.values()), None), last_values
+        )
         if not p1_ready and not p2_ready:
             return
         # Get arrays for plots
@@ -139,8 +143,12 @@ class TestDataManager:
         if p1_size != 12 and p2_size != 12:
             return
         # Check values
-        p1_ready, plot_len1 = self.checkDataLen(time_list, p1_data_dict, last_values)
-        p2_ready, plot_len2 = self.checkDataLen(time_list, p2_data_dict, last_values)
+        p1_ready, plot_len1 = self.checkDataLen(
+            time_list, next(iter(p1_data_dict.values()), None), last_values
+        )
+        p2_ready, plot_len2 = self.checkDataLen(
+            time_list, next(iter(p2_data_dict.values()), None), last_values
+        )
         if not p1_ready and not p2_ready:
             return
         # Get arrays for plots
@@ -208,7 +216,9 @@ class TestDataManager:
         if not imu_data_dict:
             return
         time_list = self.test_mngr.getTestTimes().copy()
-        imus_ready, plot_len = self.checkDataLen(time_list, imu_data_dict, last_values)
+        imus_ready, plot_len = self.checkDataLen(
+            time_list, next(iter(imu_data_dict.values()), None), last_values
+        )
         if not imus_ready:
             return
         # Get arrays for plots
@@ -225,14 +235,15 @@ class TestDataManager:
         yaw_list = []
         pitch_list = []
         roll_list = []
+        degrees_conv = float(180 / math.pi)
 
-        for data in data_list:
+        for data in data_list[-array_len:]:
             # data: qx, qy, qz, qx, w[...], acc[...]
             quat = mrpt.math.CQuaternion_double_t(data[3], data[0], data[1], data[2])
             pose = mrpt.poses.CPose3D(quat, 0, 0, 0)
-            yaw_list.append(pose.yaw())
-            pitch_list.append(pose.pitch())
-            roll_list.append(pose.roll())
+            yaw_list.append(pose.yaw() * degrees_conv)
+            pitch_list.append(pose.pitch() * degrees_conv)
+            roll_list.append(pose.roll() * degrees_conv)
 
         return [yaw_list, pitch_list, roll_list]
 
