@@ -188,7 +188,8 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.calib_mngr.stopRecording()
         values = self.calib_mngr.getValues(test_value)
         self.addMeasurementRow(values[0], values[1], values[2], values[3])
-        # TODO update plot
+        sensor_values, test_values = self.calib_mngr.getValuesArrays()
+        self.plot_widget.updateScatter(sensor_values, test_values)
         self.enableButtons(True)
 
     @QtCore.Slot()
@@ -202,12 +203,16 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         if selected_row >= 0:
             self.measurements_widget.removeRow(selected_row)
             self.calib_mngr.removeValueSet(selected_row)
+        sensor_values, test_values = self.calib_mngr.getValuesArrays()
+        self.plot_widget.updateScatter(sensor_values, test_values)
         self.enableButtons(True)
 
     @QtCore.Slot()
     def generateResults(self):
         results = self.calib_mngr.getRegressionResults()
         self.updateResultsTable(results[0], results[1], results[2])
+        sensor_values, calib_values = self.calib_mngr.getRegressionArrays()
+        self.plot_widget.updateRegression(sensor_values, calib_values)
 
     @QtCore.Slot()
     def saveResults(self):

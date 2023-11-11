@@ -112,6 +112,7 @@ class CalibrationManager:
         if auto:
             self.reference_sensor.clearValues()
             self.reference_sensor.connect()
+            self.add_ref_sensor = True
         self.calib_sensor.clearValues()
         self.calib_sensor.connect()
 
@@ -155,3 +156,11 @@ class CalibrationManager:
         self.calib_results.append(model.intercept_.item())
         self.calib_results.append(model.score(features, targets))
         return self.calib_results
+
+    def getValuesArrays(self):
+        return np.array(self.sensor_values), np.array(self.test_values)
+
+    def getRegressionArrays(self):
+        sensor_values = np.array(self.sensor_values)
+        test_values = sensor_values * self.calib_results[0] + self.calib_results[1]
+        return sensor_values, test_values
