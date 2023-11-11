@@ -43,7 +43,7 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
             (line,) = ax.plot(0, 0, label=name)
             lines_ax.append(line)
         lines_ax.append(line)
-        ax.legend()
+        ax.legend(loc="upper right")
         self.lines_defined = True
 
     def update(
@@ -97,7 +97,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         (self.line_last,) = self.ax.plot(
             0, 0, label=f"Last {self.last_indexes} values", color="red"
         )
-        self.ax.legend()
+        self.ax.legend(loc="upper right")
 
         # Platform rectangle patch (mm)
         x_len = 600
@@ -153,6 +153,10 @@ class PlotEncoderWidget(QtWidgets.QWidget):
 
     def createSubplots(self, encoder_names: list, real_set: bool = False):
         encoders_len = len(encoder_names)
+        if real_set:
+            self.figure.clear()
+            self.subplots_lines.clear()
+            self.subplots_ax.clear()
         for i, encoder_name in enumerate(encoder_names):
             ax = self.figure.add_subplot(math.ceil(encoders_len / 2), 2, i + 1)
             ax.grid(True)
@@ -168,8 +172,12 @@ class PlotEncoderWidget(QtWidgets.QWidget):
         if not self.subplots_set:
             self.createSubplots(list(encoders_dict.keys()), True)
 
-        for line, values_np in zip(self.subplots_lines, encoders_dict.values()):
+        for ax, line, values_np in zip(
+            self.subplots_ax, self.subplots_lines, encoders_dict.values()
+        ):
             line.set_data(times_np, values_np)
+            ax.relim()
+            ax.autoscale_view()
 
         self.canvas.draw()
 
@@ -200,6 +208,10 @@ class PlotIMUWidget(QtWidgets.QWidget):
 
     def createSubplots(self, imu_names: list, real_set: bool = False):
         imus_len = len(imu_names)
+        if real_set:
+            self.figure.clear(keep_observers=True)
+            self.subplots_lines.clear()
+            self.subplots_ax.clear()
         for i, encoder_name in enumerate(imu_names):
             ax = self.figure.add_subplot(math.ceil(imus_len / 2), 2, i + 1)
             ax.grid(True)
@@ -209,7 +221,9 @@ class PlotIMUWidget(QtWidgets.QWidget):
             ax.set_title(encoder_name)
             # ax.set_xlabel('Time(s)')
             ax.set_ylabel("Angle (degrees)")
-            ax.legend()
+            ax.set_ylim(-180, 180)
+            ax.set_yticks(range(-180, 181, 20))
+            ax.legend(loc="upper right")
             self.subplots_lines.append([line_x, line_y, line_z])
             self.subplots_ax.append(ax)
         self.subplots_set = real_set
@@ -218,10 +232,14 @@ class PlotIMUWidget(QtWidgets.QWidget):
         if not self.subplots_set:
             self.createSubplots(list(imus_dict.keys()), True)
 
-        for line, values_np in zip(self.subplots_lines, imus_dict.values()):
+        for ax, line, values_np in zip(
+            self.subplots_ax, self.subplots_lines, imus_dict.values()
+        ):
             line[0].set_data(times_np, values_np[0])
             line[1].set_data(times_np, values_np[1])
             line[2].set_data(times_np, values_np[2])
+            ax.relim()
+            ax.autoscale_view()
 
         self.canvas.draw()
 
