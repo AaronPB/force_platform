@@ -34,6 +34,16 @@ QPushButton#cp_btn {
     padding: 15px;
 }
 
+QPushButton#critical_btn {
+    background-color: red;
+    color: darkred;
+}
+
+QPushButton:disabled#critical_btn {
+    background-color: gray;
+    color: darkslategray;
+}
+
 QPushButton#critical_cp_btn {
     background-color: red;
     color: darkred;

@@ -62,18 +62,6 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         group_box_general_buttons = QtWidgets.QGroupBox("Manage results")
         self.grid_buttons_layout = QtWidgets.QGridLayout()
         group_box_general_buttons.setLayout(self.grid_buttons_layout)
-        self.generate_results_button = self.createQPushButton(
-            "Make linear regression",
-            QssLabels.CONTROL_PANEL_BTN,
-            enabled=False,
-            connect_fn=self.generateResults,
-        )
-        self.remove_row_button = self.createQPushButton(
-            "Remove selected measure row",
-            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
-            enabled=False,
-            connect_fn=self.removeRow,
-        )
         self.save_button = self.createQPushButton(
             "Save results", QssLabels.CONTROL_PANEL_BTN, enabled=False
         )
@@ -82,10 +70,8 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=False,
         )
-        self.grid_buttons_layout.addWidget(self.generate_results_button, 0, 0)
-        self.grid_buttons_layout.addWidget(self.remove_row_button, 0, 1)
-        self.grid_buttons_layout.addWidget(self.save_button, 1, 0)
-        self.grid_buttons_layout.addWidget(self.clear_button, 1, 1)
+        self.grid_buttons_layout.addWidget(self.save_button, 0, 0)
+        self.grid_buttons_layout.addWidget(self.clear_button, 0, 1)
 
         hbox_info_layout.addWidget(group_box_sensor_info)
         hbox_info_layout.addWidget(group_box_general_buttons)
@@ -118,11 +104,18 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.test_value_input.setPlaceholderText(
             "Enter calibration value: (example) 14.67"
         )
+        self.remove_row_button = self.createQPushButton(
+            "Remove selected row",
+            QssLabels.CRITICAL_BTN,
+            enabled=False,
+            connect_fn=self.removeRow,
+        )
         self.test_value_input.setDisabled(True)
         self.test_value_input.textChanged.connect(self.onTextChanged)
         grid_measure_btns_layout.addWidget(self.auto_measure_button, 0, 0)
         grid_measure_btns_layout.addWidget(self.manual_measure_button, 0, 1)
         grid_measure_btns_layout.addWidget(self.test_value_input, 0, 2)
+        grid_measure_btns_layout.addWidget(self.remove_row_button, 0, 3)
 
         # -  Results TableWidget
         self.calib_results_widget = QtWidgets.QTableWidget(3, 1)
@@ -146,10 +139,17 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         # - PlotWidget to plot measurements
         self.plot_widget = PlotRegressionWidget()
 
+        self.generate_results_button = self.createQPushButton(
+            "Make linear regression",
+            enabled=False,
+            connect_fn=self.generateResults,
+        )
+
         # - Build calibration layout
         vbox_calibration_layout.addWidget(self.measurements_widget)
         vbox_calibration_layout.addLayout(grid_measure_btns_layout)
         vbox_calibration_layout.addWidget(self.plot_widget)
+        vbox_calibration_layout.addWidget(self.generate_results_button)
         vbox_calibration_layout.addWidget(self.calib_results_widget)
 
         # Build main layout

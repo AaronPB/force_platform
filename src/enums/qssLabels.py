@@ -4,6 +4,7 @@ from enum import Enum
 class QssLabels(Enum):
     CONTROL_PANEL_BTN = "cp_btn"
     CRITICAL_CONTROL_PANEL_BTN = "critical_cp_btn"
+    CRITICAL_BTN = "critical_btn"
     TITLE_LABEL = "title"
     AUTHOR_COPYRIGHT_LABEL = "author_copy"
     STATUS_LABEL_INFO = "status_info"
