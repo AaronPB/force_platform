@@ -7,13 +7,10 @@ from src.handlers import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SensorParams as SParams
 from src.enums.sensorDrivers import SensorDrivers as SDrivers
-from src.utils import LogHandler
 
 
 class TestManager:
     def __init__(self, config_mngr: ConfigManager) -> None:
-        self.log_handler = LogHandler(str(__class__.__name__))
-
         # Global values
         self.config_mngr = config_mngr
         self.sensors_connected = False
