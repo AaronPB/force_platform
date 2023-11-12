@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+from loguru import logger
 from src.managers.configManager import ConfigManager
 from src.enums.configPaths import ConfigPaths as CfgPaths
 
@@ -30,7 +30,7 @@ class TestFileManager:
             )
             total_path = os.path.join(self.file_path, new_name + ".csv")
             if not os.path.exists(total_path):
-                print(
+                logger.warning(
                     f"There is already a file named {name}. The new file will be {new_name}"
                 )
                 break
@@ -45,10 +45,12 @@ class TestFileManager:
             return
         self.file_name = name
         self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_NAME.value, self.file_name)
+        logger.info(f"Changed test name to: {self.file_name}")
 
     def setFilePath(self, path: str, check_name: bool = True):
         self.file_path = path
         self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_FOLDER.value, self.file_path)
+        logger.info(f"Changed test folder path to: {self.file_path}")
         if check_name:
             self.setFileName(self.file_name)
 
@@ -68,21 +70,25 @@ class TestFileManager:
 
     def saveDataToCSV(self, df: pd.DataFrame, name_suffix: str = ""):
         if not self.getPathExists():
-            print("The file path does not exist!")
+            logger.warning("The file path does not exist!")
             return
         file_name = self.file_name + name_suffix
         total_path = os.path.join(self.file_path, file_name + ".csv")
         df.to_csv(total_path, index=False)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
-        print(f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)")
+        logger.info(
+            f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)"
+        )
 
     def saveDataToBinary(self, df: pd.DataFrame):
         if not self.getPathExists():
-            print("The file path does not exist!")
+            logger.warning("The file path does not exist!")
             return
         total_path = os.path.join(self.file_path, self.file_name + ".pk1")
         df.to_pickle(total_path, index=False)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
-        print(f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)")
+        logger.info(
+            f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)"
+        )

@@ -102,12 +102,11 @@ class MainUI(QtWidgets.QWidget):
         # Update file name in case
         self.file_mngr.checkFileName()
         self.test_name_input.setText(self.file_mngr.getFileName())
-        print(f"Starting test: {self.file_mngr.getFileName()}")
 
         self.start_button.setEnabled(False)
         self.sensors_connect_button.setEnabled(False)
         self.calibration_button.setEnabled(False)
-        self.test_mngr.testStart()
+        self.test_mngr.testStart(self.file_mngr.getFileName())
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
@@ -126,8 +125,7 @@ class MainUI(QtWidgets.QWidget):
             self.plot_thread.stopTimer()
         dataframe = self.data_mngr.getDataFrame()
         dataframe_raw = self.data_mngr.getDataFrame(raw_data=True)
-        self.test_mngr.testStop()
-        print(f"Stopped test: {self.file_mngr.getFileName()}")
+        self.test_mngr.testStop(self.file_mngr.getFileName())
 
         self.file_mngr.saveDataToCSV(dataframe)
         self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
@@ -189,7 +187,6 @@ class MainUI(QtWidgets.QWidget):
         )
         if folder_path:
             self.file_mngr.setFilePath(folder_path)
-            print(f"Changed test folder path to: {folder_path}")
             self.updateTestStatus()
 
     @QtCore.Slot()
@@ -198,7 +195,6 @@ class MainUI(QtWidgets.QWidget):
         if not test_name:
             test_name = "Test"
         self.file_mngr.setFileName(test_name)
-        print(f"Changed test name to: {self.file_mngr.getFileName()}")
         self.updateTestStatus()
 
     @QtCore.Slot()

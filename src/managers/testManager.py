@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-
+from loguru import logger
 from src.managers.configManager import ConfigManager
 from src.handlers import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
@@ -160,7 +160,8 @@ class TestManager:
         self.sensors_connected = any(connection_results_list)
         return self.sensors_connected
 
-    def testStart(self) -> None:
+    def testStart(self, test_name: str) -> None:
+        logger.info(f"Starting test: {test_name}")
         self.test_times = []
         [handler.clearSensorValues() for handler in self.sensor_group_list]
         [handler.start() for handler in self.sensor_group_list]
@@ -169,7 +170,8 @@ class TestManager:
         self.test_times.append(round(time.time() * 1000))
         [handler.register() for handler in self.sensor_group_list]
 
-    def testStop(self) -> None:
+    def testStop(self, test_name: str) -> None:
+        logger.info(f"Finish test: {test_name}")
         [handler.stop() for handler in self.sensor_group_list]
         # Save modified intercepts in config
         self.config_mngr.saveConfig()

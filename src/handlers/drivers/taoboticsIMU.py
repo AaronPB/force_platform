@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from loguru import logger
 from mrpt.pymrpt import mrpt
 
 
-# TODO replace prints to log_handler
 class TaoboticsIMU:
     def __init__(self, serial: int, channel: int = None) -> None:
         self.serial = serial
@@ -21,7 +21,7 @@ class TaoboticsIMU:
         try:
             self.handler.initialize()
         except Exception:
-            print(f"Could not connect to serial {self.serial}")
+            logger.warning(f"Could not connect to serial {self.serial}")
             return False
         return (
             self.handler.getState()

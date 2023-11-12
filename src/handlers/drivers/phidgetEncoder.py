@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import threading
+from loguru import logger
 from Phidget22.Phidget import *
 from Phidget22.Devices.Encoder import *
 
 
-# TODO replace prints to log_handler
 class PhidgetEncoder:
     def __init__(self, serial: int, channel: int) -> None:
         self.handler = Encoder()
@@ -25,7 +25,7 @@ class PhidgetEncoder:
             self.handler.openWaitForAttachment(wait_ms)
             self.handler.setDataInterval(interval_ms)
         except PhidgetException:
-            print(
+            logger.warning(
                 f"Could not connect to serial {self.handler.getDeviceSerialNumber()}, channel {self.handler.getChannel()}"
             )
             return False
@@ -35,7 +35,7 @@ class PhidgetEncoder:
         try:
             self.handler.close()
         except PhidgetException:
-            print(
+            logger.error(
                 f"Could not disconnect serial {self.handler.getDeviceSerialNumber()}, channel {self.handler.getChannel()}"
             )
 
