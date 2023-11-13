@@ -8,15 +8,11 @@ from src.enums.configPaths import ConfigPaths as CfgPaths
 class TestFileManager:
     def __init__(self, cfg_mngr: ConfigManager) -> None:
         self.cfg_mngr = cfg_mngr
-        self.file_name = "Test"
-        self.setFilePath(
-            self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_FOLDER.value, ""),
-            check_name=False,
+        self.file_name = self.cfg_mngr.getConfigValue(
+            CfgPaths.GENERAL_TEST_NAME.value, "Test"
         )
-        self.setFileName(
-            self.cfg_mngr.getConfigValue(
-                CfgPaths.GENERAL_TEST_NAME.value, self.file_name
-            )
+        self.file_path = self.cfg_mngr.getConfigValue(
+            CfgPaths.GENERAL_TEST_FOLDER.value, ""
         )
 
     def checkDuplicatedName(self, name: str) -> str:
