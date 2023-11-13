@@ -28,8 +28,9 @@ class SensorGroup:
         results = False
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
-            results = list(executor.map(lambda sensor: sensor.connect(), sensors_list))
-            executor.map(lambda sensor: sensor.disconnect(), sensors_list)
+            results = list(
+                executor.map(lambda sensor: sensor.checkConnection(), sensors_list)
+            )
         return any(results)
 
     def start(self) -> None:

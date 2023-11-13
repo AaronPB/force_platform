@@ -18,8 +18,10 @@ class Sensor:
         )
         self.values = []
 
-    def connect(self) -> bool:
+    def connect(self, check: bool = False) -> bool:
         if not self.params[SParams.READ.value]:
+            return False
+        if not check and self.status is not SStatus.AVAILABLE:
             return False
         self.status = SStatus.NOT_FOUND
         if self.driver.connect():
@@ -31,7 +33,7 @@ class Sensor:
         self.driver.disconnect()
 
     def checkConnection(self) -> bool:
-        connected = self.connect()
+        connected = self.connect(check=True)
         if connected:
             self.disconnect()
         return connected
