@@ -341,5 +341,5 @@ class TestDataManager:
         }
         df = pd.DataFrame(merged_data)
         # Format dataframes values to 0.000000e+00
-        df.iloc[:, 1:] = df.iloc[:, 1:].applymap(lambda x: "{:.6e}".format(x))
+        df.iloc[:, 1:] = df.iloc[:, 1:].apply(lambda x: x.map("{:.6e}".format))
         return df
