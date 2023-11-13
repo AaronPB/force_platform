@@ -29,7 +29,13 @@ class MainUI(QtWidgets.QWidget):
         self.updateTestStatus()
         self.getSensorInformation()
 
-        self.plot_thread = PlotterThread(self.tabular_widget, self.data_mngr, 500)
+        self.plot_thread = PlotterThread(
+            self.tabular_widget,
+            self.data_mngr,
+            self.cfg_mngr.getConfigValue(
+                CfgPaths.GENERAL_PLOTTERS_INTERVAL_MS.value, 500
+            ),
+        )
 
     def initManagers(self) -> None:
         self.file_mngr = TestFileManager(self.cfg_mngr)
@@ -114,7 +120,8 @@ class MainUI(QtWidgets.QWidget):
             self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100)
         )
 
-        self.plot_thread.start()
+        if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_PLOTTERS_ENABLED.value, False):
+            self.plot_thread.start()
 
     @QtCore.Slot()
     def stopTest(self):
@@ -127,8 +134,12 @@ class MainUI(QtWidgets.QWidget):
         dataframe_raw = self.data_mngr.getDataFrame(raw_data=True)
         self.test_mngr.testStop(self.file_mngr.getFileName())
 
-        self.file_mngr.saveDataToCSV(dataframe)
-        self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
+        if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_SAVE_CALIB.value, True):
+            self.file_mngr.saveDataToCSV(dataframe)
+        if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_SAVE_RAW.value, True):
+            self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
+
+        # TODO plot all values in tab plotters
 
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)

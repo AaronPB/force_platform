@@ -6,16 +6,19 @@ general_settings:
   test_times:
     data_interval_ms: 10
     tare_time_ms: 3000
-  test_file_path:
+  test_results:
     folder: /home/aaroncite4/Documents/Github/force_platform/pruebas
     name: Test
-  test_results:
-    generate_plot: true
-    column_headers:
-    - 1
-    - 2
-    - 3
-    - 4
+    save_calib_results: true
+    save_raw_results: true
+  tab_plotters:
+    enabled: true
+    update_interval_ms: 500
+    plot_max_values:
+      platform_forces: 1000
+      platform_stabilogram: 1000
+      encoders: 1000
+      imu_angles: 1000
 p1_phidget_loadcell_list:
   load_cell_1:
     name: P1_LoadCell_Z_1

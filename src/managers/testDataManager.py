@@ -12,6 +12,7 @@ from src.qtUIs.widgets.matplotlibWidgets import (
 )
 from src.managers.testManager import TestManager
 from src.handlers.sensorGroup import SensorGroup
+from src.enums.configPaths import ConfigPaths as CfgPaths
 
 
 class TestDataManager:
@@ -23,6 +24,19 @@ class TestDataManager:
         self.data_platform2 = {}
         self.data_encoders = {}
         self.data_imus = {}
+
+        self.forces_max_values = self.test_mngr.config_mngr.getConfigValue(
+            CfgPaths.GENERAL_PLOTTERS_MAX_FORCES.value, 1000
+        )
+        self.stabilogram_max_values = self.test_mngr.config_mngr.getConfigValue(
+            CfgPaths.GENERAL_PLOTTERS_MAX_STABILOGRAM.value, 1000
+        )
+        self.encoders_max_values = self.test_mngr.config_mngr.getConfigValue(
+            CfgPaths.GENERAL_PLOTTERS_MAX_ENCODERS.value, 1000
+        )
+        self.imus_max_values = self.test_mngr.config_mngr.getConfigValue(
+            CfgPaths.GENERAL_PLOTTERS_MAX_IMUS.value, 1000
+        )
 
     def setupPlotWidgets(self):
         p1_group_name = self.test_mngr.sensor_group_platform1.getGroupName()
@@ -43,16 +57,16 @@ class TestDataManager:
 
     def updatePlotWidgetDraw(self, index: int) -> None:
         if index == 1:
-            self.updatePlatformForces(1000)
+            self.updatePlatformForces(self.forces_max_values)
             return
         if index == 2:
-            self.updateStabilograms(2000)
+            self.updateStabilograms(self.stabilogram_max_values)
             return
         if index == 3:
-            self.updateEncoders(1000)
+            self.updateEncoders(self.encoders_max_values)
             return
         if index == 4:
-            self.updateIMUAngles(1000)
+            self.updateIMUAngles(self.imus_max_values)
             return
 
     def checkDataLen(self, times: list, data: list, last_values: int = None):
