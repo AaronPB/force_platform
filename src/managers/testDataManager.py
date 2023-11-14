@@ -55,6 +55,15 @@ class TestDataManager:
         )
         self.imu_angles_widget = PlotIMUWidget(imus_group_name, imus_group_size)
 
+    def clearAllPlots(self) -> None:
+        self.forces_p1_widget.clear()
+        self.forces_p2_widget.clear()
+        self.cop_p1_widget.clear()
+        self.cop_p2_widget.clear()
+        self.encoders_widget.clear()
+        self.imu_angles_widget.clear()
+        # self.setupPlotWidgets()
+
     def updatePlotWidgetDraw(self, index: int) -> None:
         if index == 1:
             self.updatePlatformForces(self.forces_max_values)
@@ -68,6 +77,12 @@ class TestDataManager:
         if index == 4:
             self.updateIMUAngles(self.imus_max_values)
             return
+
+    def updateAllPlots(self) -> None:
+        self.updatePlatformForces()
+        self.updateStabilograms()
+        self.updateEncoders()
+        self.updateIMUAngles()
 
     def checkDataLen(self, times: list, data: list, last_values: int = None):
         if not data or not times:
@@ -117,9 +132,6 @@ class TestDataManager:
             self.forces_p2_widget.update(
                 times_np, forces_x_p2, forces_y_p2, forces_z_p2
             )
-        # Update plots with values
-        # self.forces_p1_widget.update(times_np, forces_x_p1, forces_y_p1, forces_z_p1)
-        # self.forces_p2_widget.update(times_np, forces_x_p2, forces_y_p2, forces_z_p2)
 
     def getForces(self, data_dict: dict, plot_len: int = None):
         sum_key = "Sum forces"
@@ -239,7 +251,7 @@ class TestDataManager:
         times_np = np.array([(t - time_list[0]) / 1000 for t in time_list[-plot_len:]])
         imu_data_np = {}
         for key, values in imu_data_dict.items():
-            if not values[0]:
+            if not values:
                 continue
             imu_data_np[key] = self.getAngles(plot_len, values)
         # Update plots with values
@@ -279,8 +291,7 @@ class TestDataManager:
     def getIMUData(self, sensor_data: dict, imu_data_list: list) -> dict:
         data_dict = {}
         for key, values in sensor_data.items():
-            # FIXME despite not being connected, there will be a list with empty lists...
-            if not values[0]:
+            if not values:
                 continue
             for i, imu_data in enumerate(imu_data_list):
                 new_key = f"{key}_{imu_data}"

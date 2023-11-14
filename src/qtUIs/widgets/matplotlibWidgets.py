@@ -17,17 +17,16 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
 
         self.group_name = group_name
 
+        self.setup()
+
+    def setup(self):
         self.ax1 = self.figure.add_subplot(311)
         self.ax2 = self.figure.add_subplot(312, sharex=self.ax1)
         self.ax3 = self.figure.add_subplot(313, sharex=self.ax1)
-
         self.lines_ax1 = []
         self.lines_ax2 = []
         self.lines_ax3 = []
 
-        self.setup()
-
-    def setup(self):
         self.lines_defined = False
         self.ax1.set_title(f"Forces - {self.group_name}")
         self.ax1.set_ylabel("Forces Z (kg)")
@@ -68,6 +67,7 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         self.canvas.draw()
 
     def clear(self):
+        self.figure.clear()
         self.setup()
 
 
@@ -83,12 +83,10 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.group_name = group_name
         self.last_indexes = 20
 
-        self.ax = self.figure.add_subplot()
-
         self.setup()
 
     def setup(self):
-        self.ax.clear()
+        self.ax = self.figure.add_subplot()
         self.ax.set_title(f"COP - {self.group_name}")
         self.ax.set_xlabel("Medio-Lateral Motion (mm)")
         self.ax.set_ylabel("Anterior-Posterior Motion (mm)")
@@ -125,6 +123,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.canvas.draw()
 
     def clear(self):
+        self.figure.clear()
         self.setup()
 
 
@@ -145,7 +144,6 @@ class PlotEncoderWidget(QtWidgets.QWidget):
         self.setup()
 
     def setup(self):
-        self.figure.clear()
         self.createSubplots(
             ["Encoder " + str(i) for i in range(1, self.group_size + 1)]
         )
@@ -182,6 +180,7 @@ class PlotEncoderWidget(QtWidgets.QWidget):
         self.canvas.draw()
 
     def clear(self):
+        self.figure.clear()
         self.setup()
 
 
@@ -202,7 +201,6 @@ class PlotIMUWidget(QtWidgets.QWidget):
         self.setup()
 
     def setup(self):
-        self.figure.clear()
         self.createSubplots(["IMU " + str(i) for i in range(1, self.group_size + 1)])
         self.canvas.draw()
 
@@ -244,6 +242,7 @@ class PlotIMUWidget(QtWidgets.QWidget):
         self.canvas.draw()
 
     def clear(self):
+        self.figure.clear()
         self.setup()
 
 

@@ -116,6 +116,8 @@ class MainUI(QtWidgets.QWidget):
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
+        self.data_mngr.clearAllPlots()
+
         self.test_timer.start(
             self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100)
         )
@@ -132,14 +134,13 @@ class MainUI(QtWidgets.QWidget):
             self.plot_thread.stopTimer()
         dataframe = self.data_mngr.getDataFrame()
         dataframe_raw = self.data_mngr.getDataFrame(raw_data=True)
+        self.data_mngr.updateAllPlots()
         self.test_mngr.testStop(self.file_mngr.getFileName())
 
         if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_SAVE_CALIB.value, True):
             self.file_mngr.saveDataToCSV(dataframe)
         if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_SAVE_RAW.value, True):
             self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
-
-        # TODO plot all values in tab plotters
 
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)

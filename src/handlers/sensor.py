@@ -39,6 +39,8 @@ class Sensor:
         return connected
 
     def registerValue(self) -> None:
+        if self.status is not SStatus.AVAILABLE:
+            return
         self.values.append(self.driver.getValue())
 
     # Setters and getters methods
