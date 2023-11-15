@@ -90,7 +90,7 @@ class SensorLoader:
             return None
         if not all(key.value in ref_sensor_section.keys() for key in required_keys):
             return None
-        self.reference_sensor = Sensor(name, ref_sensor_section, sensor_driver)
+        return Sensor(name, ref_sensor_section, sensor_driver)
 
     def getSensorGroups(self) -> list:
         return [
