@@ -6,6 +6,7 @@ from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.testFileManager import TestFileManager
 from src.managers.testDataManager import TestDataManager
+from src.sensorLoader import SensorLoader
 from src.qtUIs.threads.plotterThread import PlotterThread
 from PySide6 import QtWidgets, QtGui, QtCore
 
@@ -17,11 +18,13 @@ class MainUI(QtWidgets.QWidget):
         self,
         stacked_widget: QtWidgets.QStackedWidget,
         config_manager: ConfigManager,
+        sensor_loader: SensorLoader,
         logo_image_path: str,
     ):
         super().__init__()
         self.stacked_widget = stacked_widget
         self.cfg_mngr = config_manager
+        self.sensor_loader = sensor_loader
         self.logo_img_path = logo_image_path
 
         self.initManagers()
@@ -39,7 +42,8 @@ class MainUI(QtWidgets.QWidget):
 
     def initManagers(self) -> None:
         self.file_mngr = TestFileManager(self.cfg_mngr)
-        self.test_mngr = TestManager(self.cfg_mngr)
+        self.sensor_loader.loadHandlers()
+        self.test_mngr = TestManager(self.cfg_mngr, self.sensor_loader)
         self.data_mngr = TestDataManager(self.test_mngr)
 
         self.test_timer = QtCore.QTimer(self)

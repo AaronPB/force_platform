@@ -14,6 +14,8 @@ from src.managers.testManager import TestManager
 from src.handlers.sensorGroup import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
 
+from loguru import logger
+
 
 class TestDataManager:
     def __init__(self, test_manager: TestManager):
@@ -39,12 +41,12 @@ class TestDataManager:
         )
 
     def setupPlotWidgets(self):
-        p1_group_name = self.test_mngr.sensor_group_platform1.getGroupName()
-        p2_group_name = self.test_mngr.sensor_group_platform2.getGroupName()
-        encoders_group_name = self.test_mngr.sensor_group_encoders.getGroupName()
-        encoders_group_size = self.test_mngr.sensor_group_encoders.getGroupSize()
-        imus_group_name = self.test_mngr.sensor_group_imus.getGroupName()
-        imus_group_size = self.test_mngr.sensor_group_imus.getGroupSize()
+        p1_group_name = self.test_mngr.group_platform1.getGroupName()
+        p2_group_name = self.test_mngr.group_platform2.getGroupName()
+        encoders_group_name = self.test_mngr.group_encoders.getGroupName()
+        encoders_group_size = self.test_mngr.group_encoders.getGroupSize()
+        imus_group_name = self.test_mngr.group_imus.getGroupName()
+        imus_group_size = self.test_mngr.group_imus.getGroupSize()
 
         self.forces_p1_widget = PlotPlatformForcesWidget(p1_group_name)
         self.forces_p2_widget = PlotPlatformForcesWidget(p2_group_name)
@@ -62,7 +64,6 @@ class TestDataManager:
         self.cop_p2_widget.clear()
         self.encoders_widget.clear()
         self.imu_angles_widget.clear()
-        # self.setupPlotWidgets()
 
     def updatePlotWidgetDraw(self, index: int) -> None:
         if index == 1:
@@ -100,8 +101,8 @@ class TestDataManager:
     def updatePlatformForces(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        p1_data_dict = self.getSensorData(self.test_mngr.group_platform1)
+        p2_data_dict = self.getSensorData(self.test_mngr.group_platform2)
         # Check values
         p1_ready, plot_len1 = self.checkDataLen(
             time_list, next(iter(p1_data_dict.values()), None), last_values
@@ -162,8 +163,8 @@ class TestDataManager:
     def updateStabilograms(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        p1_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform1)
-        p2_data_dict = self.getSensorData(self.test_mngr.sensor_group_platform2)
+        p1_data_dict = self.getSensorData(self.test_mngr.group_platform1)
+        p2_data_dict = self.getSensorData(self.test_mngr.group_platform2)
         p1_size = len(p1_data_dict)
         p2_size = len(p2_data_dict)
         if p1_size != 12 and p2_size != 12:
@@ -217,7 +218,7 @@ class TestDataManager:
     def updateEncoders(self, last_values: int = None) -> None:
         # Get data
         time_list = self.test_mngr.getTestTimes().copy()
-        encoder_data_dict = self.getSensorData(self.test_mngr.sensor_group_encoders)
+        encoder_data_dict = self.getSensorData(self.test_mngr.group_encoders)
         encoders_ready, plot_len = self.checkDataLen(
             time_list, encoder_data_dict, last_values
         )
@@ -236,9 +237,7 @@ class TestDataManager:
 
     def updateIMUAngles(self, last_values: int = None) -> None:
         # Get data
-        imu_data_dict = self.getSensorData(
-            self.test_mngr.sensor_group_imus, raw_data=True
-        )
+        imu_data_dict = self.getSensorData(self.test_mngr.group_imus, raw_data=True)
         if not imu_data_dict:
             return
         time_list = self.test_mngr.getTestTimes().copy()
@@ -288,6 +287,7 @@ class TestDataManager:
             data_dict[sensor_name] = values
         return data_dict
 
+    @logger.catch
     def getIMUData(self, sensor_data: dict, imu_data_list: list) -> dict:
         data_dict = {}
         for key, values in sensor_data.items():
@@ -311,25 +311,19 @@ class TestDataManager:
 
     def tareSensors(self, value_range: int) -> None:
         for sensor_group in [
-            self.test_mngr.sensor_group_platform1,
-            self.test_mngr.sensor_group_platform2,
-            self.test_mngr.sensor_group_encoders,
+            self.test_mngr.group_platform1,
+            self.test_mngr.group_platform2,
+            self.test_mngr.group_encoders,
         ]:
             mean_dict = self.getGroupMeanValues(sensor_group, value_range)
             sensor_group.tareSensors(mean_dict)
 
     def getDataFrame(self, raw_data: bool = False) -> pd.DataFrame:
         timestamp_dict = {"timestamp": self.test_mngr.getTestTimes().copy()}
-        p1_loadcells_dict = self.getSensorData(
-            self.test_mngr.sensor_group_platform1, raw_data
-        )
-        p2_loadcells_dict = self.getSensorData(
-            self.test_mngr.sensor_group_platform2, raw_data
-        )
-        encoders_dict = self.getSensorData(
-            self.test_mngr.sensor_group_encoders, raw_data
-        )
-        imus_dict = self.getSensorData(self.test_mngr.sensor_group_imus, True)
+        p1_loadcells_dict = self.getSensorData(self.test_mngr.group_platform1, raw_data)
+        p2_loadcells_dict = self.getSensorData(self.test_mngr.group_platform2, raw_data)
+        encoders_dict = self.getSensorData(self.test_mngr.group_encoders, raw_data)
+        imus_dict = self.getSensorData(self.test_mngr.group_imus, True)
         imu_data_list = [
             "q_x",
             "q_y",

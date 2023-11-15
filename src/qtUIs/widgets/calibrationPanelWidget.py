@@ -10,6 +10,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     def __init__(self, calib_mngr: CalibrationManager):
         super(CalibrationPanelWidget, self).__init__()
         self.calib_mngr = calib_mngr
+        self.ref_sensor = False
 
         self.recording_timer = QtCore.QTimer(self)
         self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
@@ -194,7 +195,20 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def recordDataWithSensor(self):
-        pass
+        self.enableButtons(False)
+        self.calib_mngr.startRecording(auto=True)
+        self.recording_timer.start(self.calib_mngr.getCalibTestInterval())
+        QtCore.QTimer.singleShot(
+            self.calib_mngr.getCalibDuration(), self.recording_timer.stop
+        )
+        while self.recording_timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+        self.calib_mngr.stopRecording()
+        values = self.calib_mngr.getValues()
+        self.addMeasurementRow(values[0], values[1], values[2], values[3])
+        sensor_values, test_values = self.calib_mngr.getValuesArrays()
+        self.plot_widget.updateScatter(sensor_values, test_values)
+        self.enableButtons(True)
 
     @QtCore.Slot()
     def removeRow(self):
@@ -234,6 +248,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             print("Could not load desired sensor!")
             return
         self.updateSensorInformation(sensor_info[0], sensor_info[1])
+        self.checkReferenceSensor()
         self.enableButtons(True)
 
     def updateSensorInformation(self, name: str, properties: str):
@@ -255,9 +270,14 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             self.remove_row_button.setEnabled(enable)
         if self.measurements_widget.rowCount() > 1:
             self.generate_results_button.setEnabled(enable)
+        if self.ref_sensor:
+            self.auto_measure_button.setEnabled(enable)
         self.test_value_input.setEnabled(enable)
         self.manual_measure_button.setEnabled(enable)
         self.clear_button.setEnabled(enable)
+
+    def checkReferenceSensor(self):
+        self.ref_sensor = self.calib_mngr.checkRefSensorConnection()
 
     def addMeasurementRow(
         self,
