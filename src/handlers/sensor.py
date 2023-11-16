@@ -20,6 +20,7 @@ class Sensor:
 
     def connect(self, check: bool = False) -> bool:
         if not self.params[SParams.READ.value]:
+            self.status = SStatus.IGNORED
             return False
         if not check and self.status is not SStatus.AVAILABLE:
             return False
