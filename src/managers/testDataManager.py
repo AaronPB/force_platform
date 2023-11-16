@@ -276,7 +276,7 @@ class TestDataManager:
         data_dict = {}
         if not sensor_group.getGroupIsActive():
             return data_dict
-        sensor_group_info = sensor_group.getGroupInfo().copy()
+        sensor_group_info = sensor_group.getGroupAvailableInfo().copy()
         sensor_group_values = {}
         if raw_data:
             sensor_group_values = sensor_group.getGroupValues().copy()

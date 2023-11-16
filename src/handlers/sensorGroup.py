@@ -3,6 +3,7 @@
 import concurrent.futures
 
 from src.enums.sensorDrivers import SensorDrivers as SDrivers
+from src.enums.sensorStatus import SensorStatus as SStatus
 from src.handlers.sensor import Sensor
 
 
@@ -78,6 +79,19 @@ class SensorGroup:
             ]
         return group_dict
 
+    def getGroupAvailableInfo(self) -> dict:
+        group_dict = {}
+        for sensor_id, sensor in self.sensors.items():
+            if sensor.getStatus() is not SStatus.AVAILABLE:
+                continue
+            group_dict[sensor_id] = [
+                sensor.getName(),
+                sensor.getProperties(),
+                sensor.getStatus(),
+                sensor.getIsReadable(),
+            ]
+        return group_dict
+
     def getGroupSize(self) -> int:
         return len(self.sensors)
 
@@ -87,12 +101,16 @@ class SensorGroup:
     def getGroupValues(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
+            if sensor.getStatus() is not SStatus.AVAILABLE:
+                continue
             group_dict[sensor_id] = sensor.getValues()
         return group_dict
 
     def getGroupCalibValues(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
+            if sensor.getStatus() is not SStatus.AVAILABLE:
+                continue
             group_dict[sensor_id] = sensor.getCalibValues()
         return group_dict
 
