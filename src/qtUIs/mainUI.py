@@ -192,6 +192,7 @@ class MainUI(QtWidgets.QWidget):
             self.cfg_mngr.loadConfigFile(config_file_path)
         self.initManagers()
         self.getSensorInformation()
+        self.updatePlotTabs()
         self.updateTestStatus()
 
     @QtCore.Slot()
@@ -457,6 +458,22 @@ class MainUI(QtWidgets.QWidget):
         )
         self.status_vbox_layout.addWidget(self.status_label)
         self.setControlPanelButtons(False)
+
+    def updatePlotTabs(self):
+        for i in range(1, self.tabular_widget.count()):
+            self.tabular_widget.removeTab(1)
+        self.tabular_widget.addTab(self.loadTabPlatformPlots(), "Platform plots")
+        self.tabular_widget.addTab(self.loadTabCOPPlots(), "COP plots")
+        self.tabular_widget.addTab(self.loadTabEncoderPlots(), "Encoder plots")
+        self.tabular_widget.addTab(self.loadTabIMUPlots(), "IMU plots")
+
+        self.plot_thread = PlotterThread(
+            self.tabular_widget,
+            self.data_mngr,
+            self.cfg_mngr.getConfigValue(
+                CfgPaths.GENERAL_PLOTTERS_INTERVAL_MS.value, 500
+            ),
+        )
 
     def setControlPanelButtons(self, enable: bool = False) -> None:
         if not enable:
