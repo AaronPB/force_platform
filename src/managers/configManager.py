@@ -40,6 +40,7 @@ class ConfigManager:
         logger.info(f"Loading custom file: {file_path}.")
         # First save new custom config path in default config
         self.loadConfig(self.default_config_path)
+        self.selected_config_path = self.default_config_path
         self.setConfigValue(
             ConfigPaths.GENERAL_CUSTOM_CONFIG_PATH.value, str(file_path)
         )
