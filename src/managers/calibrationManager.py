@@ -7,6 +7,7 @@ from src.managers.configManager import ConfigManager
 from src.sensorLoader import SensorLoader
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorStatus import SensorStatus as SStatus
+from src.handlers.sensor import Sensor
 
 from loguru import logger
 
@@ -20,7 +21,7 @@ class CalibrationManager:
         self.sensor_values = []
         self.test_values = []
         self.calib_results = []
-        self.calib_sensor = None
+        self.calib_sensor: Sensor = None
         self.group_platform1 = sensor_loader.getSensorGroupPlatform1()
         self.group_platform2 = sensor_loader.getSensorGroupPlatform2()
         self.reference_sensor = sensor_loader.getRefSensor()
@@ -132,3 +133,13 @@ class CalibrationManager:
         sensor_values = np.array(self.sensor_values)
         test_values = sensor_values * self.calib_results[0] + self.calib_results[1]
         return sensor_values, test_values
+
+    def saveResults(self):
+        if self.calib_results is None:
+            return
+        self.calib_sensor.setSlope(self.calib_results[0])
+        self.calib_sensor.setIntercept(self.calib_results[1])
+        self.config_mngr.saveConfig()
+        logger.info(
+            f"Saved sensor {self.calib_sensor.getName()} slope: {self.calib_results[0]:.4f}; intercept: {self.calib_results[1]:.4f}"
+        )

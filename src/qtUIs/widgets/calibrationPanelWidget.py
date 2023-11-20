@@ -64,12 +64,16 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.grid_buttons_layout = QtWidgets.QGridLayout()
         group_box_general_buttons.setLayout(self.grid_buttons_layout)
         self.save_button = self.createQPushButton(
-            "Save results", QssLabels.CONTROL_PANEL_BTN, enabled=False
+            "Save results",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=False,
+            connect_fn=self.saveResults,
         )
         self.clear_button = self.createQPushButton(
             "Clear calibration test",
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=False,
+            connect_fn=self.clearValues,
         )
         self.grid_buttons_layout.addWidget(self.save_button, 0, 0)
         self.grid_buttons_layout.addWidget(self.clear_button, 0, 1)
@@ -102,9 +106,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             "Measure with value", enabled=False, connect_fn=self.recordData
         )
         self.test_value_input = QtWidgets.QLineEdit()
-        self.test_value_input.setPlaceholderText(
-            "Enter calibration value: (example) 14.67"
-        )
+        self.test_value_input.setPlaceholderText("Enter calibration value: (ex) 14.67")
         self.remove_row_button = self.createQPushButton(
             "Remove selected row",
             QssLabels.CRITICAL_BTN,
@@ -227,18 +229,25 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.updateResultsTable(results[0], results[1], results[2])
         sensor_values, calib_values = self.calib_mngr.getRegressionArrays()
         self.plot_widget.updateRegression(sensor_values, calib_values)
+        self.save_button.setEnabled(True)
 
     @QtCore.Slot()
     def saveResults(self):
-        pass
+        self.calib_mngr.saveResults()
+        self.save_button.setEnabled(False)
 
     @QtCore.Slot()
     def clearValues(self):
-        pass
+        self.enableButtons(False)
+        self.clearCalibrationTest()
+        self.checkReferenceSensor()
+        self.enableButtons(True)
 
     # Widget functions
 
     def selectPlatformSensor(self, index, platform):
+        self.enableButtons(False)
+        self.clearCalibrationTest()
         sensor_info = ["Name error", "Properties error"]
         if platform == 1:
             sensor_info = self.calib_mngr.calibrateP1Sensor(index)
@@ -305,3 +314,11 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.scope_result_label.setText("{:.6e}".format(scope))
         self.intercept_result_label.setText("{:.6e}".format(intercept))
         self.score_result_label.setText("{:.4f}".format(score))
+
+    def clearCalibrationTest(self):
+        self.test_value_input.clear()
+        self.measurements_widget.clearContents()
+        self.measurements_widget.setRowCount(0)
+        self.plot_widget.clear()
+        self.updateResultsTable(0, 0, 0)
+        self.calib_mngr.clearAllValues()

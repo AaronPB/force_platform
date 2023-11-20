@@ -54,6 +54,9 @@ class Sensor:
             SParams.INTERCEPT.value
         ] = intercept
 
+    def setSlope(self, slope: float) -> None:
+        self.params[SParams.CALIBRATION_SECTION.value][SParams.SLOPE.value] = slope
+
     def clearValues(self) -> None:
         self.values.clear()
 
