@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from src.handlers import Sensor, SensorGroup
+from src.handlers.sensorGroup import SensorGroup
 from src.enums.sensorStatus import SensorStatus as SStatus
 import pytest
 
@@ -62,7 +62,7 @@ def sensor_group_single() -> SensorGroup:
 
 
 @pytest.fixture
-def sensor_group_filled() -> Sensor:
+def sensor_group_filled() -> SensorGroup:
     """
     Sensor group filled with 2 available and 2 unavailable sensors
     """
@@ -123,14 +123,10 @@ def test_sensor_group_available_info_size(sensor_group_filled: SensorGroup) -> N
 def test_sensor_group_tare(sensor_group_filled: SensorGroup) -> None:
     """
     Try to tare only sensor_1, having a mean value of 4.
-    When taring, mean should be 0, so: b_new = b - mean
+    Mean should be 0, so new_intercept = old_intercept - measured_mean
+    In this test case, it is simplified to: intercept = 10 - 4 = 6
     """
     mean_dict = {"sensor_1": 4}
     sensor_group_filled.tareSensors(mean_dict)
     calib_params = sensor_group_filled.sensors["sensor_1"].getSlopeIntercept()
     assert calib_params[1] == 6
-
-
-# TODO
-# - Group values
-# - Group calib values
