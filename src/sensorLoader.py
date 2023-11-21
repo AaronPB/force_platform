@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+
 from loguru import logger
 from src.managers.configManager import ConfigManager
-from src.handlers import SensorGroup, Sensor
+from src.handlers.sensorGroup import SensorGroup
+from src.handlers.sensor import Sensor, Driver
+from src.handlers.drivers import PhidgetLoadCell, PhidgetEncoder, TaoboticsIMU
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SensorParams as SParams
-from src.enums.sensorDrivers import SensorDrivers as SDrivers
 
 
 class SensorLoader:
@@ -34,31 +37,33 @@ class SensorLoader:
             "Platform 1",
             CfgPaths.PHIDGET_P1_LOADCELL_CONFIG_SECTION,
             self.required_keys_loadcells,
-            SDrivers.PHIDGET_LOADCELL_DRIVER,
+            PhidgetLoadCell,
         )
         self.sensor_group_platform2 = self.setSensorGroup(
             "Platform 2",
             CfgPaths.PHIDGET_P2_LOADCELL_CONFIG_SECTION,
             self.required_keys_loadcells,
-            SDrivers.PHIDGET_LOADCELL_DRIVER,
+            PhidgetLoadCell,
         )
         self.sensor_group_encoders = self.setSensorGroup(
             "Barbell encoders",
             CfgPaths.PHIDGET_ENCODER_CONFIG_SECTION,
             self.required_keys_encoders,
-            SDrivers.PHIDGET_ENCODER_DRIVER,
+            PhidgetEncoder,
         )
         self.sensor_group_imus = self.setSensorGroup(
             "Body IMUs",
             CfgPaths.TAOBOTICS_IMU_CONFIG_SECTION,
             self.required_keys_taobotics,
-            SDrivers.TAOBOTICS_IMU_DRIVER,
+            TaoboticsIMU,
         )
-        self.ref_sensor = self.setSensor(
+        self.ref_sensor = Sensor()
+        self.loadSensor(
+            self.ref_sensor,
             "REF",
-            CfgPaths.CALIBRATION_CONFIG_SECTION,
+            CfgPaths.CALIBRATION_CONFIG_SECTION.value,
             self.required_keys_loadcells,
-            SDrivers.PHIDGET_LOADCELL_DRIVER,
+            PhidgetLoadCell,
         )
 
     def setSensorGroup(
@@ -66,31 +71,36 @@ class SensorLoader:
         group_name: str,
         config_section: CfgPaths,
         required_keys: list,
-        sensor_driver: SDrivers,
+        sensor_driver: Driver,
     ) -> SensorGroup:
         sensor_group = SensorGroup(group_name)
         for sensor_id in self.config_mngr.getConfigValue(config_section.value):
-            sensor_params = self.config_mngr.getConfigValue(
-                config_section.value + "." + sensor_id
+            sensor = Sensor()
+            config_path = config_section.value + "." + sensor_id
+            setup = self.loadSensor(
+                sensor, sensor_id, config_path, required_keys, sensor_driver
             )
-            sensor_group.addSensor(
-                sensor_id, sensor_params, required_keys, sensor_driver
-            )
+            if not setup:
+                logger.warning(f"Could not load sensor in config path {config_path}!")
+                continue
+            sensor_group.addSensor(sensor)
         return sensor_group
 
-    def setSensor(
+    def loadSensor(
         self,
-        name: str,
-        config_section: CfgPaths,
+        sensor: Sensor,
+        id: str,
+        config_path: str,
         required_keys: list,
-        sensor_driver: SDrivers,
-    ) -> Sensor:
-        ref_sensor_section = self.config_mngr.getConfigValue(config_section.value, None)
-        if ref_sensor_section is None:
-            return None
-        if not all(key.value in ref_sensor_section.keys() for key in required_keys):
-            return None
-        return Sensor(name, ref_sensor_section, sensor_driver)
+        driver: Driver,
+    ) -> bool:
+        sensor_params = self.config_mngr.getConfigValue(config_path, None)
+        if sensor_params is None:
+            return False
+        if not all(key.value in sensor_params.keys() for key in required_keys):
+            return False
+        sensor.setup(id, sensor_params, driver)
+        return True
 
     def getSensorGroups(self) -> list:
         return [

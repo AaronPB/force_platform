@@ -7,7 +7,6 @@ from src.sensorLoader import SensorLoader
 from src.handlers import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SensorParams as SParams
-from src.enums.sensorDrivers import SensorDrivers as SDrivers
 
 
 class TestManager:

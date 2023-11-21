@@ -2,21 +2,38 @@
 
 from src.enums.sensorParams import SensorParams as SParams
 from src.enums.sensorStatus import SensorStatus as SStatus
-from src.enums.sensorDrivers import SensorDrivers as SDrivers
+from typing import Protocol
+
+
+class Driver(Protocol):
+    def __init__(self, serial: int, channel: int) -> None:
+        ...
+
+    def connect(self, wait_ms: int, interval_ms: int) -> bool:
+        ...
+
+    def disconnect(self) -> None:
+        ...
+
+    def getValue(self):
+        ...
 
 
 class Sensor:
-    def __init__(
-        self, sensor_id: str, sensor_params: dict, sensor_driver: SDrivers
-    ) -> None:
-        self.id = sensor_id
-        self.params = sensor_params
-        self.status = SStatus.IGNORED
-        self.driver = sensor_driver.value(
+    def __init__(self) -> None:
+        self.id: str
+        self.params: dict
+        self.status: SStatus = SStatus.IGNORED
+        self.driver: Driver
+        self.values: list = []
+
+    def setup(self, id: str, params: dict, driver: Driver):
+        self.id = id
+        self.params = params
+        self.driver = driver(
             self.params[SParams.SERIAL.value],
             self.params.get(SParams.CHANNEL.value, None),
         )
-        self.values = []
 
     def connect(self, check: bool = False) -> bool:
         if not self.params[SParams.READ.value]:

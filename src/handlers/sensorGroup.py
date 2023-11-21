@@ -2,7 +2,6 @@
 
 import concurrent.futures
 
-from src.enums.sensorDrivers import SensorDrivers as SDrivers
 from src.enums.sensorStatus import SensorStatus as SStatus
 from src.handlers.sensor import Sensor
 
@@ -11,19 +10,10 @@ class SensorGroup:
     def __init__(self, group_name: str) -> None:
         self.group_name = group_name
         self.is_group_active = False
-        self.sensors = {}
+        self.sensors: dict[str, Sensor] = {}
 
-    def addSensor(
-        self,
-        sensor_id: str,
-        sensor_params: dict,
-        required_config_keys: list,
-        sensor_driver: SDrivers,
-    ) -> None:
-        if not all(key.value in sensor_params.keys() for key in required_config_keys):
-            return
-        sensor = Sensor(sensor_id, sensor_params, sensor_driver)
-        self.sensors[sensor_id] = sensor
+    def addSensor(self, sensor: Sensor):
+        self.sensors[sensor.id] = sensor
 
     def checkConnections(self) -> bool:
         results = False
