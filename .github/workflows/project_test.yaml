@@ -11,7 +11,7 @@ jobs:
     runs-on: [ubuntu-latest]
     strategy:
       matrix:
-        python-version: [3.10, 3.11]
+        python-version: ['3.10', '3.11']
     
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
 
       - name: Install base dependencies
         run: |
-          python -m install pip --upgrade pip
+          python -m pip install --upgrade pip
           pip install pytest pytest-cov
       
       - name: Run project tests
