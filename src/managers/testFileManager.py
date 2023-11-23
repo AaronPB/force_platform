@@ -83,7 +83,7 @@ class TestFileManager:
             logger.warning("The file path does not exist!")
             return
         total_path = os.path.join(self.file_path, self.file_name + ".pk1")
-        df.to_pickle(total_path, index=False)
+        df.to_pickle(total_path)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
         logger.info(
