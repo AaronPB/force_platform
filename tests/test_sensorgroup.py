@@ -51,6 +51,16 @@ class SensorMock:
     def getSlopeIntercept(self) -> list[float]:
         return [1, self.intercept]
 
+    def getValues(self) -> list:
+        if self.status is not SStatus.AVAILABLE:
+            return []
+        return [1, 2]
+
+    def getCalibValues(self) -> list:
+        if self.status is not SStatus.AVAILABLE:
+            return []
+        return [1, 2]
+
 
 @pytest.fixture
 def sensor_group_single() -> SensorGroup:
@@ -79,40 +89,40 @@ def sensor_group_filled() -> SensorGroup:
 # Tests
 
 
-def test_sensor_group_add() -> None:
+def test_group_add() -> None:
     sensor_group = SensorGroup("Test")
     sensor_group.addSensor(SensorMock())
     assert sensor_group.getGroupSize() == 1
 
 
-def test_sensor_group_status_start_unchecked(sensor_group_filled: SensorGroup) -> None:
+def test_group_status_start_unchecked(sensor_group_filled: SensorGroup) -> None:
     sensor_group_filled.start()
     assert not sensor_group_filled.getGroupIsActive()
 
 
-def test_sensor_group_status_start(sensor_group_filled: SensorGroup) -> None:
+def test_group_status_start(sensor_group_filled: SensorGroup) -> None:
     sensor_group_filled.checkConnections()
     sensor_group_filled.start()
     assert sensor_group_filled.getGroupIsActive()
 
 
-def test_sensor_group_status_stop(sensor_group_filled: SensorGroup) -> None:
+def test_group_status_stop(sensor_group_filled: SensorGroup) -> None:
     sensor_group_filled.checkConnections()
     sensor_group_filled.start()
     sensor_group_filled.stop()
     assert not sensor_group_filled.getGroupIsActive()
 
 
-def test_sensor_group_connections(sensor_group_filled: SensorGroup) -> None:
+def test_group_connections(sensor_group_filled: SensorGroup) -> None:
     connected = sensor_group_filled.checkConnections()
     assert connected
 
 
-def test_sensor_group_info_size_match(sensor_group_filled: SensorGroup) -> None:
+def test_group_info_size_match(sensor_group_filled: SensorGroup) -> None:
     assert len(sensor_group_filled.getGroupInfo()) == sensor_group_filled.getGroupSize()
 
 
-def test_sensor_group_available_info_size(sensor_group_filled: SensorGroup) -> None:
+def test_group_available_info_size(sensor_group_filled: SensorGroup) -> None:
     """
     Check dict size when getting only the available sensor information
     """
@@ -120,7 +130,7 @@ def test_sensor_group_available_info_size(sensor_group_filled: SensorGroup) -> N
     assert len(sensor_group_filled.getGroupAvailableInfo()) == 2
 
 
-def test_sensor_group_tare(sensor_group_filled: SensorGroup) -> None:
+def test_group_tare(sensor_group_filled: SensorGroup) -> None:
     """
     Try to tare only sensor_1, having a mean value of 4.
     Mean should be 0, so new_intercept = old_intercept - measured_mean
@@ -130,3 +140,22 @@ def test_sensor_group_tare(sensor_group_filled: SensorGroup) -> None:
     sensor_group_filled.tareSensors(mean_dict)
     calib_params = sensor_group_filled.sensors["sensor_1"].getSlopeIntercept()
     assert calib_params[1] == 6
+
+
+def test_group_values_getter(sensor_group_filled: SensorGroup) -> None:
+    group_values = sensor_group_filled.getGroupValues()
+    assert len(group_values) == 2
+
+
+def test_group_calib_values_getter(sensor_group_filled: SensorGroup) -> None:
+    group_values = sensor_group_filled.getGroupCalibValues()
+    assert len(group_values) == 2
+
+
+def test_group_calib_params_getter(sensor_group_filled: SensorGroup) -> None:
+    group_calib_params = sensor_group_filled.getGroupCalibrationParams()
+    assert len(group_calib_params) == 4
+
+
+def test_group_name_getter(sensor_group_filled: SensorGroup) -> None:
+    assert sensor_group_filled.getGroupName() == "Sensor Group Test"

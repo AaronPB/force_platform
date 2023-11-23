@@ -91,6 +91,14 @@ def sensor_unav_nr() -> Sensor:
 # Tests
 
 
+def test_sensor_setup() -> None:
+    sensor = Sensor()
+    sensor.setup(
+        id="sensor_id", params=buildSensorParamsDict(), driver=AvailableDriverMock
+    )
+    assert sensor.getName() == "Test name"
+
+
 def test_available_noread_sensor_connect(sensor_av_nr: Sensor) -> None:
     sensor_av_nr.connect(check=True)
     assert sensor_av_nr.getStatus() == SStatus.IGNORED
@@ -165,3 +173,8 @@ def test_sensor_modify_calibration_params(sensor_av: Sensor) -> None:
 def test_sensor_modify_read_status(sensor_av: Sensor) -> None:
     sensor_av.setRead(read=False)
     assert not sensor_av.getIsReadable()
+
+
+def test_sensor_properties_getter(sensor_av: Sensor) -> None:
+    properties = sensor_av.getProperties()
+    assert properties == " - Y8888888 - 150 kg - "
