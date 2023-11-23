@@ -10,6 +10,7 @@ from src.enums.sensorParams import SensorParams as SParams
 
 
 class TestManager:
+    __test__ = False
     def __init__(self, config_mngr: ConfigManager, sensor_loader: SensorLoader) -> None:
         # Global values
         self.config_mngr = config_mngr

@@ -18,6 +18,7 @@ from loguru import logger
 
 
 class TestDataManager:
+    __test__ = False
     def __init__(self, test_manager: TestManager):
         self.test_mngr = test_manager
         self.setupPlotWidgets()
