@@ -24,7 +24,7 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas
+          pip install loguru pyyaml pandas
           pip install pytest pytest-cov
       
       - name: Run project tests
