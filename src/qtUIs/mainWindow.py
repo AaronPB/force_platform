@@ -18,12 +18,14 @@ class MainMenu(QtWidgets.QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("Force platform reader")
-        self.setWindowIcon(QtGui.QIcon(os.path.join(self.images_folder, "logo.ico")))
+        self.setWindowIcon(
+            QtGui.QIcon(os.path.join(self.images_folder, "window_icon.ico"))
+        )
         self.setGeometry(100, 100, 1920, 1080)
 
         stacked_widget = QtWidgets.QStackedWidget()
-        logo_image_path = os.path.join(self.images_folder, "mainUI_logo.svg")
-        platform_image_path = os.path.join(self.images_folder, "platform1.png")
+        logo_image_path = os.path.join(self.images_folder, "project_ui_logo.svg")
+        platform_image_path = os.path.join(self.images_folder, "platform.png")
         config_manager = ConfigManager()
         sensor_loader = SensorLoader(config_manager)
 
