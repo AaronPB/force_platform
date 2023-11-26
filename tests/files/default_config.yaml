@@ -1,0 +1,13 @@
+general_settings:
+  custom_config_path: null
+  calibration_times:
+    data_interval_ms: 10
+    calibration_time_ms: 3000
+  test_times:
+    data_interval_ms: 10
+    tare_time_ms: 3000
+  test_results:
+    folder: /default/test/folder
+    name: Default Test Name
+    save_calib_results: true
+    save_raw_results: true
