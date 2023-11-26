@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from PySide6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtWidgets, QtCore
 from src.enums.qssLabels import QssLabels
 from src.managers.calibrationManager import CalibrationManager
+from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.matplotlibWidgets import PlotRegressionWidget
 
 
@@ -17,31 +18,6 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
         self.setLayout(self.loadLayout())
 
-    # UI generic widgets setup methods
-
-    def createLabelBox(
-        self, text: str, qss_object: QssLabels = None
-    ) -> QtWidgets.QLabel:
-        label = QtWidgets.QLabel(text)
-        if qss_object is not None:
-            label.setObjectName(qss_object.value)
-        return label
-
-    def createQPushButton(
-        self,
-        title: str,
-        qss_object: QssLabels = None,
-        enabled: bool = False,
-        connect_fn=None,
-    ) -> QtWidgets.QPushButton:
-        button = QtWidgets.QPushButton(title)
-        if qss_object is not None:
-            button.setObjectName(qss_object.value)
-        button.setEnabled(enabled)
-        if connect_fn is not None:
-            button.clicked.connect(connect_fn)
-        return button
-
     # UI section loaders
 
     def loadLayout(self) -> QtWidgets.QVBoxLayout:
@@ -55,7 +31,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.vbox_sensor_info_layout = QtWidgets.QVBoxLayout()
         self.vbox_sensor_info_layout.setAlignment(QtCore.Qt.AlignTop)
         group_box_sensor_info.setLayout(self.vbox_sensor_info_layout)
-        self.sensor_info_label = self.createLabelBox(
+        self.sensor_info_label = customQT.createLabelBox(
             "Select an available sensor", QssLabels.STATUS_LABEL_WARN
         )
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
@@ -63,13 +39,13 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         group_box_general_buttons = QtWidgets.QGroupBox("Manage results")
         self.grid_buttons_layout = QtWidgets.QGridLayout()
         group_box_general_buttons.setLayout(self.grid_buttons_layout)
-        self.save_button = self.createQPushButton(
+        self.save_button = customQT.createQPushButton(
             "Save results",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=False,
             connect_fn=self.saveResults,
         )
-        self.clear_button = self.createQPushButton(
+        self.clear_button = customQT.createQPushButton(
             "Clear calibration test",
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=False,
@@ -99,15 +75,15 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
         # - Measure control buttons
         grid_measure_btns_layout = QtWidgets.QGridLayout()
-        self.auto_measure_button = self.createQPushButton(
+        self.auto_measure_button = customQT.createQPushButton(
             "Measure with sensor", enabled=False, connect_fn=self.recordDataWithSensor
         )
-        self.manual_measure_button = self.createQPushButton(
+        self.manual_measure_button = customQT.createQPushButton(
             "Measure with value", enabled=False, connect_fn=self.recordData
         )
         self.test_value_input = QtWidgets.QLineEdit()
         self.test_value_input.setPlaceholderText("Enter calibration value: (ex) 14.67")
-        self.remove_row_button = self.createQPushButton(
+        self.remove_row_button = customQT.createQPushButton(
             "Remove selected row",
             QssLabels.CRITICAL_BTN,
             enabled=False,
@@ -142,7 +118,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         # - PlotWidget to plot measurements
         self.plot_widget = PlotRegressionWidget()
 
-        self.generate_results_button = self.createQPushButton(
+        self.generate_results_button = customQT.createQPushButton(
             "Make linear regression",
             enabled=False,
             connect_fn=self.generateResults,
@@ -262,7 +238,7 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
     def updateSensorInformation(self, name: str, properties: str):
         self.sensor_info_label.setParent(None)
-        self.sensor_info_label = self.createLabelBox(
+        self.sensor_info_label = customQT.createLabelBox(
             f"Name: {name}\nProperties: {properties}", QssLabels.STATUS_LABEL_INFO
         )
         self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)

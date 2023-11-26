@@ -7,6 +7,7 @@ from src.managers.testManager import TestManager
 from src.managers.testFileManager import TestFileManager
 from src.managers.testDataManager import TestDataManager
 from src.sensorLoader import SensorLoader
+from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.threads.plotterThread import PlotterThread
 from PySide6 import QtWidgets, QtGui, QtCore
 
@@ -61,49 +62,6 @@ class MainUI(QtWidgets.QWidget):
         self.main_layout.addWidget(self.tabular_widget)
 
         self.setLayout(self.main_layout)
-
-    # UI generic widgets setup methods
-
-    def createLabelBox(
-        self, text: str, qss_object: QssLabels = None
-    ) -> QtWidgets.QLabel:
-        label = QtWidgets.QLabel(text)
-        if qss_object is not None:
-            label.setObjectName(qss_object.value)
-        return label
-
-    def createQPushButton(
-        self,
-        title: str,
-        qss_object: QssLabels = None,
-        enabled: bool = False,
-        connect_fn=None,
-    ) -> QtWidgets.QPushButton:
-        button = QtWidgets.QPushButton(title)
-        if qss_object is not None:
-            button.setObjectName(qss_object.value)
-        button.setEnabled(enabled)
-        if connect_fn is not None:
-            button.clicked.connect(connect_fn)
-        return button
-
-    def createSensorQCheckBox(
-        self,
-        text: str,
-        qss_object: QssLabels = None,
-        enabled: bool = True,
-        change_fn=None,
-        index=0,
-    ) -> QtWidgets.QCheckBox:
-        checkbox = QtWidgets.QCheckBox(text)
-        if qss_object is not None:
-            checkbox.setObjectName(qss_object.value)
-        checkbox.setEnabled(enabled)
-        if change_fn is not None:
-            checkbox.stateChanged.connect(
-                lambda state, index=index: change_fn(index, state == 2)
-            )
-        return checkbox
 
     # UI buttons click connectors
 
@@ -243,7 +201,7 @@ class MainUI(QtWidgets.QWidget):
         status_group_box = QtWidgets.QGroupBox("Status Information")
         self.status_vbox_layout = QtWidgets.QVBoxLayout()
         status_group_box.setLayout(self.status_vbox_layout)
-        self.status_label = self.createLabelBox(
+        self.status_label = customQT.createLabelBox(
             "Loading ...", QssLabels.STATUS_LABEL_WARN
         )
         self.status_vbox_layout.addWidget(self.status_label)
@@ -251,22 +209,22 @@ class MainUI(QtWidgets.QWidget):
         buttons_group_box = QtWidgets.QGroupBox("Control Panel")
         buttons_vbox_layout = QtWidgets.QVBoxLayout()
         buttons_group_box.setLayout(buttons_vbox_layout)
-        self.start_button = self.createQPushButton(
+        self.start_button = customQT.createQPushButton(
             "Start test", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.startTest
         )
-        self.stop_button = self.createQPushButton(
+        self.stop_button = customQT.createQPushButton(
             "Stop test", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.stopTest
         )
-        self.tare_button = self.createQPushButton(
+        self.tare_button = customQT.createQPushButton(
             "Tare sensors", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.tareSensors
         )
-        self.calibration_button = self.createQPushButton(
+        self.calibration_button = customQT.createQPushButton(
             "Calibrate sensors",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=True,
             connect_fn=self.calibrateSensors,
         )
-        self.close_button = self.createQPushButton(
+        self.close_button = customQT.createQPushButton(
             "Close",
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=True,
@@ -276,7 +234,7 @@ class MainUI(QtWidgets.QWidget):
         buttons_vbox_layout.addWidget(self.tare_button)
         buttons_vbox_layout.addWidget(self.stop_button)
         # Author label
-        author_label = self.createLabelBox(
+        author_label = customQT.createLabelBox(
             "© github.AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
 
@@ -319,22 +277,22 @@ class MainUI(QtWidgets.QWidget):
         settings_group_box.setLayout(settings_grid_layout)
         settings_grid_layout.setAlignment(QtCore.Qt.AlignTop)
         # - Config file
-        config_label = self.createLabelBox("Configuration file:")
-        config_button = self.createQPushButton(
+        config_label = customQT.createLabelBox("Configuration file:")
+        config_button = customQT.createQPushButton(
             "Select config file", enabled=True, connect_fn=self.setConfigFile
         )
         self.config_path = QtWidgets.QLineEdit(self)
         self.config_path.setReadOnly(True)
         # - Test folder
-        test_folder_label = self.createLabelBox("Test folder path:")
-        test_folder_button = self.createQPushButton(
+        test_folder_label = customQT.createLabelBox("Test folder path:")
+        test_folder_button = customQT.createQPushButton(
             "Select folder", enabled=True, connect_fn=self.setTestFolder
         )
         self.test_folder_path = QtWidgets.QLineEdit(self)
         self.test_folder_path.setReadOnly(True)
         # - Test name
-        test_name_label = self.createLabelBox("Test name:")
-        test_name_button = self.createQPushButton(
+        test_name_label = customQT.createLabelBox("Test name:")
+        test_name_button = customQT.createQPushButton(
             "Save name", enabled=True, connect_fn=self.setTestName
         )
         self.test_name_input = QtWidgets.QLineEdit(self)
@@ -356,7 +314,7 @@ class MainUI(QtWidgets.QWidget):
         sensors_vbox_layout.setAlignment(QtCore.Qt.AlignTop)
         # - Connection button and progress bar
         connect_grid_layout = QtWidgets.QGridLayout()
-        self.sensors_connect_button = self.createQPushButton(
+        self.sensors_connect_button = customQT.createQPushButton(
             "Connect selected sensors", enabled=True, connect_fn=self.connectSensors
         )
         self.sensors_connection_progressbar = QtWidgets.QProgressBar()
@@ -392,7 +350,6 @@ class MainUI(QtWidgets.QWidget):
 
         return tab_widget
 
-    # TODO WIP
     def loadTabPlatformPlots(self) -> QtWidgets.QWidget:
         tab_widget = QtWidgets.QWidget()
         grid_general_layout = QtWidgets.QGridLayout()
@@ -447,13 +404,13 @@ class MainUI(QtWidgets.QWidget):
 
         self.status_label.setParent(None)
         if status_text == "":
-            self.status_label = self.createLabelBox(
+            self.status_label = customQT.createLabelBox(
                 "Ready to start test", QssLabels.STATUS_LABEL_OK
             )
             self.status_vbox_layout.addWidget(self.status_label)
             self.setControlPanelButtons(True)
             return
-        self.status_label = self.createLabelBox(
+        self.status_label = customQT.createLabelBox(
             status_text, QssLabels.STATUS_LABEL_WARN
         )
         self.status_vbox_layout.addWidget(self.status_label)
@@ -509,7 +466,7 @@ class MainUI(QtWidgets.QWidget):
         # Add new widgets
         index = 0
         for index, sensor_list in enumerate(sensor_dict.values()):
-            checkbox = self.createSensorQCheckBox(
+            checkbox = customQT.createSensorQCheckBox(
                 sensor_list[0] + " (" + sensor_list[1] + ")",
                 sensor_list[2].value,
                 change_fn=update_fn,

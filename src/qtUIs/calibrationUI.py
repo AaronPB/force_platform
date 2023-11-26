@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from src.enums.qssLabels import QssLabels
-from src.enums.sensorStatus import SensorStatus as SStatus
 from src.managers.configManager import ConfigManager
 from src.managers.calibrationManager import CalibrationManager
 from src.sensorLoader import SensorLoader
+from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.calibrationPanelWidget import CalibrationPanelWidget
 from PySide6 import QtWidgets, QtGui, QtCore
 
@@ -35,7 +35,6 @@ class CalibrationUI(QtWidgets.QWidget):
 
     def initManagers(self) -> None:
         self.calib_mngr = CalibrationManager(self.cfg_mngr, self.sensor_loader)
-        # TODO timers, etc
 
     def initUI(self):
         self.main_layout = QtWidgets.QHBoxLayout()
@@ -48,49 +47,6 @@ class CalibrationUI(QtWidgets.QWidget):
         self.main_layout.addWidget(self.calib_widget)
 
         self.setLayout(self.main_layout)
-
-    # UI generic widgets setup methods
-
-    def createLabelBox(
-        self, text: str, qss_object: QssLabels = None
-    ) -> QtWidgets.QLabel:
-        label = QtWidgets.QLabel(text)
-        if qss_object is not None:
-            label.setObjectName(qss_object.value)
-        return label
-
-    def createQPushButton(
-        self,
-        title: str,
-        qss_object: QssLabels = None,
-        enabled: bool = False,
-        connect_fn=None,
-    ) -> QtWidgets.QPushButton:
-        button = QtWidgets.QPushButton(title)
-        if qss_object is not None:
-            button.setObjectName(qss_object.value)
-        button.setEnabled(enabled)
-        if connect_fn is not None:
-            button.clicked.connect(connect_fn)
-        return button
-
-    def createSensorQPushButton(
-        self,
-        title: str,
-        sensor_status: SStatus,
-        connect_fn=None,
-        index: int = 0,
-        platform: int = 1,
-    ) -> QtWidgets.QPushButton:
-        button = QtWidgets.QPushButton(title)
-        button.setEnabled(False)
-        if sensor_status == SStatus.AVAILABLE:
-            button.setEnabled(True)
-        if connect_fn is not None:
-            button.clicked.connect(
-                lambda index=index, platform=platform: connect_fn(index, platform)
-            )
-        return button
 
     # UI buttons click connectors
 
@@ -133,14 +89,14 @@ class CalibrationUI(QtWidgets.QWidget):
         imgs_grid_layout.addWidget(image_logo, 0, 0)
         imgs_grid_layout.addWidget(image_platform, 0, 1)
         # Buttons
-        self.close_button = self.createQPushButton(
+        self.close_button = customQT.createQPushButton(
             "Return to main window",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=True,
             connect_fn=self.goToMainUI,
         )
         # Author label
-        author_label = self.createLabelBox(
+        author_label = customQT.createLabelBox(
             "© github.AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
 
@@ -165,7 +121,7 @@ class CalibrationUI(QtWidgets.QWidget):
         sensors_vbox_layout.setAlignment(QtCore.Qt.AlignTop)
         # - Connection button and progress bar
         connect_grid_layout = QtWidgets.QGridLayout()
-        self.sensors_connect_button = self.createQPushButton(
+        self.sensors_connect_button = customQT.createQPushButton(
             "Connect sensors", enabled=True, connect_fn=self.connectSensors
         )
         self.sensors_connection_progressbar = QtWidgets.QProgressBar()
@@ -221,9 +177,9 @@ class CalibrationUI(QtWidgets.QWidget):
                 widget.deleteLater()
         # Add new widgets
         for index, sensor_list in enumerate(sensor_dict.values()):
-            button = self.createSensorQPushButton(
+            button = customQT.createSensorQPushButton(
                 sensor_list[0] + " (" + sensor_list[1] + ")",
-                sensor_list[2],
+                sensor_list[2].value,
                 connect_fn=update_fn,
                 index=index,
                 platform=platform,
