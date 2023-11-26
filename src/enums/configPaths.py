@@ -7,9 +7,11 @@ class ConfigPaths(Enum):
     GENERAL_CALIBRATION_INTERVAL_MS = (
         "general_settings.calibration_times.data_interval_ms"
     )
-    GENERAL_CALIBRATION_DURATION_MS = "general_settings.calibration_times.recording_ms"
+    GENERAL_CALIBRATION_DURATION_MS = (
+        "general_settings.calibration_times.calibration_time_ms"
+    )
     GENERAL_TEST_INTERVAL_MS = "general_settings.test_times.data_interval_ms"
-    GENERAL_TARE_DURATION_MS = "general_settings.test_times.tare_recording_ms"
+    GENERAL_TARE_DURATION_MS = "general_settings.test_times.tare_time_ms"
 
     GENERAL_TEST_FOLDER = "general_settings.test_results.folder"
     GENERAL_TEST_NAME = "general_settings.test_results.name"
