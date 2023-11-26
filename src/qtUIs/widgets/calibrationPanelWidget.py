@@ -8,17 +8,22 @@ from src.qtUIs.widgets.matplotlibWidgets import PlotRegressionWidget
 
 
 class CalibrationPanelWidget(QtWidgets.QWidget):
-    def __init__(self, calib_mngr: CalibrationManager):
+    def __init__(self):
         super(CalibrationPanelWidget, self).__init__()
+        self.calib_mngr: CalibrationManager
+        self.ref_sensor = False
+        self.recording_timer: QtCore.QTimer
+
+        self.setLayout(self.loadLayout())
+
+    # UI section loaders
+
+    def loadManager(self, calib_mngr: CalibrationManager):
         self.calib_mngr = calib_mngr
         self.ref_sensor = False
 
         self.recording_timer = QtCore.QTimer(self)
         self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
-
-        self.setLayout(self.loadLayout())
-
-    # UI section loaders
 
     def loadLayout(self) -> QtWidgets.QVBoxLayout:
         main_layout = QtWidgets.QVBoxLayout()

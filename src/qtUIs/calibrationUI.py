@@ -31,6 +31,7 @@ class CalibrationUI(QtWidgets.QWidget):
 
     def updateUI(self) -> None:
         self.initManagers()
+        self.calib_widget.loadManager(self.calib_mngr)
         self.getSensorInformation()
 
     def initManagers(self) -> None:
@@ -40,7 +41,7 @@ class CalibrationUI(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QHBoxLayout()
 
         # Load UI layouts
-        self.calib_widget = CalibrationPanelWidget(self.calib_mngr)
+        self.calib_widget = CalibrationPanelWidget()
         self.settings_panel = self.loadInfoPanel()
 
         self.main_layout.addWidget(self.settings_panel)
