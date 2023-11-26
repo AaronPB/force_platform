@@ -264,7 +264,7 @@ class PlotRegressionWidget(QtWidgets.QWidget):
         self.ax.grid(True)
         (self.line_plot,) = self.ax.plot(0, 0, label="Regression", color="blue")
         self.line_scatter = self.ax.scatter(0, 0, label="Measurements", color="red")
-        self.ax.legend(loc="upper left")
+        self.ax.legend()
         self.figure.set_figheight(4)
 
         self.canvas.draw()
@@ -275,6 +275,9 @@ class PlotRegressionWidget(QtWidgets.QWidget):
         # Update plot scales
         x_margin = 0.1 * (np.max(sensor_values_np) - np.min(sensor_values_np))
         y_margin = 0.1 * (np.max(test_values_np) - np.min(test_values_np))
+        if sensor_values_np.size == 1:
+            x_margin = 0.1 * np.max(sensor_values_np)
+            y_margin = 0.1 * np.max(test_values_np)
         self.ax.set_xlim(
             np.min(sensor_values_np) - x_margin, np.max(sensor_values_np) + x_margin
         )
