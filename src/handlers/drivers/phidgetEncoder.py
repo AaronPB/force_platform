@@ -13,11 +13,13 @@ class PhidgetEncoder:
         self.handler.setChannel(channel)
         self.handler.setOnPositionChangeHandler(self.onPositionChange)
         self.mutex = threading.Lock()
-        self.value = None
+        self.value: float = 0
 
-    def onPositionChange(self, handler: Encoder, positionChange):
+    def onPositionChange(
+        self, handler: Encoder, positionChange, timeChange, indexTriggered
+    ):
         self.mutex.acquire()
-        self.value = positionChange
+        self.value += positionChange
         self.mutex.release()
 
     def connect(self, wait_ms: int = 2000, interval_ms: int = 8) -> bool:
