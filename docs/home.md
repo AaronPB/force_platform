@@ -4,7 +4,7 @@
 
 Welcome to the `force_platform` documentation! Here you will find all the necessary information to be able to manage the program properly.
 
-![Main GUI](../images/docs_images/main_gui.png)
+![Main GUI](images/mainUI.png)
 
 ## Documentation sections
 
