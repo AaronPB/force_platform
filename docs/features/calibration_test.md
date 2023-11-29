@@ -8,7 +8,7 @@ To access the calibration menu, click on the <kbd>Calibrate sensors</kbd> button
 
 ## Calibration menu
 
-![Calibration UI](images/calibrationUI_default.png)
+![Calibration UI](../images/calibrationUI_default.png)
 
 At the left side, the menu loads all compatible sensor lists defined in `config.yaml`, but only the connected ones will be enabled. You can connect the sensors previously from the main menu or click the <kbd>Connect sensors</kbd> button to try another connection to the selected ones.
 
@@ -20,7 +20,7 @@ In order to preform a calibration test, click the enabled button of the connecte
 
 The right part of the calibration menu will update with the sensor information at the top when clicking an enabled sensor button, as shown here.
 
-![Calibration UI panel](images/calibrationUI_panel.png)
+![Calibration UI panel](../images/calibrationUI_panel.png)
 
 The window is structured in the following sections:
 - Sensor information and general test buttons.
@@ -68,7 +68,7 @@ Once all measurements have been taken, linear regression can be performed by cli
 
 > A minimum of two measurements must be taken for the <kbd>Make linear regression</kbd> button to be available.
 
-![Calibration UI results](images/calibrationUI_results.png)
+![Calibration UI results](../images/calibrationUI_results.png)
 
 This will generate a graph with the regression line obtained (in red) and the measurements taken (as blue dots). The values of the line are displayed above the graph.
 

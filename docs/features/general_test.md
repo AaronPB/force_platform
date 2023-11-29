@@ -7,7 +7,7 @@ The main objective of the program is to record data from the connected sensors i
 
 When running the `main.py` file of the program, a window like this will open:
 
-![Main UI default](images/mainUI_default.png)
+![Main UI default](../images/mainUI_default.png)
 
 The interface is organised in three main sections which will be detailed below:
 - At the left side:
@@ -20,7 +20,7 @@ The interface is organised in three main sections which will be detailed below:
 
 | Control panel disabled | Control panel enabled |
 | :---: | :---: |
-| ![](images/mainUI_cp_status.png) | ![](images/mainUI_cp.png)|
+| ![](../images/mainUI_cp_status.png) | ![](../images/mainUI_cp.png)|
 
 When running the program, all the buttons on the control panel are disabled until the following requirements are satisfied:
 - There is a valid folder to save the test files. See [Folder and file name of the test](#folder-and-file-name-of-the-test).
@@ -38,7 +38,7 @@ The layer is divided into three parts:
 
 ## Settings and sensor information
 
-![Main UI settings tab](images/mainUI_tab_settings.png)
+![Main UI settings tab](../images/mainUI_tab_settings.png)
 
 This is the default tab where you can configure the following options listed below.
 
@@ -50,7 +50,7 @@ If you want to load another configuration file, click on the <kbd>Select config 
 
 Once selected, if it is in the correct format, the window will be updated with the new sensor information.
 
-![Main GUI Section 1](images/mainUI_tab_custom_config.png)
+![Main GUI Section 1](../images/mainUI_tab_custom_config.png)
 
 The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
 
@@ -68,7 +68,7 @@ To connect the sensors you must mark the ones you want to connect in the **Senso
 
 You can check the selection status by identifying its color border:
 
-![Main UI settings tab sensors](images/mainUI_tab_settings_sensors.png)
+![Main UI settings tab sensors](../images/mainUI_tab_settings_sensors.png)
 
 | Border color | Description |
 | :---: | :--- |
@@ -79,7 +79,7 @@ Once the sensors are selected, press the <kbd>Connect sensors</kbd> button. Depe
 
 Once a connection is established (or not) with the indicated sensors, the background colors will be updated with the status of each sensor as follows:
 
-![Main UI settings tab sensors connection](images/mainUI_tab_settings_sensors_connect.png)
+![Main UI settings tab sensors connection](../images/mainUI_tab_settings_sensors_connect.png)
 
 | Background color | Description |
 | :---: | :--- |
