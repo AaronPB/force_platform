@@ -1,4 +1,11 @@
-# Force Platform Data Reader
+<p align="center">
+  <a href="#readme"><img alt="Force platform reader logo" src="images/project_logo.svg"></a>
+</p>
+<p align="center">
+  <a href="#"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue.svg"></a>
+  <a href="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml"><img alt="Project test status" src="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml/badge.svg"></a>
+  <a href="docs/home.md"><img alt="Documentation link" src="https://img.shields.io/badge/docs-available-limegreen.svg"></a>
+</p>
 
 ## Information
 
