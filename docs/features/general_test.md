@@ -54,6 +54,7 @@ Once selected, if it is in the correct format, the window will be updated with t
 
 The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
 
+> [!NOTE]\
 > This can be cancelled by loading again the default `config.yaml` file or deleting the custom configuration path manually.
 
 ### Folder and file name of the test
@@ -97,14 +98,15 @@ All the plot data processing is done by the [`TestDataManager`](../../src/manage
 
 ### Platform forces
 
+> [!IMPORTANT]\
 > Requires `_X_n`, `_Y_n` or `_Z_n` markers in sensor names of [`platform loadcell list` config section](../setup/config_file.md#platform-1-loadcell-list) in order to be plotted.
 
 *TODO plot image*
 
 ### Platform COP
 
-> Requires `_X_n`, `_Y_n` or `_Z_n` markers in sensor names of [`platform loadcell list` config section](../setup/config_file.md#platform-1-loadcell-list).
-
+> [!IMPORTANT]\
+> Requires `_X_n`, `_Y_n` or `_Z_n` markers in sensor names of [`platform loadcell list` config section](../setup/config_file.md#platform-1-loadcell-list).\
 > Requires the 12 platform sensors to be available in order to be plotted.
 
 *TODO plot image*

@@ -12,6 +12,7 @@ To access the calibration menu, click on the <kbd>Calibrate sensors</kbd> button
 
 At the left side, the menu loads all compatible sensor lists defined in `config.yaml`, but only the connected ones will be enabled. You can connect the sensors previously from the main menu or click the <kbd>Connect sensors</kbd> button to try another connection to the selected ones.
 
+>  [!TIP]\
 > Need more information about how to connect sensors? Check the [sensor connection](general_test.md#sensor-connection) section of the general test procedure.
 
 In order to preform a calibration test, click the enabled button of the connected sensor.
@@ -37,6 +38,7 @@ The calibration program allows the known value to be recorded in two ways:
 
 The following sections shows how to preform each action.
 
+> [!NOTE]\
 > If a measurement goes wrong, you can remove it selecting the correspondent row from the measurement table and click the <kbd>Remove selected row</kbd> button.
 
 ### Calibrate with manual inputs
@@ -66,6 +68,7 @@ If the button is active, then the sensor is correctly connected. The steps to pr
 ### Generate the calibration results
 Once all measurements have been taken, linear regression can be performed by clicking on the <kbd>Make linear regression</kbd> button.
 
+> [!IMPORTANT]\
 > A minimum of two measurements must be taken for the <kbd>Make linear regression</kbd> button to be available.
 
 ![Calibration UI results](../images/calibrationUI_results.png)

@@ -4,6 +4,7 @@
 
 The installation process will be explained for **Linux**. It is also possible to install on Windows and MacOs (not tested) if the required dependencies have support for those OS.
 
+> [!NOTE]\
 > Please note that if you do not use Linux and you want to use the Taobotics IMUs, you will have to manage its drivers.
 
 The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 12.04 LTS` with Taobotics IMUs.
@@ -56,6 +57,7 @@ sudo apt install libmrpt-dev mrpt-apps
 sudo apt install python3-pymrpt
 ```
 
+> [!WARNING]\
 > If you are using `virtualenv` (or any other virtual environment), MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
 
 ## Run the project
