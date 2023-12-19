@@ -34,9 +34,7 @@ class SensorGroup:
         [sensor.registerValue() for sensor in self.sensors.values()]
 
     def stop(self) -> None:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            sensors_list = list(self.sensors.values())
-            executor.map(lambda sensor: sensor.disconnect(), sensors_list)
+        [sensor.disconnect() for sensor in list(self.sensors.values())]
         self.is_group_active = False
 
     # Setters and getters
