@@ -1,0 +1,12 @@
+general_settings:
+  calibration_times:
+    data_interval_ms: 10
+    calibration_time_ms: 3000
+  test_times:
+    data_interval_ms: 10
+    tare_time_ms: 3000
+  test_results:
+    folder: /example/folder
+    name: Example Test
+    save_calib_results: true
+    save_raw_results: false

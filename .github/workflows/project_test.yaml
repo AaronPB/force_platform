@@ -1,0 +1,31 @@
+name: Project Test
+
+on:
+  pull_request:
+    branches:
+    - master
+    - develop
+
+jobs:
+  test:
+    runs-on: [ubuntu-latest]
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install loguru pyyaml pandas
+          pip install pytest pytest-cov
+      
+      - name: Run project tests
+        run: python -m pytest tests/ --cov
