@@ -259,6 +259,7 @@ class MainUI(QtWidgets.QWidget):
     def loadTabularPanel(self) -> QtWidgets.QTabWidget:
         tabular_panel = QtWidgets.QTabWidget()
         tabular_panel.addTab(self.loadTabSettings(), "Settings and sensor information")
+        tabular_panel.addTab(self.loadTabResults(), "Results")
         tabular_panel.addTab(self.loadTabPlatformPlots(), "Platform plots")
         tabular_panel.addTab(self.loadTabCOPPlots(), "COP plots")
         tabular_panel.addTab(self.loadTabEncoderPlots(), "Encoder plots")
@@ -348,6 +349,120 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout.addItem(QtWidgets.QSpacerItem(40, 40))
         vbox_general_layout.addWidget(sensors_group_box)
 
+        return tab_widget
+
+    def loadTabResults(self) -> QtWidgets.QWidget:
+        tab_widget = QtWidgets.QWidget()
+        vbox_general_layout = QtWidgets.QVBoxLayout()
+        tab_widget.setLayout(vbox_general_layout)
+        vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
+
+        # Data preview box
+        data_preview_box = QtWidgets.QGroupBox("Data preview")
+        data_preview_grid = QtWidgets.QGridLayout()
+        data_preview_box.setLayout(data_preview_grid)
+        data_preview_grid.setAlignment(QtCore.Qt.AlignTop)
+        # - Information and import button
+        data_options_layout = QtWidgets.QVBoxLayout()
+        data_options_layout.setAlignment(QtCore.Qt.AlignTop)
+        self.results_status = customQT.createLabelBox(
+            "Make a test or import a valid csv file", QssLabels.STATUS_LABEL_WARN
+        )
+        file_import_button = customQT.createQPushButton(
+            "Import file", QssLabels.CONTROL_PANEL_BTN, enabled=False
+        )
+
+        # - File information
+        file_info_grid = QtWidgets.QGridLayout()
+        file_name = customQT.createLabelBox("Name:")
+        self.file_name_text = QtWidgets.QLineEdit(self)
+        self.file_name_text.setReadOnly(True)
+        file_date = customQT.createLabelBox("Date:")
+        self.file_date_text = QtWidgets.QLineEdit(self)
+        self.file_date_text.setReadOnly(True)
+        file_values = customQT.createLabelBox("Values:")
+        self.file_values_text = QtWidgets.QLineEdit(self)
+        self.file_values_text.setReadOnly(True)
+        file_info_grid.addWidget(file_name, 0, 0)
+        file_info_grid.addWidget(self.file_name_text, 0, 1)
+        file_info_grid.addWidget(file_date, 1, 0)
+        file_info_grid.addWidget(self.file_date_text, 1, 1)
+        file_info_grid.addWidget(file_values, 2, 0)
+        file_info_grid.addWidget(self.file_values_text, 2, 1)
+
+        # - Data start and end points
+        data_index_header = customQT.createLabelBox("Modify data range:")
+        data_index_layout = QtWidgets.QHBoxLayout()
+        self.data_start = QtWidgets.QLineEdit(self)
+        self.data_start.setText("0")
+        self.data_end = QtWidgets.QLineEdit(self)
+        self.data_end.setText("0")
+        data_index_layout.addWidget(self.data_start)
+        data_index_layout.addWidget(customQT.createLabelBox("-"))
+        data_index_layout.addWidget(self.data_end)
+
+        # - Butterworth filter options
+        filter_header = customQT.createLabelBox("Modify Butterworth filter:")
+        filter_grid = QtWidgets.QGridLayout()
+        filter_fs = customQT.createLabelBox("Sampling rate (Fs):")
+        self.filter_fs_input = QtWidgets.QLineEdit(self)
+        self.filter_fs_input.setText("100")
+        filter_fs_units = customQT.createLabelBox("Hz")
+        filter_fc = customQT.createLabelBox("Cutoff freq (Fc):")
+        self.filter_fc_input = QtWidgets.QLineEdit(self)
+        self.filter_fc_input.setText("5")
+        filter_fc_units = customQT.createLabelBox("Hz")
+        filter_order = customQT.createLabelBox("Order:")
+        self.filter_order_input = QtWidgets.QLineEdit(self)
+        self.filter_order_input.setText("6")
+        filter_grid.addWidget(filter_fs, 0, 0)
+        filter_grid.addWidget(self.filter_fs_input, 0, 1)
+        filter_grid.addWidget(filter_fs_units, 0, 2)
+        filter_grid.addWidget(filter_fc, 1, 0)
+        filter_grid.addWidget(self.filter_fc_input, 1, 1)
+        filter_grid.addWidget(filter_fc_units, 1, 2)
+        filter_grid.addWidget(filter_order, 2, 0)
+        filter_grid.addWidget(self.filter_order_input, 2, 1)
+
+        # - Recalculate button
+        data_options_layout = QtWidgets.QVBoxLayout()
+        data_options_layout.setAlignment(QtCore.Qt.AlignTop)
+        recalculate_button = customQT.createQPushButton(
+            "Recalculate", QssLabels.CONTROL_PANEL_BTN, enabled=False
+        )
+
+        # - Build vertical layout
+        data_options_layout.addWidget(self.results_status)
+        data_options_layout.addWidget(file_import_button)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        data_options_layout.addLayout(file_info_grid)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        data_options_layout.addWidget(data_index_header)
+        data_options_layout.addLayout(data_index_layout)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
+        data_options_layout.addWidget(filter_header)
+        data_options_layout.addLayout(filter_grid)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
+        data_options_layout.addWidget(recalculate_button)
+        container = QtWidgets.QWidget()
+        container.setLayout(data_options_layout)
+        container.setFixedWidth(400)
+        data_preview_grid.addWidget(container, 0, 0)
+
+        # - TODO Build left graph
+
+        # TODO Results box
+        results_box = QtWidgets.QGroupBox("Results")
+        results_grid = QtWidgets.QGridLayout()
+        results_box.setLayout(results_grid)
+        results_grid.setAlignment(QtCore.Qt.AlignTop)
+        # - TODO COP areas section
+        # - TODO check other interesting stuff to generate
+
+        # Build main tab vbox
+        vbox_general_layout.addWidget(data_preview_box)
+        # vbox_general_layout.addItem(QtWidgets.QSpacerItem(40, 40))
+        vbox_general_layout.addWidget(results_box)
         return tab_widget
 
     def loadTabPlatformPlots(self) -> QtWidgets.QWidget:
