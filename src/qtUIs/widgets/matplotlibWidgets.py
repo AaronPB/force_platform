@@ -293,3 +293,41 @@ class PlotRegressionWidget(QtWidgets.QWidget):
     def clear(self):
         self.figure.clear()
         self.setup()
+
+
+class PlotResultsForcesWidget(QtWidgets.QWidget):
+    def __init__(self, test_name: str):
+        super(PlotResultsForcesWidget, self).__init__()
+
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.setLayout(QtWidgets.QVBoxLayout())
+        self.layout().addWidget(self.canvas)
+
+        self.test_name = test_name
+        self.data_index_start = 0
+        self.data_index_end = 1
+
+        self.setup()
+
+    def setup(self):
+        self.ax = self.figure.add_subplot()
+        self.ax.set_title(f"Z axis platform forces sum - {self.test_name}")
+        self.ax.set_xlabel("Data values")
+        self.ax.set_ylabel("Weight (kg)")
+        self.ax.grid(True)
+        self.ax.axvline(x=self.data_index_start, color="blue", linestyle="--")
+        self.ax.axvline(x=self.data_index_end, color="blue", linestyle="--")
+        self.canvas.draw()
+
+    def update(self, forces_z: np.ndarray, index_start: int, index_end: int):
+        self.data_index_start = index_start
+        self.data_index_end = index_end
+        self.clear()
+        # TODO plot forces_z
+        self.ax.plot(0, 0, color="black")
+        self.canvas.draw()
+
+    def clear(self):
+        self.figure.clear()
+        self.setup()

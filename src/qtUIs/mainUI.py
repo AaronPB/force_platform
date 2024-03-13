@@ -449,7 +449,8 @@ class MainUI(QtWidgets.QWidget):
         container.setFixedWidth(400)
         data_preview_grid.addWidget(container, 0, 0)
 
-        # - TODO Build left graph
+        # - Build left graph
+        data_preview_grid.addWidget(self.data_mngr.test_zforce_widget, 0, 1)
 
         # TODO Results box
         results_box = QtWidgets.QGroupBox("Results")

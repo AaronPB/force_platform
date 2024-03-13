@@ -9,6 +9,7 @@ from src.qtUIs.widgets.matplotlibWidgets import (
     PlotPlatformCOPWidget,
     PlotEncoderWidget,
     PlotIMUWidget,
+    PlotResultsForcesWidget,
 )
 from src.managers.testManager import TestManager
 from src.handlers.sensorGroup import SensorGroup
@@ -19,6 +20,7 @@ from loguru import logger
 
 class TestDataManager:
     __test__ = False
+
     def __init__(self, test_manager: TestManager):
         self.test_mngr = test_manager
         self.setupPlotWidgets()
@@ -57,6 +59,7 @@ class TestDataManager:
             encoders_group_name, encoders_group_size
         )
         self.imu_angles_widget = PlotIMUWidget(imus_group_name, imus_group_size)
+        self.test_zforce_widget = PlotResultsForcesWidget("WIP")
 
     def clearAllPlots(self) -> None:
         self.forces_p1_widget.clear()
@@ -65,6 +68,7 @@ class TestDataManager:
         self.cop_p2_widget.clear()
         self.encoders_widget.clear()
         self.imu_angles_widget.clear()
+        self.test_zforce_widget.clear()
 
     def updatePlotWidgetDraw(self, index: int) -> None:
         if index == 1:
