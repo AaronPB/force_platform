@@ -3,6 +3,7 @@
 import math
 import numpy as np
 import pandas as pd
+from scipy.signal import butter, filtfilt
 from mrpt.pymrpt import mrpt
 from src.qtUIs.widgets.matplotlibWidgets import (
     PlotPlatformForcesWidget,
@@ -16,6 +17,17 @@ from src.handlers.sensorGroup import SensorGroup
 from src.enums.configPaths import ConfigPaths as CfgPaths
 
 from loguru import logger
+
+
+# ButterWorth filter
+def dataFilter(
+    df: pd.DataFrame, fs: int = 100, fc: int = 5, order: int = 6
+) -> pd.DataFrame:
+    b, a = butter(order, fc / (0.5 * fs), btype="low", analog=False)
+    filtered_df = pd.DataFrame()
+    for col in df.columns:
+        filtered_df[col] = filtfilt(b, a, df[col])
+    return filtered_df
 
 
 class TestDataManager:
