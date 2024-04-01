@@ -15,7 +15,7 @@ settings:
 sensor_groups:
   platform_1:
     name: Platform 1
-    type: PLATFORM
+    type: GROUP_PLATFORM
     read: true
     sensor_list:
     - p1_z1
@@ -32,7 +32,7 @@ sensor_groups:
     - p1_y4
   platform_2:
     name: Platform 2
-    type: PLATFORM
+    type: GROUP_PLATFORM
     read: true
     sensor_list:
     - p2_z1
@@ -69,6 +69,7 @@ sensors:
   p1_z1:
     name: P1_LoadCell_Z_1
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 583477
@@ -81,6 +82,7 @@ sensors:
   p1_z2:
     name: P1_LoadCell_Z_2
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 1
       serial: 583477
@@ -93,6 +95,7 @@ sensors:
   p1_z3:
     name: P1_LoadCell_Z_3
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 2
       serial: 583477
@@ -105,6 +108,7 @@ sensors:
   p1_z4:
     name: P1_LoadCell_Z_4
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 3
       serial: 583477
@@ -118,6 +122,7 @@ sensors:
   p1_x1:
     name: P1_LoadCell_X_1
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 583467
@@ -130,6 +135,7 @@ sensors:
   p1_x2:
     name: P1_LoadCell_X_2
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 1
       serial: 583467
@@ -142,6 +148,7 @@ sensors:
   p1_x3:
     name: P1_LoadCell_X_3
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 2
       serial: 583467
@@ -154,6 +161,7 @@ sensors:
   p1_x4:
     name: P1_LoadCell_X_4
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 3
       serial: 583467
@@ -166,6 +174,7 @@ sensors:
   p1_y1:
     name: P1_LoadCell_Y_1
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 588715
@@ -178,6 +187,7 @@ sensors:
   p1_y2:
     name: P1_LoadCell_Y_2
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 1
       serial: 588715
@@ -190,6 +200,7 @@ sensors:
   p1_y3:
     name: P1_LoadCell_Y_3
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 2
       serial: 588715
@@ -202,6 +213,7 @@ sensors:
   p1_y4:
     name: P1_LoadCell_Y_4
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 3
       serial: 588715
@@ -214,6 +226,7 @@ sensors:
   p2_z1:
     name: P2_LoadCell_Z_1
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 588569
@@ -226,6 +239,7 @@ sensors:
   p2_z2:
     name: P2_LoadCell_Z_2
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 1
       serial: 588569
@@ -238,6 +252,7 @@ sensors:
   p2_z3:
     name: P2_LoadCell_Z_3
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 2
       serial: 588569
@@ -250,6 +265,7 @@ sensors:
   p2_z4:
     name: P2_LoadCell_Z_4
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 3
       serial: 588569
@@ -262,6 +278,7 @@ sensors:
   p2_x1:
     name: P2_LoadCell_X_1
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 588718
@@ -274,6 +291,7 @@ sensors:
   p2_x2:
     name: P2_LoadCell_X_2
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 1
       serial: 588718
@@ -286,6 +304,7 @@ sensors:
   p2_x3:
     name: P2_LoadCell_X_3
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 2
       serial: 588718
@@ -298,6 +317,7 @@ sensors:
   p2_x4:
     name: P2_LoadCell_X_4
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 3
       serial: 588718
@@ -310,6 +330,7 @@ sensors:
   p2_y1:
     name: P2_LoadCell_Y_1
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 582535
@@ -322,6 +343,7 @@ sensors:
   p2_y2:
     name: P2_LoadCell_Y_2
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 1
       serial: 582535
@@ -334,6 +356,7 @@ sensors:
   p2_y3:
     name: P2_LoadCell_Y_3
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 2
       serial: 582535
@@ -346,6 +369,7 @@ sensors:
   p2_y4:
     name: P2_LoadCell_Y_4
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 3
       serial: 582535
@@ -358,6 +382,7 @@ sensors:
   encoder_1:
     name: Encoder_Z_1
     type: SENSOR_ENCODER
+    read: true
     connection:
       channel: 0
       serial: 641800
@@ -371,6 +396,7 @@ sensors:
   encoder_2:
     name: Encoder_Z_2
     type: SENSOR_ENCODER
+    read: true
     connection:
       channel: 1
       serial: 641800
@@ -384,6 +410,7 @@ sensors:
   imu_1:
     name: IMU_Leg_Right
     type: SENSOR_IMU
+    read: true
     connection:
       serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.3:1.0-port0
     properties:
@@ -391,6 +418,7 @@ sensors:
   imu_2:
     name: IMU_Thigh_Right
     type: SENSOR_IMU
+    read: true
     connection:
       serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.4:1.0-port0
     properties:
@@ -398,6 +426,7 @@ sensors:
   imu_3:
     name: IMU_UpperTrunk_Right
     type: SENSOR_IMU
+    read: true
     connection:
       serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.2:1.0-port0
     properties:
@@ -405,6 +434,7 @@ sensors:
   s_type:
     name: S-Type Phidget Load Cell
     type: SENSOR_LOADCELL
+    read: true
     connection:
       channel: 0
       serial: 583229
