@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from src.enums.sensorParams import SensorParams as SParams
+from src.enums.sensorParams import SParams
 from src.enums.sensorStatus import SensorStatus as SStatus
 from typing import Protocol
 
 
 class Driver(Protocol):
-    def __init__(self, serial: int, channel: int) -> None:
-        ...
+    def __init__(self, serial: int, channel: int) -> None: ...
 
-    def connect(self, wait_ms: int, interval_ms: int) -> bool:
-        ...
+    def connect(self, wait_ms: int, interval_ms: int) -> bool: ...
 
-    def disconnect(self) -> None:
-        ...
+    def disconnect(self) -> None: ...
 
-    def getValue(self):
-        ...
+    def getValue(self): ...
 
 
 class Sensor:
@@ -63,16 +59,11 @@ class Sensor:
 
     # Setters and getters methods
 
-    def setRead(self, read: bool) -> None:
-        self.params[SParams.READ.value] = read
+    def setSlope(self, slope: float) -> None:
+        self.params[SParams.SLOPE.value] = slope
 
     def setIntercept(self, intercept: float) -> None:
-        self.params[SParams.CALIBRATION_SECTION.value][
-            SParams.INTERCEPT.value
-        ] = intercept
-
-    def setSlope(self, slope: float) -> None:
-        self.params[SParams.CALIBRATION_SECTION.value][SParams.SLOPE.value] = slope
+        self.params[SParams.INTERCEPT.value] = intercept
 
     def clearValues(self) -> None:
         self.values.clear()
@@ -83,9 +74,6 @@ class Sensor:
     def getStatus(self) -> SStatus:
         return self.status
 
-    def getIsReadable(self) -> bool:
-        return self.params[SParams.READ.value]
-
     def getProperties(self) -> str:
         text = " - "
         for property in self.params[SParams.PROPERTIES_SECTION.value]:
@@ -94,15 +82,11 @@ class Sensor:
             )
         return text
 
-    def getSlopeIntercept(self) -> list:
-        calib_params = self.params[SParams.CALIBRATION_SECTION.value]
-        slope = calib_params.get(SParams.SLOPE.value, 1)
-        intercept = calib_params.get(SParams.INTERCEPT.value, 0)
-        return [slope, intercept]
+    def getSlope(self) -> float:
+        return self.params.get(SParams.SLOPE.value, 1)
+
+    def getIntercept(self) -> float:
+        return self.params.get(SParams.INTERCEPT.value)
 
     def getValues(self) -> list:
         return self.values
-
-    def getCalibValues(self) -> list:
-        calib_params = self.getSlopeIntercept()
-        return [calib_params[0] * value + calib_params[1] for value in self.values]

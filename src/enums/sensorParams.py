@@ -8,13 +8,14 @@ class SParams(Enum):
     CALIBRATION_SECTION = "calibration"
     PROPERTIES_SECTION = "properties"
 
-    # Config params
+    # Config params paths
     NAME = "name"
     TYPE = "type"
-    CHANNEL = "channel"
-    SERIAL = "serial"
-    SLOPE = "slope"
-    INTERCEPT = "intercept"
+    READ = "read"
+    CHANNEL = "connection.channel"
+    SERIAL = "connection.serial"
+    SLOPE = "calibration.slope"
+    INTERCEPT = "calibration.intercept"
     INITIAL_POS = "initial_position"
 
     # Handler additional params

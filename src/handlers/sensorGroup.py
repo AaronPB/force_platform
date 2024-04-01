@@ -7,9 +7,10 @@ from src.handlers.sensor import Sensor
 
 
 class SensorGroup:
-    def __init__(self, group_name: str) -> None:
-        self.group_name = group_name
-        self.is_group_active = False
+    def __init__(self, id: str, name: str) -> None:
+        self.id = id
+        self.name = name
+        self.active = False
         self.sensors: dict[str, Sensor] = {}
 
     def addSensor(self, sensor: Sensor):
@@ -39,10 +40,8 @@ class SensorGroup:
 
     # Setters and getters
 
-    def setSensorRead(self, sensor_id: str, read: bool) -> None:
-        if sensor_id not in self.sensors.keys():
-            return
-        self.sensors[sensor_id].setRead(read)
+    def setActive(self, active: bool) -> None:
+        self.active = active
 
     def tareSensors(self, mean_dict: dict) -> None:
         for sensor_id, mean in mean_dict.items():
@@ -50,43 +49,22 @@ class SensorGroup:
             current_params = sensor.getSlopeIntercept()
             sensor.setIntercept(float(current_params[1] - mean))
 
-    def clearSensorValues(self) -> None:
+    def clearValues(self) -> None:
         [sensor.clearValues() for sensor in self.sensors.values()]
 
-    def getGroupName(self) -> str:
-        return self.group_name
+    def getID(self) -> str:
+        return self.id
 
-    def getGroupInfo(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            group_dict[sensor_id] = [
-                sensor.getName(),
-                sensor.getProperties(),
-                sensor.getStatus(),
-                sensor.getIsReadable(),
-            ]
-        return group_dict
+    def getName(self) -> str:
+        return self.name
 
-    def getGroupAvailableInfo(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
-                continue
-            group_dict[sensor_id] = [
-                sensor.getName(),
-                sensor.getProperties(),
-                sensor.getStatus(),
-                sensor.getIsReadable(),
-            ]
-        return group_dict
-
-    def getGroupSize(self) -> int:
+    def getSize(self) -> int:
         return len(self.sensors)
 
-    def getGroupIsActive(self) -> bool:
-        return self.is_group_active
+    def isActive(self) -> bool:
+        return self.active
 
-    def getGroupValues(self) -> dict:
+    def getValues(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             if sensor.getStatus() is not SStatus.AVAILABLE:
@@ -94,16 +72,18 @@ class SensorGroup:
             group_dict[sensor_id] = sensor.getValues()
         return group_dict
 
-    def getGroupCalibValues(self) -> dict:
+    def getSlopes(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             if sensor.getStatus() is not SStatus.AVAILABLE:
                 continue
-            group_dict[sensor_id] = sensor.getCalibValues()
+            group_dict[sensor_id] = sensor.getSlope()
         return group_dict
 
-    def getGroupCalibrationParams(self) -> dict:
+    def getIntercepts(self) -> dict:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
-            group_dict[sensor_id] = sensor.getSlopeIntercept()
+            if sensor.getStatus() is not SStatus.AVAILABLE:
+                continue
+            group_dict[sensor_id] = sensor.getIntercept()
         return group_dict
