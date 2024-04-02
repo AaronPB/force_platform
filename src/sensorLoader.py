@@ -23,7 +23,7 @@ encoder_keys = [
     SParams.CHANNEL,
     SParams.INITIAL_POS,
 ]
-taobotics_keys = [SParams.NAME, SParams.SERIAL]
+taobotics_keys = [SParams.SERIAL]
 
 
 class SensorLoader:
@@ -32,8 +32,6 @@ class SensorLoader:
 
         self.sensor_groups: list[SensorGroup] = []
         self.platform_groups: list[SensorGroup] = []
-        self.encoder_groups: list[SensorGroup] = []
-        self.imu_groups: list[SensorGroup] = []
 
         self.loadcell_calib_ref: Sensor = None
         self.platform_calib_ref: Sensor = None
@@ -51,6 +49,7 @@ class SensorLoader:
         platform_calib_id = config_mngr.getConfigValue(
             CfgPaths.CALIBRATION_PLATFORM_SENSOR.value, {}
         )
+        self.clearSensors()
         self.loadSensorGroups(config_groups)
         self.loadcell_calib_ref = self.loadSensor(loadcell_calib_id)
         self.platform_calib_ref = self.loadSensor(platform_calib_id)
@@ -66,8 +65,10 @@ class SensorLoader:
             sensor_group = self.loadSensorGroup(group_id, config_groups[group_id])
             if sensor_group is None:
                 continue
-            # TODO check group type (for certain groups such as platforms)
-            # TODO add group to list
+            # Add sensor group to list
+            self.sensor_groups.append(sensor_group)
+            if config_groups[group_id][SGParams.TYPE] == SGTypes.GROUP_PLATFORM:
+                self.platform_groups.append(sensor_group)
 
     def loadSensorGroup(self, id: str, content: dict) -> SensorGroup:
         if content is None:
@@ -100,8 +101,7 @@ class SensorLoader:
             )
             return None
         content = self.config_sensors[id]
-        # TODO Now sensor params needs to have a generic style.
-        # Following sections are required: name, type and connection.
+        # Sections are required: name, type, read and connection.
         # Optional sections: calibration and properties.
         if not all(key.value in content.keys() for key in sensor_keys):
             logger.warning(f"Sensor {id} does not have the required keys! Not loaded.")
@@ -111,10 +111,36 @@ class SensorLoader:
                 f"Sensor {id} does not have a valid sensor type! Not loaded."
             )
             return None
-        # TODO sensor params
+        # Check sensor type required keys
+        if content[SParams.TYPE.value] == STypes.SENSOR_LOADCELL:
+            if not all(key.value in content.keys() for key in loadcell_keys):
+                logger.warning(
+                    f"Sensor {id} does not have the required loadcell keys! Not loaded."
+                )
+                return None
+        elif content[SParams.TYPE.value] == STypes.SENSOR_ENCODER:
+            if not all(key.value in content.keys() for key in encoder_keys):
+                logger.warning(
+                    f"Sensor {id} does not have the required encoder keys! Not loaded."
+                )
+                return None
+        elif content[SParams.TYPE.value] == STypes.SENSOR_IMU:
+            if not all(key.value in content.keys() for key in taobotics_keys):
+                logger.warning(
+                    f"Sensor {id} does not have the required taobotics keys! Not loaded."
+                )
+                return None
+        # Setup sensor
         sensor = Sensor()
-        sensor.setup(id, {}, STypes[content[SParams.TYPE.value]].value)
+        sensor.setup(id, content, STypes[content[SParams.TYPE.value]].value)
         return sensor
+
+    def clearSensors(self) -> None:
+        self.sensor_groups.clear()
+        self.platform_groups.clear()
+
+        self.loadcell_calib_ref: Sensor = None
+        self.platform_calib_ref: Sensor = None
 
     def getGroups(self) -> list:
         return self.sensor_groups
@@ -122,14 +148,8 @@ class SensorLoader:
     def getPlatformGroups(self) -> SensorGroup:
         return self.platform_groups
 
-    def getEncoderGroups(self) -> SensorGroup:
-        return self.encoder_groups
-
-    def getIMUGroups(self) -> SensorGroup:
-        return self.imu_groups
-
     def getSensorCalibRef(self) -> Sensor:
-        pass
+        return self.loadcell_calib_ref
 
     def getPlatformCalibRef(self) -> Sensor:
-        pass
+        return self.platform_calib_ref
