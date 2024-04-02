@@ -3,8 +3,7 @@
 from loguru import logger
 from src.managers.configManager import ConfigManager
 from src.handlers.sensorGroup import SensorGroup
-from src.handlers.sensor import Sensor, Driver
-from src.handlers.drivers import PhidgetLoadCell, PhidgetEncoder, TaoboticsIMU
+from src.handlers.sensor import Sensor
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SParams, SGParams
 from src.enums.sensorTypes import STypes, SGTypes
@@ -26,7 +25,7 @@ encoder_keys = [
 taobotics_keys = [SParams.SERIAL]
 
 
-class SensorLoader:
+class SensorManager:
     def __init__(self) -> None:
         self.config_sensors: dict = {}
 
