@@ -60,6 +60,9 @@ class Sensor:
 
     # Setters and getters methods
 
+    def setRead(self, read: bool) -> None:
+        self.params[SParams.READ.value] = read
+
     def setSlope(self, slope: float) -> None:
         self.params[SParams.SLOPE.value] = slope
 

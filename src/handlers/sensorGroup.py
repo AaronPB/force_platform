@@ -10,6 +10,7 @@ class SensorGroup:
     def __init__(self, id: str, name: str) -> None:
         self.id = id
         self.name = name
+        self.read = False
         self.active = False
         self.sensors: dict[str, Sensor] = {}
 
@@ -40,8 +41,8 @@ class SensorGroup:
 
     # Setters and getters
 
-    def setActive(self, active: bool) -> None:
-        self.active = active
+    def setRead(self, read: bool) -> None:
+        self.read = read
 
     def tareSensors(self, mean_dict: dict) -> None:
         for sensor_id, mean in mean_dict.items():
@@ -62,6 +63,9 @@ class SensorGroup:
 
     def isActive(self) -> bool:
         return self.active
+
+    def getSensors(self) -> dict[str, Sensor]:
+        return self.sensors
 
     def getValues(self) -> dict:
         group_dict = {}

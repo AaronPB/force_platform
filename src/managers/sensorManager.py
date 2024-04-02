@@ -138,8 +138,43 @@ class SensorManager:
         self.sensor_groups.clear()
         self.platform_groups.clear()
 
-        self.loadcell_calib_ref: Sensor = None
-        self.platform_calib_ref: Sensor = None
+        self.loadcell_calib_ref = None
+        self.platform_calib_ref = None
+
+    # Setters and getters
+    def setSensorRead(
+        self,
+        config_mngr: ConfigManager,
+        read: bool,
+        group_id: str,
+        sensor_id: str = None,
+    ) -> None:
+        for group in self.sensor_groups:
+            if group.getID() != group_id:
+                continue
+            if sensor_id is None:
+                group.setRead(read)
+                config_mngr.setConfigValue(
+                    CfgPaths.SENSOR_GROUPS_SECTION.value
+                    + "."
+                    + group_id
+                    + "."
+                    + SGParams.READ.value,
+                    read,
+                )
+                return
+            group_sensors = group.getSensors()
+            if sensor_id in group_sensors:
+                group_sensors[sensor_id].setRead(read)
+                config_mngr.setConfigValue(
+                    CfgPaths.SENSORS_SECTION.value
+                    + "."
+                    + sensor_id
+                    + "."
+                    + SParams.READ.value,
+                    read,
+                )
+                return
 
     def getGroups(self) -> list:
         return self.sensor_groups
