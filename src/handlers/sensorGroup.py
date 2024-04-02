@@ -46,8 +46,7 @@ class SensorGroup:
     def tareSensors(self, mean_dict: dict) -> None:
         for sensor_id, mean in mean_dict.items():
             sensor = self.sensors.get(sensor_id)
-            current_params = sensor.getSlopeIntercept()
-            sensor.setIntercept(float(current_params[1] - mean))
+            sensor.setIntercept(float(sensor.getIntercept() - mean))
 
     def clearValues(self) -> None:
         [sensor.clearValues() for sensor in self.sensors.values()]

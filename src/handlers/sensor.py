@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from src.enums.sensorParams import SParams
+from src.enums.sensorTypes import STypes
 from src.enums.sensorStatus import SensorStatus as SStatus
 from typing import Protocol
 
@@ -68,8 +69,14 @@ class Sensor:
     def clearValues(self) -> None:
         self.values.clear()
 
+    def getID(self) -> str:
+        return self.id
+
     def getName(self) -> str:
         return self.params[SParams.NAME.value]
+
+    def getType(self) -> STypes:
+        return STypes[self.params[SParams.TYPE.value]]
 
     def getStatus(self) -> SStatus:
         return self.status
@@ -86,7 +93,7 @@ class Sensor:
         return self.params.get(SParams.SLOPE.value, 1)
 
     def getIntercept(self) -> float:
-        return self.params.get(SParams.INTERCEPT.value)
+        return self.params.get(SParams.INTERCEPT.value, 0)
 
     def getValues(self) -> list:
         return self.values
