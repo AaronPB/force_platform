@@ -28,8 +28,10 @@ class Sensor:
         self.id = id
         self.params = params
         self.driver = driver(
-            self.params[SParams.SERIAL.value],
-            self.params.get(SParams.CHANNEL.value, None),
+            self.params[SParams.CONNECTION_SECTION.value][SParams.SERIAL.value],
+            self.params[SParams.CONNECTION_SECTION.value].get(
+                SParams.CHANNEL.value, None
+            ),
         )
 
     def connect(self, check: bool = False) -> bool:
@@ -64,10 +66,12 @@ class Sensor:
         self.params[SParams.READ.value] = read
 
     def setSlope(self, slope: float) -> None:
-        self.params[SParams.SLOPE.value] = slope
+        self.params[SParams.CALIBRATION_SECTION.value][SParams.SLOPE.value] = slope
 
     def setIntercept(self, intercept: float) -> None:
-        self.params[SParams.INTERCEPT.value] = intercept
+        self.params[SParams.CALIBRATION_SECTION.value][
+            SParams.INTERCEPT.value
+        ] = intercept
 
     def clearValues(self) -> None:
         self.values.clear()

@@ -12,10 +12,10 @@ class SParams(Enum):
     NAME = "name"
     TYPE = "type"
     READ = "read"
-    CHANNEL = "connection.channel"
-    SERIAL = "connection.serial"
-    SLOPE = "calibration.slope"
-    INTERCEPT = "calibration.intercept"
+    CHANNEL = "channel"
+    SERIAL = "serial"
+    SLOPE = "slope"
+    INTERCEPT = "intercept"
     INITIAL_POS = "initial_position"
 
     # Handler additional params

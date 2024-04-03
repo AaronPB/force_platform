@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from handlers import drivers
+from src.handlers import drivers
 
 
 # Sensor types

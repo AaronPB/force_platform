@@ -9,20 +9,11 @@ from src.enums.sensorParams import SParams, SGParams
 from src.enums.sensorTypes import STypes, SGTypes
 
 # Required param keys for sensor handlers
-group_keys = [
-    SGParams.NAME,
-    SGParams.TYPE,
-    SGParams.READ,
-    SGParams.SENSOR_LIST,
-]
+group_keys = [SGParams.NAME, SGParams.TYPE, SGParams.READ, SGParams.SENSOR_LIST]
 sensor_keys = [SParams.NAME, SParams.TYPE, SParams.READ, SParams.CONNECTION_SECTION]
-loadcell_keys = [SParams.SERIAL, SParams.CHANNEL]
-encoder_keys = [
-    SParams.SERIAL,
-    SParams.CHANNEL,
-    SParams.INITIAL_POS,
-]
-taobotics_keys = [SParams.SERIAL]
+loadcell_conn_keys = [SParams.SERIAL, SParams.CHANNEL]
+encoder_conn_keys = [SParams.SERIAL, SParams.CHANNEL]
+taobotics_conn_keys = [SParams.SERIAL]
 
 
 class SensorManager:
@@ -65,10 +56,16 @@ class SensorManager:
             if sensor_group is None:
                 continue
             # Add sensor group to list
-            if config_groups[group_id][SGParams.TYPE] == SGTypes.GROUP_DEFAULT:
+            if (
+                config_groups[group_id][SGParams.TYPE.value]
+                == SGTypes.GROUP_DEFAULT.name
+            ):
                 self.default_groups.append(sensor_group)
                 return
-            if config_groups[group_id][SGParams.TYPE] == SGTypes.GROUP_PLATFORM:
+            if (
+                config_groups[group_id][SGParams.TYPE.value]
+                == SGTypes.GROUP_PLATFORM.name
+            ):
                 self.platform_groups.append(sensor_group)
                 return
 
@@ -86,7 +83,7 @@ class SensorManager:
             return None
         sensor_group = SensorGroup(id, content[SGParams.NAME.value])
         # Load all sensors for this sensor group
-        for sensor_id in content[SGParams.SENSOR_LIST]:
+        for sensor_id in content[SGParams.SENSOR_LIST.value]:
             sensor = self.loadSensor(sensor_id)
             if sensor is not None:
                 sensor_group.addSensor(sensor)
@@ -108,28 +105,37 @@ class SensorManager:
         if not all(key.value in content.keys() for key in sensor_keys):
             logger.warning(f"Sensor {id} does not have the required keys! Not loaded.")
             return None
-        if content[SParams.TYPE.value] not in STypes:
+        if content[SParams.TYPE.value] not in STypes._member_names_:
             logger.warning(
                 f"Sensor {id} does not have a valid sensor type! Not loaded."
             )
             return None
         # Check sensor type required keys
-        if content[SParams.TYPE.value] == STypes.SENSOR_LOADCELL:
-            if not all(key.value in content.keys() for key in loadcell_keys):
+        if content[SParams.TYPE.value] == STypes.SENSOR_LOADCELL.name:
+            if not all(
+                key.value in content[SParams.CONNECTION_SECTION.value].keys()
+                for key in loadcell_conn_keys
+            ):
                 logger.warning(
-                    f"Sensor {id} does not have the required loadcell keys! Not loaded."
+                    f"Sensor {id} does not have the required loadcell connection keys! Not loaded."
                 )
                 return None
-        elif content[SParams.TYPE.value] == STypes.SENSOR_ENCODER:
-            if not all(key.value in content.keys() for key in encoder_keys):
+        elif content[SParams.TYPE.value] == STypes.SENSOR_ENCODER.name:
+            if not all(
+                key.value in content[SParams.CONNECTION_SECTION.value].keys()
+                for key in encoder_conn_keys
+            ):
                 logger.warning(
-                    f"Sensor {id} does not have the required encoder keys! Not loaded."
+                    f"Sensor {id} does not have the required encoder connection keys! Not loaded."
                 )
                 return None
-        elif content[SParams.TYPE.value] == STypes.SENSOR_IMU:
-            if not all(key.value in content.keys() for key in taobotics_keys):
+        elif content[SParams.TYPE.value] == STypes.SENSOR_IMU.name:
+            if not all(
+                key.value in content[SParams.CONNECTION_SECTION.value].keys()
+                for key in taobotics_conn_keys
+            ):
                 logger.warning(
-                    f"Sensor {id} does not have the required taobotics keys! Not loaded."
+                    f"Sensor {id} does not have the required taobotics connection keys! Not loaded."
                 )
                 return None
         # Setup sensor
@@ -138,7 +144,7 @@ class SensorManager:
         return sensor
 
     def clearSensors(self) -> None:
-        self.sensor_groups.clear()
+        self.default_groups.clear()
         self.platform_groups.clear()
 
         self.loadcell_calib_ref = None
@@ -152,7 +158,7 @@ class SensorManager:
         group_id: str,
         sensor_id: str = None,
     ) -> None:
-        for group in self.sensor_groups:
+        for group in self.getGroups():
             if group.getID() != group_id:
                 continue
             if sensor_id is None:
