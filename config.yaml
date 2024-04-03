@@ -49,7 +49,7 @@ sensor_groups:
     - p2_y4
   imus:
     name: Body IMUs
-    type: DEFAULT
+    type: GROUP_DEFAULT
     read: true
     sensor_list:
     - imu_1
@@ -57,7 +57,7 @@ sensor_groups:
     - imu_3
   barbell_encoders:
     name: Barbell encoders
-    type: DEFAULT
+    type: GROUP_DEFAULT
     read: true
     sensor_list:
     - encoder_1

@@ -61,13 +61,19 @@ class SensorManager:
                 == SGTypes.GROUP_DEFAULT.name
             ):
                 self.default_groups.append(sensor_group)
-                return
+                logger.info(
+                    f"Default group {group_id} successfully loaded, with {sensor_group.getSize()} sensors."
+                )
+                continue
             if (
                 config_groups[group_id][SGParams.TYPE.value]
                 == SGTypes.GROUP_PLATFORM.name
             ):
                 self.platform_groups.append(sensor_group)
-                return
+                logger.info(
+                    f"Platform group {group_id} successfully loaded, with {sensor_group.getSize()} sensors."
+                )
+                continue
 
     def loadSensorGroup(self, id: str, content: dict) -> SensorGroup:
         if content is None:
@@ -206,10 +212,10 @@ class SensorManager:
     def getGroups(self) -> list[SensorGroup]:
         return [self.default_groups, self.platform_groups]
 
-    def getDefaultGroups(self) -> SensorGroup:
+    def getDefaultGroups(self) -> list[SensorGroup]:
         return self.default_groups
 
-    def getPlatformGroups(self) -> SensorGroup:
+    def getPlatformGroups(self) -> list[SensorGroup]:
         return self.platform_groups
 
     def getSensorCalibRef(self) -> Sensor:
