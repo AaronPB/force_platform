@@ -176,7 +176,25 @@ class SensorManager:
                 )
                 return
 
-    def getGroups(self) -> list:
+    def tareSensors(
+        self, config_mngr: ConfigManager, mean_dict: dict[str, float]
+    ) -> None:
+        for sensor_id, mean in mean_dict.items():
+            for group_id in self.platform_groups:
+                if sensor_id in group_id.getSensors().keys():
+                    sensor = group_id.getSensors()[sensor_id]
+                    intercept = float(sensor.getIntercept() - mean)
+                    sensor.setIntercept(intercept)
+                    config_mngr.setConfigValue(
+                        CfgPaths.SENSORS_SECTION.value
+                        + "."
+                        + sensor_id
+                        + "."
+                        + SParams.INTERCEPT.value,
+                        intercept,
+                    )
+
+    def getGroups(self) -> list[SensorGroup]:
         return self.sensor_groups
 
     def getPlatformGroups(self) -> SensorGroup:

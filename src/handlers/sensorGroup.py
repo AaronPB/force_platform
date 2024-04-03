@@ -44,11 +44,6 @@ class SensorGroup:
     def setRead(self, read: bool) -> None:
         self.read = read
 
-    def tareSensors(self, mean_dict: dict) -> None:
-        for sensor_id, mean in mean_dict.items():
-            sensor = self.sensors.get(sensor_id)
-            sensor.setIntercept(float(sensor.getIntercept() - mean))
-
     def clearValues(self) -> None:
         [sensor.clearValues() for sensor in self.sensors.values()]
 
