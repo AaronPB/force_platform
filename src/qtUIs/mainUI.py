@@ -6,9 +6,8 @@ from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.testFileManager import TestFileManager
 from src.managers.testDataManager import TestDataManager
-from src.sensorLoader import SensorLoader
+from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
-from src.qtUIs.threads.plotterThread import PlotterThread
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -19,7 +18,7 @@ class MainUI(QtWidgets.QWidget):
         self,
         stacked_widget: QtWidgets.QStackedWidget,
         config_manager: ConfigManager,
-        sensor_loader: SensorLoader,
+        sensor_loader: SensorManager,
         logo_image_path: str,
     ):
         super().__init__()
@@ -32,14 +31,6 @@ class MainUI(QtWidgets.QWidget):
         self.initUI()
         self.updateTestStatus()
         self.getSensorInformation()
-
-        self.plot_thread = PlotterThread(
-            self.tabular_widget,
-            self.data_mngr,
-            self.cfg_mngr.getConfigValue(
-                CfgPaths.GENERAL_PLOTTERS_INTERVAL_MS.value, 500
-            ),
-        )
 
     def initManagers(self) -> None:
         self.file_mngr = TestFileManager(self.cfg_mngr)
@@ -84,16 +75,11 @@ class MainUI(QtWidgets.QWidget):
             self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100)
         )
 
-        if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_PLOTTERS_ENABLED.value, False):
-            self.plot_thread.start()
-
     @QtCore.Slot()
     def stopTest(self):
         self.tare_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.test_timer.stop()
-        if self.plot_thread.isRunning():
-            self.plot_thread.stopTimer()
         dataframe = self.data_mngr.getDataFrame()
         dataframe_raw = self.data_mngr.getDataFrame(raw_data=True)
         self.data_mngr.updateAllPlots()
@@ -539,14 +525,6 @@ class MainUI(QtWidgets.QWidget):
         self.tabular_widget.addTab(self.loadTabCOPPlots(), "COP plots")
         self.tabular_widget.addTab(self.loadTabEncoderPlots(), "Encoder plots")
         self.tabular_widget.addTab(self.loadTabIMUPlots(), "IMU plots")
-
-        self.plot_thread = PlotterThread(
-            self.tabular_widget,
-            self.data_mngr,
-            self.cfg_mngr.getConfigValue(
-                CfgPaths.GENERAL_PLOTTERS_INTERVAL_MS.value, 500
-            ),
-        )
 
     def setControlPanelButtons(self, enable: bool = False) -> None:
         if not enable:
