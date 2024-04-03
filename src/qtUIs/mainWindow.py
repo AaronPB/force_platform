@@ -5,7 +5,7 @@ from PySide6 import QtWidgets, QtGui, QtCore
 from src.qtUIs.mainUI import MainUI
 from src.qtUIs.calibrationUI import CalibrationUI
 from src.managers.configManager import ConfigManager
-from src.sensorLoader import SensorLoader
+from src.managers.sensorManager import SensorManager
 
 
 class MainMenu(QtWidgets.QMainWindow):
@@ -27,16 +27,16 @@ class MainMenu(QtWidgets.QMainWindow):
         logo_image_path = os.path.join(self.images_folder, "project_ui_logo.svg")
         platform_image_path = os.path.join(self.images_folder, "platform.png")
         config_manager = ConfigManager()
-        sensor_loader = SensorLoader(config_manager)
+        sensor_manager = SensorManager()
 
         # Define UIs and connect signals
         self.mainUI = MainUI(
-            stacked_widget, config_manager, sensor_loader, logo_image_path
+            stacked_widget, config_manager, sensor_manager, logo_image_path
         )
         self.calibrationUI = CalibrationUI(
             stacked_widget,
             config_manager,
-            sensor_loader,
+            sensor_manager,
             logo_image_path,
             platform_image_path,
         )
