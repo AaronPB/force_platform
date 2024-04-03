@@ -7,13 +7,12 @@ from src.enums.configPaths import ConfigPaths as CfgPaths
 
 class TestFileManager:
     __test__ = False
+
     def __init__(self, cfg_mngr: ConfigManager) -> None:
         self.cfg_mngr = cfg_mngr
-        self.file_name = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_NAME.value, "Test"
-        )
+        self.file_name = self.cfg_mngr.getConfigValue(CfgPaths.TEST_NAME.value, "Test")
         self.file_path = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_FOLDER.value, ""
+            CfgPaths.TEST_FOLDER_PATH.value, ""
         )
 
     def checkDuplicatedName(self, name: str) -> str:
@@ -41,12 +40,12 @@ class TestFileManager:
         if name == self.file_name:
             return
         self.file_name = name
-        self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_NAME.value, self.file_name)
+        self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
         logger.info(f"Changed test name to: {self.file_name}")
 
     def setFilePath(self, path: str, check_name: bool = True):
         self.file_path = path
-        self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_FOLDER.value, self.file_path)
+        self.cfg_mngr.setConfigValue(CfgPaths.TEST_FOLDER_PATH.value, self.file_path)
         logger.info(f"Changed test folder path to: {self.file_path}")
         if check_name:
             self.setFileName(self.file_name)
