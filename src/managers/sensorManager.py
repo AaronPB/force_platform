@@ -200,6 +200,9 @@ class SensorManager:
     def getGroups(self) -> list[SensorGroup]:
         return [self.default_groups, self.platform_groups]
 
+    def getDefaultGroups(self) -> SensorGroup:
+        return self.default_groups
+
     def getPlatformGroups(self) -> SensorGroup:
         return self.platform_groups
 

@@ -33,7 +33,7 @@ class TestManager:
 
     def testStart(self, test_name: str) -> None:
         logger.info(f"Starting test: {test_name}")
-        self.test_times = []
+        self.test_times.clear()
         [handler.clearValues() for handler in self.sensor_groups]
         [handler.start() for handler in self.sensor_groups]
 
