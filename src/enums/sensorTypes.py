@@ -11,5 +11,5 @@ class STypes(Enum):
 
 # Sensor group types
 class SGTypes(Enum):
+    GROUP_DEFAULT = auto()
     GROUP_PLATFORM = auto()
-    GROUP_GENERIC = auto()

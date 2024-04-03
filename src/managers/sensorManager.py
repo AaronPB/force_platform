@@ -29,7 +29,7 @@ class SensorManager:
     def __init__(self) -> None:
         self.config_sensors: dict = {}
 
-        self.sensor_groups: list[SensorGroup] = []
+        self.default_groups: list[SensorGroup] = []
         self.platform_groups: list[SensorGroup] = []
 
         self.loadcell_calib_ref: Sensor = None
@@ -65,9 +65,12 @@ class SensorManager:
             if sensor_group is None:
                 continue
             # Add sensor group to list
-            self.sensor_groups.append(sensor_group)
+            if config_groups[group_id][SGParams.TYPE] == SGTypes.GROUP_DEFAULT:
+                self.default_groups.append(sensor_group)
+                return
             if config_groups[group_id][SGParams.TYPE] == SGTypes.GROUP_PLATFORM:
                 self.platform_groups.append(sensor_group)
+                return
 
     def loadSensorGroup(self, id: str, content: dict) -> SensorGroup:
         if content is None:
@@ -195,7 +198,7 @@ class SensorManager:
                     )
 
     def getGroups(self) -> list[SensorGroup]:
-        return self.sensor_groups
+        return [self.default_groups, self.platform_groups]
 
     def getPlatformGroups(self) -> SensorGroup:
         return self.platform_groups
