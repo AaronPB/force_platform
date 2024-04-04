@@ -55,6 +55,9 @@ class SensorGroup:
 
     def getSize(self) -> int:
         return len(self.sensors)
+    
+    def getRead(self) -> bool:
+        return self.read
 
     def isActive(self) -> bool:
         return self.active

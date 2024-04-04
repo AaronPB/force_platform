@@ -88,6 +88,7 @@ class SensorManager:
             logger.warning(f"Sensor group {id} has an empty sensor list! Not loaded.")
             return None
         sensor_group = SensorGroup(id, content[SGParams.NAME.value])
+        sensor_group.setRead(content[SGParams.READ.value])
         # Load all sensors for this sensor group
         for sensor_id in content[SGParams.SENSOR_LIST.value]:
             sensor = self.loadSensor(sensor_id)
