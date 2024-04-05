@@ -2,6 +2,7 @@
 
 from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
+from src.enums.uiResources import IconPaths, ImagePaths
 from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.testFileManager import TestFileManager
@@ -19,13 +20,11 @@ class MainUI(QtWidgets.QWidget):
         stacked_widget: QtWidgets.QStackedWidget,
         config_manager: ConfigManager,
         sensor_manager: SensorManager,
-        logo_image_path: str,
     ):
         super().__init__()
         self.stacked_widget = stacked_widget
         self.cfg_mngr = config_manager
         self.sensor_mngr = sensor_manager
-        self.logo_img_path = logo_image_path
 
         self.test_mngr = TestManager()
         # self.data_mngr = TestDataManager(self.test_mngr)
@@ -185,7 +184,7 @@ class MainUI(QtWidgets.QWidget):
         container.setFixedWidth(250)
         # Top icon
         image = QtWidgets.QLabel(self)
-        pixmap = QtGui.QPixmap(self.logo_img_path)
+        pixmap = QtGui.QPixmap(ImagePaths.LOGO.value)
         image.setPixmap(pixmap)
         image.setAlignment(QtCore.Qt.AlignCenter)
         # Status label
@@ -201,7 +200,10 @@ class MainUI(QtWidgets.QWidget):
         buttons_vbox_layout = QtWidgets.QVBoxLayout()
         buttons_group_box.setLayout(buttons_vbox_layout)
         self.start_button = customQT.createQPushButton(
-            "Start test", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.startTest
+            " Start test",
+            QssLabels.CONTROL_PANEL_BTN,
+            icon=QtGui.QIcon(IconPaths.SEND.value),
+            connect_fn=self.startTest,
         )
         self.stop_button = customQT.createQPushButton(
             "Stop test", QssLabels.CONTROL_PANEL_BTN, connect_fn=self.stopTest
@@ -224,10 +226,23 @@ class MainUI(QtWidgets.QWidget):
         buttons_vbox_layout.addWidget(self.start_button)
         buttons_vbox_layout.addWidget(self.tare_button)
         buttons_vbox_layout.addWidget(self.stop_button)
-        # Author label
-        author_label = customQT.createLabelBox(
-            "© github.AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
+        # Author and version label
+        credits_layout = QtWidgets.QHBoxLayout()
+        credits_layout.setAlignment(QtCore.Qt.AlignLeft)
+        github_icon = customQT.createIconLabelBox(
+            QtGui.QPixmap(IconPaths.GITHUB.value), None
         )
+        tag_icon = customQT.createIconLabelBox(QtGui.QPixmap(IconPaths.TAG.value), None)
+        author_label = customQT.createLabelBox(
+            "AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
+        )
+        version_label = customQT.createLabelBox(
+            "PRE-v.1.2", QssLabels.AUTHOR_COPYRIGHT_LABEL
+        )
+        credits_layout.addWidget(github_icon)
+        credits_layout.addWidget(author_label)
+        credits_layout.addWidget(tag_icon)
+        credits_layout.addWidget(version_label)
 
         # Build layout
         vbox_layout.addWidget(image)
@@ -244,15 +259,19 @@ class MainUI(QtWidgets.QWidget):
         )
         vbox_layout.addWidget(self.close_button)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        vbox_layout.addWidget(author_label)
+        vbox_layout.addLayout(credits_layout)
         return container
 
     # - Tab Widget
 
     def loadTabularPanel(self) -> QtWidgets.QTabWidget:
         tabular_panel = QtWidgets.QTabWidget()
-        tabular_panel.addTab(self.loadTabSettings(), "Settings and sensor information")
-        tabular_panel.addTab(self.loadTabFigures(), "Figures")
+        tabular_panel.addTab(
+            self.loadTabSettings(), QtGui.QIcon(IconPaths.SETTINGS.value), "Settings"
+        )
+        tabular_panel.addTab(
+            self.loadTabFigures(), QtGui.QIcon(IconPaths.GRAPH.value), "Figures"
+        )
         return tabular_panel
 
     def loadTabSettings(self) -> QtWidgets.QWidget:
@@ -492,11 +511,6 @@ class MainUI(QtWidgets.QWidget):
         # Add new widgets
         index = 0
         for index, group in enumerate(sensor_groups):
-            checkbox = customQT.createSensorQCheckBox(
-                group.getName() + "\n" + str(group.getSize()) + " sensors",
-                qss_object=None,
-                change_fn=update_fn,
-                index=index,
-            )
-            checkbox.setChecked(False)
-            hbox_layout.addWidget(checkbox)
+            text = f"{group.getName()} \n {group.getSize()} sensors"
+            group_button = customQT.createQPushButton(text)
+            hbox_layout.addWidget(group_button)

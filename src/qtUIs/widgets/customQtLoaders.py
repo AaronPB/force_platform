@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from src.enums.qssLabels import QssLabels
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtGui
+
+
+def createIconLabelBox(
+    icon: QtGui.QPixmap, qss_object: QssLabels = None
+) -> QtWidgets.QLabel:
+    label = QtWidgets.QLabel()
+    label.setPixmap(icon)
+    if qss_object is not None:
+        label.setObjectName(qss_object.value)
+    return label
 
 
 def createLabelBox(text: str, qss_object: QssLabels = None) -> QtWidgets.QLabel:
@@ -15,12 +25,15 @@ def createQPushButton(
     title: str,
     qss_object: QssLabels = None,
     enabled: bool = False,
+    icon: QtGui.QIcon = None,
     connect_fn=None,
 ) -> QtWidgets.QPushButton:
     button = QtWidgets.QPushButton(title)
     if qss_object is not None:
         button.setObjectName(qss_object.value)
     button.setEnabled(enabled)
+    if icon is not None:
+        button.setIcon(icon)
     if connect_fn is not None:
         button.clicked.connect(connect_fn)
     return button
