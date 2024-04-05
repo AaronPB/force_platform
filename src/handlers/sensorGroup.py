@@ -2,29 +2,38 @@
 
 import concurrent.futures
 
-from src.enums.sensorStatus import SensorStatus as SStatus
+from src.enums.sensorStatus import SStatus, SGStatus
 from src.handlers.sensor import Sensor
 
 
 class SensorGroup:
     def __init__(self, id: str, name: str) -> None:
-        self.id = id
-        self.name = name
-        self.read = False
-        self.active = False
+        self.id: str = id
+        self.name: str = name
+        self.read: bool = False
+        self.status: SGStatus = SGStatus.IGNORED
+        self.active: bool = False
         self.sensors: dict[str, Sensor] = {}
 
     def addSensor(self, sensor: Sensor):
         self.sensors[sensor.id] = sensor
 
     def checkConnections(self) -> bool:
+        if not self.read:
+            self.status = SGStatus.IGNORED
+            return False
         results = False
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
             results = list(
                 executor.map(lambda sensor: sensor.checkConnection(), sensors_list)
             )
-        return any(results)
+        self.status = SGStatus.ERROR
+        if all(results):
+            self.status = SGStatus.OK
+        elif any(results):
+            self.status = SGStatus.WARNING
+        return self.status != SGStatus.ERROR
 
     def start(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -55,9 +64,12 @@ class SensorGroup:
 
     def getSize(self) -> int:
         return len(self.sensors)
-    
+
     def getRead(self) -> bool:
         return self.read
+
+    def getStatus(self) -> SGStatus:
+        return self.status
 
     def isActive(self) -> bool:
         return self.active

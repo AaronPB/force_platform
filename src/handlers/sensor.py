@@ -2,7 +2,7 @@
 
 from src.enums.sensorParams import SParams
 from src.enums.sensorTypes import STypes
-from src.enums.sensorStatus import SensorStatus as SStatus
+from src.enums.sensorStatus import SStatus
 from typing import Protocol
 
 

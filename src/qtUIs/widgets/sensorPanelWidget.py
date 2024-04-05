@@ -46,7 +46,7 @@ class SensorPanelWidget:
         # Build elements
         # TODO Change icons and colors based on current status
         status_label = customQtLoaders.createIconLabelBox(
-            IconPaths.STATUS_OFF, QssLabels.SENSOR_IGNORED
+            sensor.getStatus().value[0], sensor.getStatus().value[1]
         )
         type_label = customQtLoaders.createIconLabelBox(
             IconPaths.GRAPH, QssLabels.SENSOR
@@ -73,7 +73,7 @@ class SensorPanelWidget:
         # Build elements
         # TODO Change icons and colors based on current status
         status_label = customQtLoaders.createIconLabelBox(
-            IconPaths.STATUS_OFF, QssLabels.SENSOR_GROUP_IGNORED
+            group.getStatus().value[0], group.getStatus().value[1]
         )
         edit_btn = customQtLoaders.createIconQPushButton(
             IconPaths.SETTINGS,
