@@ -20,3 +20,7 @@ class IconPaths(Enum):
     SEND = os.path.join(_icon_folder, "send-plane-horizontal.svg")
     SETTINGS = os.path.join(_icon_folder, "filter-horizontal.svg")
     GRAPH = os.path.join(_icon_folder, "graph-trend-line.svg")
+    STATUS_OK = os.path.join(_icon_folder, "check-tick-circle.svg")
+    STATUS_WARN = os.path.join(_icon_folder, "troubleshoot.svg")
+    STATUS_ERROR = os.path.join(_icon_folder, "multiple-cross-cancel-circle.svg")
+    STATUS_OFF = os.path.join(_icon_folder, "minus-circle.svg")
