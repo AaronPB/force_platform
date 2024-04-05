@@ -85,6 +85,9 @@ class Sensor:
     def getType(self) -> STypes:
         return STypes[self.params[SParams.TYPE.value]]
 
+    def getRead(self) -> bool:
+        return self.params[SParams.READ.value]
+
     def getStatus(self) -> SStatus:
         return self.status
 
