@@ -17,7 +17,9 @@ taobotics_conn_keys = [SParams.SERIAL]
 
 
 class SensorManager:
-    def __init__(self) -> None:
+    def __init__(self, config_manager: ConfigManager) -> None:
+        self.config_mngr = config_manager
+
         self.config_sensors: dict = {}
 
         self.default_groups: list[SensorGroup] = []
@@ -26,17 +28,17 @@ class SensorManager:
         self.loadcell_calib_ref: Sensor = None
         self.platform_calib_ref: Sensor = None
 
-    def setup(self, config_mngr: ConfigManager) -> None:
-        self.config_sensors = config_mngr.getConfigValue(
+    def setup(self) -> None:
+        self.config_sensors = self.config_mngr.getConfigValue(
             CfgPaths.SENSORS_SECTION.value, {}
         )
-        config_groups = config_mngr.getConfigValue(
+        config_groups = self.config_mngr.getConfigValue(
             CfgPaths.SENSOR_GROUPS_SECTION.value, {}
         )
-        loadcell_calib_id = config_mngr.getConfigValue(
+        loadcell_calib_id = self.config_mngr.getConfigValue(
             CfgPaths.CALIBRATION_LOADCELL_SENSOR.value, {}
         )
-        platform_calib_id = config_mngr.getConfigValue(
+        platform_calib_id = self.config_mngr.getConfigValue(
             CfgPaths.CALIBRATION_PLATFORM_SENSOR.value, {}
         )
         self.clearSensors()
@@ -160,7 +162,6 @@ class SensorManager:
     # Setters and getters
     def setSensorRead(
         self,
-        config_mngr: ConfigManager,
         read: bool,
         group_id: str,
         sensor_id: str = None,
@@ -169,8 +170,9 @@ class SensorManager:
             if group.getID() != group_id:
                 continue
             if sensor_id is None:
+                logger.debug(f"Set read status of group {group_id} to {read}")
                 group.setRead(read)
-                config_mngr.setConfigValue(
+                self.config_mngr.setConfigValue(
                     CfgPaths.SENSOR_GROUPS_SECTION.value
                     + "."
                     + group_id
@@ -181,8 +183,9 @@ class SensorManager:
                 return
             group_sensors = group.getSensors()
             if sensor_id in group_sensors:
+                logger.debug(f"Set read status of sensor {sensor_id} to {read}")
                 group_sensors[sensor_id].setRead(read)
-                config_mngr.setConfigValue(
+                self.config_mngr.setConfigValue(
                     CfgPaths.SENSORS_SECTION.value
                     + "."
                     + sensor_id
@@ -192,16 +195,14 @@ class SensorManager:
                 )
                 return
 
-    def tareSensors(
-        self, config_mngr: ConfigManager, mean_dict: dict[str, float]
-    ) -> None:
+    def tareSensors(self, mean_dict: dict[str, float]) -> None:
         for sensor_id, mean in mean_dict.items():
             for group_id in self.platform_groups:
                 if sensor_id in group_id.getSensors().keys():
                     sensor = group_id.getSensors()[sensor_id]
                     intercept = float(sensor.getIntercept() - mean)
                     sensor.setIntercept(intercept)
-                    config_mngr.setConfigValue(
+                    self.config_mngr.setConfigValue(
                         CfgPaths.SENSORS_SECTION.value
                         + "."
                         + sensor_id
@@ -211,13 +212,19 @@ class SensorManager:
                     )
 
     def getGroups(self) -> list[SensorGroup]:
-        return [self.default_groups, self.platform_groups]
+        return self.default_groups + self.platform_groups
 
     def getDefaultGroups(self) -> list[SensorGroup]:
         return self.default_groups
 
     def getPlatformGroups(self) -> list[SensorGroup]:
         return self.platform_groups
+
+    def getGroup(self, group_id: str) -> SensorGroup:
+        for group in self.getGroups():
+            if group.getID() == group_id:
+                return group
+        return None
 
     def getSensorCalibRef(self) -> Sensor:
         return self.loadcell_calib_ref
