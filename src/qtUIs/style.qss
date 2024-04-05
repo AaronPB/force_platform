@@ -8,23 +8,68 @@ QLabel#status_info {
     color: white;
     padding: 15px;
 }
-
 QLabel#status_ok {
     background-color: green;
     color: white;
     padding: 15px;
 }
-
 QLabel#status_warn {
     background-color: red;
     color: white;
     padding: 15px;
 }
 
+QLabel#sensor_group_ignored {
+    background-color: gray;
+    padding: 15px;
+    /* icon-size: 20px 20px; */
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+QLabel#sensor_group_warn {
+    background-color: orange;
+    padding: 15px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+QLabel#sensor_group_ok {
+    background-color: green;
+    padding: 15px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+QLabel#sensor_ignored {
+    background-color: gray;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+QLabel#sensor_error {
+    background-color: red;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+QLabel#sensor_ok {
+    background-color: green;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+QLabel#sensor {
+    background-color: #326295;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 QPushButton {
     background-color: #326295;
 }
-
 QPushButton:disabled {
     background-color: gray;
     /* color: darkslategray; */
@@ -39,7 +84,6 @@ QPushButton#critical_btn {
     background-color: red;
     color: darkred;
 }
-
 QPushButton:disabled#critical_btn {
     background-color: gray;
     color: darkslategray;
@@ -50,44 +94,63 @@ QPushButton#critical_cp_btn {
     color: darkred;
     padding: 15px;
 }
-
 QPushButton:disabled#critical_cp_btn {
     background-color: gray;
     color: darkslategray;
 }
 
+QPushButton#sensor_group {
+    icon-size: 20px 20px;
+    border: none;
+    border-radius: 0px;
+    padding: 15px;
+}
+QPushButton:hover#sensor_group {
+    background-color: #77a7db;
+}
+
 QProgressBar {
     text-align: center;
 }
-
 QProgressBar::chunk {
     background-color: #326295;
 }
 
-QCheckBox {
-    padding: 8px;
-    border: 4px solid darkslategray;
-    border-radius: 5px;
-    text-align: center;
+QCheckBox::indicator#sensor {
+    width: 0;
+    height: 0;
+    border: none;
 }
-
-QCheckBox::indicator {
+QCheckBox::indicator#sensor_group {
     width: 0;
     height: 0;
     border: none;
 }
 
-QCheckBox:checked {
-    border-color: green;
+QCheckBox#sensor {
+    background-color: gray;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    /* text-align: center; */
+}
+QCheckBox#sensor_group {
+    padding: 15px;
+    background-color: gray;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    /* text-align: center; */
 }
 
-QCheckBox:checked#connected {
-    background-color: lightgreen;
-    color: black
+QCheckBox:checked#sensor {
+    background-color: #326295;
+}
+QCheckBox:checked#sensor_group {
+    background-color: #326295;
 }
 
-QCheckBox:checked#not_connected {
-    border-color: red;
-    background-color: lightcoral;
-    color: black
+QCheckBox:hover#sensor {
+    background-color: #77a7db;
+}
+QCheckBox:hover#sensor_group {
+    background-color: #77a7db;
 }

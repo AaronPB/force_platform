@@ -3,6 +3,7 @@ from src.enums.qssLabels import QssLabels
 
 
 class SensorStatus(Enum):
+    # TODO WIP
     IGNORED = None
-    AVAILABLE = QssLabels.SENSOR_CONNECTED
-    NOT_FOUND = QssLabels.SENSOR_NOT_CONNECTED
+    AVAILABLE = None
+    NOT_FOUND = None

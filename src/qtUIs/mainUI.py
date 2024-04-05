@@ -9,6 +9,7 @@ from src.managers.testFileManager import TestFileManager
 from src.managers.testDataManager import TestDataManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
+from src.qtUIs.widgets.sensorPanelWidget import SensorPanelWidget
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -36,7 +37,7 @@ class MainUI(QtWidgets.QWidget):
 
     def initManagers(self) -> None:
         self.file_mngr = TestFileManager(self.cfg_mngr)
-        self.sensor_mngr.setup(self.cfg_mngr)
+        self.sensor_mngr.setup()
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
         # TODO data_mngr
 
@@ -202,7 +203,7 @@ class MainUI(QtWidgets.QWidget):
         self.start_button = customQT.createQPushButton(
             " Start test",
             QssLabels.CONTROL_PANEL_BTN,
-            icon=QtGui.QIcon(IconPaths.SEND.value),
+            icon_path=IconPaths.SEND,
             connect_fn=self.startTest,
         )
         self.stop_button = customQT.createQPushButton(
@@ -229,10 +230,8 @@ class MainUI(QtWidgets.QWidget):
         # Author and version label
         credits_layout = QtWidgets.QHBoxLayout()
         credits_layout.setAlignment(QtCore.Qt.AlignLeft)
-        github_icon = customQT.createIconLabelBox(
-            QtGui.QPixmap(IconPaths.GITHUB.value), None
-        )
-        tag_icon = customQT.createIconLabelBox(QtGui.QPixmap(IconPaths.TAG.value), None)
+        github_icon = customQT.createIconLabelBox(IconPaths.GITHUB, None)
+        tag_icon = customQT.createIconLabelBox(IconPaths.TAG, None)
         author_label = customQT.createLabelBox(
             "AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
@@ -488,20 +487,18 @@ class MainUI(QtWidgets.QWidget):
         self.start_button.setEnabled(enable)
 
     def getSensorInformation(self):
+        # TODO
+        sensor_panels = SensorPanelWidget(self.sensor_mngr)
         self.setSensorBox(
-            self.hbox_platforms,
-            self.sensor_mngr.getPlatformGroups(),
-            None,
+            self.hbox_platforms, sensor_panels.getSensorGroupPlatformPanels()
         )
         self.setSensorBox(
-            self.hbox_defaults,
-            self.sensor_mngr.getDefaultGroups(),
-            None,
+            self.hbox_defaults, sensor_panels.getSensorGroupDefaultPanels()
         )
 
     # TODO to be resolved
     def setSensorBox(
-        self, hbox_layout: QtWidgets.QHBoxLayout, sensor_groups: list, update_fn
+        self, hbox_layout: QtWidgets.QHBoxLayout, panels: list[QtWidgets.QWidget]
     ):
         # Clear layout
         for i in reversed(range(hbox_layout.count())):
@@ -509,8 +506,5 @@ class MainUI(QtWidgets.QWidget):
             if widget is not None:
                 widget.deleteLater()
         # Add new widgets
-        index = 0
-        for index, group in enumerate(sensor_groups):
-            text = f"{group.getName()} \n {group.getSize()} sensors"
-            group_button = customQT.createQPushButton(text)
-            hbox_layout.addWidget(group_button)
+        for panel in panels:
+            hbox_layout.addWidget(panel)
