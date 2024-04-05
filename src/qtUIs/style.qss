@@ -26,6 +26,12 @@ QLabel#sensor_group_ignored {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
+QLabel#sensor_group_error {
+    background-color: red;
+    padding: 15px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
 QLabel#sensor_group_warn {
     background-color: orange;
     padding: 15px;

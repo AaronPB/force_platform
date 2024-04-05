@@ -16,6 +16,7 @@ class QssLabels(Enum):
     SENSOR = "sensor"
 
     SENSOR_GROUP_IGNORED = "sensor_group_ignored"
+    SENSOR_GROUP_ERROR = "sensor_group_error"
     SENSOR_GROUP_WARN = "sensor_group_warn"
     SENSOR_GROUP_OK = "sensor_group_ok"
     SENSOR_IGNORED = "sensor_ignored"
