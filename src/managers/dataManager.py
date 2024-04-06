@@ -30,9 +30,7 @@ def dataFilter(
     return filtered_df
 
 
-class TestDataManager:
-    __test__ = False
-
+class DataManager:
     def __init__(self, test_manager: TestManager):
         self.test_mngr = test_manager
         self.setupPlotWidgets()

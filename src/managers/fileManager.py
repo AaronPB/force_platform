@@ -5,9 +5,7 @@ from src.managers.configManager import ConfigManager
 from src.enums.configPaths import ConfigPaths as CfgPaths
 
 
-class TestFileManager:
-    __test__ = False
-
+class FileManager:
     def __init__(self, cfg_mngr: ConfigManager) -> None:
         self.cfg_mngr = cfg_mngr
         self.file_name = self.cfg_mngr.getConfigValue(CfgPaths.TEST_NAME.value, "Test")

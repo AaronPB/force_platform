@@ -5,8 +5,8 @@ from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.uiResources import IconPaths, ImagePaths
 from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
-from src.managers.testFileManager import TestFileManager
-from src.managers.testDataManager import TestDataManager
+from src.managers.fileManager import FileManager
+from src.managers.dataManager import DataManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.sensorPanelWidget import SensorPanelWidget
@@ -36,7 +36,7 @@ class MainUI(QtWidgets.QWidget):
         self.getSensorInformation()
 
     def initManagers(self) -> None:
-        self.file_mngr = TestFileManager(self.cfg_mngr)
+        self.file_mngr = FileManager(self.cfg_mngr)
         self.sensor_mngr.setup()
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
         # TODO data_mngr
