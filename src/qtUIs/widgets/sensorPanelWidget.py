@@ -3,7 +3,8 @@
 from loguru import logger
 from src.enums.qssLabels import QssLabels
 from src.enums.uiResources import IconPaths
-from PySide6 import QtWidgets, QtGui, QtCore
+from src.enums.sensorTypes import STypes, SGTypes
+from PySide6 import QtWidgets, QtCore
 from src.qtUIs.widgets import customQtLoaders
 from src.managers.sensorManager import SensorManager
 from src.handlers import Sensor, SensorGroup
@@ -12,6 +13,16 @@ from src.handlers import Sensor, SensorGroup
 class SensorPanelWidget:
     def __init__(self, sensor_manager: SensorManager):
         self.sensor_mngr = sensor_manager
+        # Sensor and sensor group icons
+        self.sensor_types: dict[STypes, IconPaths] = {
+            STypes.SENSOR_LOADCELL: IconPaths.LOADCELL_ICON,
+            STypes.SENSOR_ENCODER: IconPaths.ENCODER_ICON,
+            STypes.SENSOR_IMU: IconPaths.IMU_ICON,
+        }
+        self.sensor_group_types: dict[SGTypes, IconPaths] = {
+            SGTypes.GROUP_DEFAULT: IconPaths.DEFAULT_GROUP_ICON,
+            SGTypes.GROUP_PLATFORM: IconPaths.PLATFORM_ICON,
+        }
 
     # Panel list getters
 
@@ -44,13 +55,13 @@ class SensorPanelWidget:
         hbox_layout = QtWidgets.QHBoxLayout()
         widget.setLayout(hbox_layout)
         # Build elements
-        # TODO Change icons and colors based on current status
         status_label = customQtLoaders.createIconLabelBox(
             sensor.getStatus().value[0], sensor.getStatus().value[1]
         )
-        type_label = customQtLoaders.createIconLabelBox(
-            IconPaths.GRAPH, QssLabels.SENSOR
-        )
+        sensor_icon = IconPaths.GRAPH
+        if sensor.getType() in self.sensor_types:
+            sensor_icon = self.sensor_types[sensor.getType()]
+        type_label = customQtLoaders.createIconLabelBox(sensor_icon, QssLabels.SENSOR)
         text = f"{sensor.getName()} \n {sensor.getProperties()}"
         sensor_checkbox = customQtLoaders.createSensorQCheckBox(
             text,
@@ -71,9 +82,14 @@ class SensorPanelWidget:
         hbox_layout = QtWidgets.QHBoxLayout()
         widget.setLayout(hbox_layout)
         # Build elements
-        # TODO Change icons and colors based on current status
         status_label = customQtLoaders.createIconLabelBox(
             group.getStatus().value[0], group.getStatus().value[1]
+        )
+        group_icon = IconPaths.DEFAULT_GROUP_ICON
+        if group.getType() in self.sensor_group_types:
+            group_icon = self.sensor_group_types[group.getType()]
+        type_label = customQtLoaders.createIconLabelBox(
+            group_icon, QssLabels.SENSOR_GROUP
         )
         edit_btn = customQtLoaders.createIconQPushButton(
             IconPaths.SETTINGS,
@@ -93,6 +109,7 @@ class SensorPanelWidget:
         )
         # Build layout
         hbox_layout.addWidget(status_label)
+        hbox_layout.addWidget(type_label)
         hbox_layout.addWidget(edit_btn)
         hbox_layout.addWidget(group_checkbox)
         return widget

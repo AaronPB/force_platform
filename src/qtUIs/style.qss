@@ -72,6 +72,10 @@ QLabel#sensor {
     padding-left: 5px;
     padding-right: 5px;
 }
+QLabel#sensor_group {
+    background-color: #326295;
+    padding: 15px;
+}
 
 QPushButton {
     background-color: #326295;
