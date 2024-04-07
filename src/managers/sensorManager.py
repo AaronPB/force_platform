@@ -19,12 +19,9 @@ taobotics_conn_keys = [SParams.SERIAL]
 class SensorManager:
     def __init__(self, config_manager: ConfigManager) -> None:
         self.config_mngr = config_manager
-
         self.config_sensors: dict = {}
 
-        self.default_groups: list[SensorGroup] = []
-        self.platform_groups: list[SensorGroup] = []
-
+        self.sensor_groups: list[SensorGroup] = []
         self.loadcell_calib_ref: Sensor = None
         self.platform_calib_ref: Sensor = None
 
@@ -58,24 +55,11 @@ class SensorManager:
             if sensor_group is None:
                 continue
             # Add sensor group to list
-            if (
-                config_groups[group_id][SGParams.TYPE.value]
-                == SGTypes.GROUP_DEFAULT.name
-            ):
-                self.default_groups.append(sensor_group)
-                logger.info(
-                    f"Default group {group_id} successfully loaded, with {sensor_group.getSize()} sensors."
-                )
-                continue
-            if (
-                config_groups[group_id][SGParams.TYPE.value]
-                == SGTypes.GROUP_PLATFORM.name
-            ):
-                self.platform_groups.append(sensor_group)
-                logger.info(
-                    f"Platform group {group_id} successfully loaded, with {sensor_group.getSize()} sensors."
-                )
-                continue
+            self.sensor_groups.append(sensor_group)
+            logger.info(
+                f"Sensor group {sensor_group.getID()} of type {sensor_group.getType().name} successfully loaded,"
+                + f"with {sensor_group.getSize()} sensors."
+            )
 
     def loadSensorGroup(self, id: str, content: dict) -> SensorGroup:
         if content is None:
@@ -86,10 +70,17 @@ class SensorManager:
                 f"Sensor group {id} does not have the required keys! Not loaded."
             )
             return None
+        if content[SGParams.TYPE.value] not in SGTypes._member_names_:
+            logger.warning(
+                f"Sensor group {id} does not have a valid group type! Not loaded."
+            )
+            return None
         if not content[SGParams.SENSOR_LIST.value]:
             logger.warning(f"Sensor group {id} has an empty sensor list! Not loaded.")
             return None
-        sensor_group = SensorGroup(id, content[SGParams.NAME.value])
+        sensor_group = SensorGroup(
+            id, content[SGParams.NAME.value], SGTypes[content[SGParams.TYPE.value]]
+        )
         sensor_group.setRead(content[SGParams.READ.value])
         # Load all sensors for this sensor group
         for sensor_id in content[SGParams.SENSOR_LIST.value]:
@@ -153,9 +144,7 @@ class SensorManager:
         return sensor
 
     def clearSensors(self) -> None:
-        self.default_groups.clear()
-        self.platform_groups.clear()
-
+        self.sensor_groups.clear()
         self.loadcell_calib_ref = None
         self.platform_calib_ref = None
 
@@ -197,7 +186,7 @@ class SensorManager:
 
     def tareSensors(self, mean_dict: dict[str, float]) -> None:
         for sensor_id, mean in mean_dict.items():
-            for group_id in self.platform_groups:
+            for group_id in self.getPlatformGroups():
                 if sensor_id in group_id.getSensors().keys():
                     sensor = group_id.getSensors()[sensor_id]
                     intercept = float(sensor.getIntercept() - mean)
@@ -212,13 +201,21 @@ class SensorManager:
                     )
 
     def getGroups(self) -> list[SensorGroup]:
-        return self.default_groups + self.platform_groups
+        return self.sensor_groups
 
     def getDefaultGroups(self) -> list[SensorGroup]:
-        return self.default_groups
+        sensor_list: list[SensorGroup] = []
+        for group in self.sensor_groups:
+            if group.getType() == SGTypes.GROUP_DEFAULT:
+                sensor_list.append(group)
+        return sensor_list
 
     def getPlatformGroups(self) -> list[SensorGroup]:
-        return self.platform_groups
+        sensor_list: list[SensorGroup] = []
+        for group in self.sensor_groups:
+            if group.getType() == SGTypes.GROUP_PLATFORM:
+                sensor_list.append(group)
+        return sensor_list
 
     def getGroup(self, group_id: str) -> SensorGroup:
         for group in self.getGroups():

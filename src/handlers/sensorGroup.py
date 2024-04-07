@@ -3,13 +3,15 @@
 import concurrent.futures
 
 from src.enums.sensorStatus import SStatus, SGStatus
+from src.enums.sensorTypes import SGTypes
 from src.handlers.sensor import Sensor
 
 
 class SensorGroup:
-    def __init__(self, id: str, name: str) -> None:
+    def __init__(self, id: str, name: str, type: SGTypes) -> None:
         self.id: str = id
         self.name: str = name
+        self.type: SGTypes = type
         self.read: bool = False
         self.status: SGStatus = SGStatus.IGNORED
         self.active: bool = False
@@ -61,6 +63,9 @@ class SensorGroup:
 
     def getName(self) -> str:
         return self.name
+
+    def getType(self) -> SGTypes:
+        return self.type
 
     def getSize(self) -> int:
         return len(self.sensors)
