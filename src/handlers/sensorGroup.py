@@ -82,26 +82,10 @@ class SensorGroup:
     def getSensors(self) -> dict[str, Sensor]:
         return self.sensors
 
-    def getValues(self) -> dict:
+    def getAvailableSensors(self) -> dict[str, Sensor]:
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
             if sensor.getStatus() is not SStatus.AVAILABLE:
                 continue
-            group_dict[sensor_id] = sensor.getValues()
-        return group_dict
-
-    def getSlopes(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
-                continue
-            group_dict[sensor_id] = sensor.getSlope()
-        return group_dict
-
-    def getIntercepts(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
-                continue
-            group_dict[sensor_id] = sensor.getIntercept()
+            group_dict[sensor_id] = sensor
         return group_dict
