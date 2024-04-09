@@ -2,8 +2,39 @@ import numpy as np
 import matplotlib.patches as patches
 import math
 from PySide6 import QtWidgets
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+    NavigationToolbar2QT,
+)
 from matplotlib.figure import Figure
+
+
+class PlotFigureWidget(QtWidgets.QWidget):
+    def __init__(self):
+        super(PlotFigureWidget, self).__init__()
+
+        self.figure: Figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+
+        self.setLayout(QtWidgets.QVBoxLayout())
+        self.layout().addWidget(self.toolbar)
+        self.layout().addWidget(self.canvas)
+
+    def setupPlot(self, data_dict: dict) -> None:
+        ax = self.figure.add_subplot(111)
+        for key, series in data_dict.items():
+            ax.plot(series.index, series.values, label=key)
+        ax.legend()
+        self.canvas.draw()
+
+    def setupRangedPlot(self, data_dict: dict, idx1: int, idx2: int) -> None:
+        ax = self.figure.add_subplot(111)
+        for key, series in data_dict.items():
+            new_series = series[idx1:idx2]
+            ax.plot(series.index, new_series.values, label=key)
+        ax.legend()
+        self.canvas.draw()
 
 
 class PlotPlatformForcesWidget(QtWidgets.QWidget):
