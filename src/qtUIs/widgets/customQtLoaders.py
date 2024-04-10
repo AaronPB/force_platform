@@ -55,6 +55,7 @@ def createQPushButton(
     connect_fn=None,
 ) -> QtWidgets.QPushButton:
     button = QtWidgets.QPushButton(title)
+    button.setCursor(QtCore.Qt.PointingHandCursor)
     if qss_object is not None:
         button.setObjectName(qss_object.value)
     button.setEnabled(enabled)

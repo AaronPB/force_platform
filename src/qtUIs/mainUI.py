@@ -9,7 +9,7 @@ from src.managers.fileManager import FileManager
 from src.managers.dataManager import DataManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
-from src.qtUIs.widgets.sensorPanelWidget import SensorPanelWidget
+from src.qtUIs.widgets.mainWidgets import SensorSettings
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -139,7 +139,7 @@ class MainUI(QtWidgets.QWidget):
             self.cfg_mngr.loadConfigFile(config_file_path)
         self.initManagers()
         self.getSensorInformation()
-        self.updatePlotTabs()
+        # self.updatePlotTabs()
         self.updateTestStatus()
 
     @QtCore.Slot()
@@ -487,24 +487,10 @@ class MainUI(QtWidgets.QWidget):
         self.start_button.setEnabled(enable)
 
     def getSensorInformation(self):
-        # TODO
-        sensor_panels = SensorPanelWidget(self.sensor_mngr)
-        self.setSensorBox(
-            self.hbox_platforms, sensor_panels.getSensorGroupPlatformPanels()
+        sensor_panels = SensorSettings(self.sensor_mngr)
+        sensor_panels.updateLayout(
+            self.hbox_platforms, self.sensor_mngr.getPlatformGroups()
         )
-        self.setSensorBox(
-            self.hbox_defaults, sensor_panels.getSensorGroupDefaultPanels()
+        sensor_panels.updateLayout(
+            self.hbox_defaults, self.sensor_mngr.getDefaultGroups()
         )
-
-    # TODO to be resolved
-    def setSensorBox(
-        self, hbox_layout: QtWidgets.QHBoxLayout, panels: list[QtWidgets.QWidget]
-    ):
-        # Clear layout
-        for i in reversed(range(hbox_layout.count())):
-            widget = hbox_layout.itemAt(i).widget()
-            if widget is not None:
-                widget.deleteLater()
-        # Add new widgets
-        for panel in panels:
-            hbox_layout.addWidget(panel)
