@@ -9,7 +9,7 @@ from src.managers.fileManager import FileManager
 from src.managers.dataManager import DataManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
-from src.qtUIs.widgets.mainWidgets import SensorSettings
+from src.qtUIs.widgets.mainWidgets import SensorSettings, SensorPlotSelector
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -28,7 +28,7 @@ class MainUI(QtWidgets.QWidget):
         self.sensor_mngr = sensor_manager
 
         self.test_mngr = TestManager()
-        # self.data_mngr = TestDataManager(self.test_mngr)
+        self.data_mngr = DataManager()
 
         self.initManagers()
         self.initUI()
@@ -409,8 +409,24 @@ class MainUI(QtWidgets.QWidget):
 
         # - Sensor selectors
         selector_box = QtWidgets.QGroupBox("Sensor selector")
-        self.selector_layout = QtWidgets.QVBoxLayout()
-        selector_box.setLayout(self.selector_layout)
+        selector_layout = QtWidgets.QHBoxLayout()
+        selector_box.setLayout(selector_layout)
+
+        group_box_sensor_groups = QtWidgets.QGroupBox("Select group")
+        group_box_sensors = QtWidgets.QGroupBox("Select sensor")
+        group_box_options = QtWidgets.QGroupBox("Select option")
+        self.vbox_selector_groups = QtWidgets.QVBoxLayout()
+        self.vbox_selector_sensors = QtWidgets.QVBoxLayout()
+        self.vbox_selector_options = QtWidgets.QVBoxLayout()
+        self.vbox_selector_groups.setAlignment(QtCore.Qt.AlignTop)
+        self.vbox_selector_sensors.setAlignment(QtCore.Qt.AlignTop)
+        self.vbox_selector_options.setAlignment(QtCore.Qt.AlignTop)
+        group_box_sensor_groups.setLayout(self.vbox_selector_groups)
+        group_box_sensors.setLayout(self.vbox_selector_sensors)
+        group_box_options.setLayout(self.vbox_selector_options)
+        selector_layout.addWidget(group_box_sensor_groups)
+        selector_layout.addWidget(group_box_sensors)
+        selector_layout.addWidget(group_box_options)
 
         # - Build top grid layout
         data_options_layout = QtWidgets.QVBoxLayout()
@@ -430,7 +446,7 @@ class MainUI(QtWidgets.QWidget):
 
         # Figure layout
         figure_box = QtWidgets.QGroupBox("Figure")
-        self.figure_layout = QtWidgets.QHBoxLayout()
+        self.figure_layout = QtWidgets.QVBoxLayout()
         figure_box.setLayout(self.figure_layout)
         self.figure_layout.addWidget(
             QtWidgets.QLabel("Select an option at the selector.")
@@ -441,6 +457,15 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout.addLayout(top_grid_layout)
         vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_general_layout.addWidget(figure_box)
+
+        # Define selector class
+        self.sensor_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
+        self.sensor_plotter.setupLayouts(
+            self.vbox_selector_groups,
+            self.vbox_selector_sensors,
+            self.vbox_selector_options,
+            self.figure_layout,
+        )
 
         return tab_widget
 

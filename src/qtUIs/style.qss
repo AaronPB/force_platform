@@ -119,6 +119,16 @@ QPushButton:hover#sensor_group {
     background-color: #77a7db;
 }
 
+QPushButton#sensor {
+    icon-size: 20px 20px;
+    border: none;
+    border-radius: 0px;
+    padding: 5px;
+}
+QPushButton:hover#sensor {
+    background-color: #77a7db;
+}
+
 QProgressBar {
     text-align: center;
 }
