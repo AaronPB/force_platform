@@ -149,7 +149,14 @@ class SensorPlotSelector(QtWidgets.QWidget):
         self.figure_layout = figure
 
     def updateLayouts(self) -> None:
-        self.updateGroupsSelectorLayout()
+        self.updateGroupSelectorLayout()
+        clearWidgetsLayout(self.figure_layout)
+        self.figure_layout.addWidget(
+            customQT.createLabelBox(
+                "Select a plot option from the sensor selector panel",
+                QssLabels.STATUS_LABEL_WARN,
+            )
+        )
 
     def updateGroupSelectorLayout(self) -> None:
         clearWidgetsLayout(self.group_selector_layout)

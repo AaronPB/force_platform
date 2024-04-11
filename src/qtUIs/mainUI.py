@@ -72,10 +72,8 @@ class MainUI(QtWidgets.QWidget):
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
-        self.data_mngr.clearAllPlots()
-
         self.test_timer.start(
-            self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100)
+            self.cfg_mngr.getConfigValue(CfgPaths.RECORD_INTERVAL_MS.value, 100)
         )
 
     @QtCore.Slot()
@@ -83,14 +81,17 @@ class MainUI(QtWidgets.QWidget):
         self.tare_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.test_timer.stop()
-        dataframe = self.data_mngr.getDataFrame()
-        dataframe_raw = self.data_mngr.getDataFrame(raw_data=True)
-        self.data_mngr.updateAllPlots()
+        self.data_mngr.loadData(
+            self.test_mngr.getTestTimes(), self.sensor_mngr.getGroups()
+        )
+        dataframe = self.data_mngr.getCalibrateDataframe()
+        dataframe_raw = self.data_mngr.getRawDataframe()
+        self.sensor_plotter.updateLayouts()
         self.test_mngr.testStop(self.file_mngr.getFileName())
 
-        if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_SAVE_CALIB.value, True):
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
             self.file_mngr.saveDataToCSV(dataframe)
-        if self.cfg_mngr.getConfigValue(CfgPaths.GENERAL_TEST_SAVE_RAW.value, True):
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
             self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
 
         self.start_button.setEnabled(True)
@@ -102,12 +103,14 @@ class MainUI(QtWidgets.QWidget):
         self.stop_button.setEnabled(False)
         self.tare_button.setEnabled(False)
 
-        tare_time_ms = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TARE_DURATION_MS.value, 3000
+        # WIP - TODO
+        tare_amount = self.cfg_mngr.getConfigValue(
+            CfgPaths.RECORD_TARE_AMOUNT.value, 300
         )
         tare_interval_ms = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_INTERVAL_MS.value, 100
+            CfgPaths.RECORD_INTERVAL_MS.value, 100
         )
+        tare_time_ms = int(tare_amount / tare_interval_ms)
 
         self.tare_timer.start()
         QtCore.QTimer.singleShot(tare_time_ms, self.tare_timer.stop)
@@ -359,11 +362,6 @@ class MainUI(QtWidgets.QWidget):
         tab_widget.setLayout(vbox_general_layout)
         vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
 
-        # Status message
-        self.results_status = customQT.createLabelBox(
-            "Make a test or import a valid csv file", QssLabels.STATUS_LABEL_WARN
-        )
-
         # Top sensor selector and data options
         top_grid_layout = QtWidgets.QGridLayout()
         data_options_box = QtWidgets.QGroupBox("Data options")
@@ -449,11 +447,13 @@ class MainUI(QtWidgets.QWidget):
         self.figure_layout = QtWidgets.QVBoxLayout()
         figure_box.setLayout(self.figure_layout)
         self.figure_layout.addWidget(
-            QtWidgets.QLabel("Select an option at the selector.")
+            customQT.createLabelBox(
+                "First preform a test and select a plot option from the sensor selector panel",
+                QssLabels.STATUS_LABEL_WARN,
+            )
         )
 
         # Build general layout
-        vbox_general_layout.addWidget(self.results_status)
         vbox_general_layout.addLayout(top_grid_layout)
         vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_general_layout.addWidget(figure_box)
@@ -496,14 +496,6 @@ class MainUI(QtWidgets.QWidget):
         )
         self.status_vbox_layout.addWidget(self.status_label)
         self.setControlPanelButtons(False)
-
-    def updatePlotTabs(self):
-        for i in range(1, self.tabular_widget.count()):
-            self.tabular_widget.removeTab(1)
-        self.tabular_widget.addTab(self.loadTabPlatformPlots(), "Platform plots")
-        self.tabular_widget.addTab(self.loadTabCOPPlots(), "COP plots")
-        self.tabular_widget.addTab(self.loadTabEncoderPlots(), "Encoder plots")
-        self.tabular_widget.addTab(self.loadTabIMUPlots(), "IMU plots")
 
     def setControlPanelButtons(self, enable: bool = False) -> None:
         if not enable:
