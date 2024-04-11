@@ -100,10 +100,14 @@ class Sensor:
         return text
 
     def getSlope(self) -> float:
-        return self.params.get(SParams.SLOPE.value, 1)
+        return self.params[SParams.CALIBRATION_SECTION.value].get(
+            SParams.SLOPE.value, 1
+        )
 
     def getIntercept(self) -> float:
-        return self.params.get(SParams.INTERCEPT.value, 0)
+        return self.params[SParams.CALIBRATION_SECTION.value].get(
+            SParams.INTERCEPT.value, 0
+        )
 
     def getValues(self) -> list:
         return self.values

@@ -26,7 +26,6 @@ class DataManager:
         self.df_raw: pd.DataFrame = pd.DataFrame()
         self.df_calibrated: pd.DataFrame = pd.DataFrame()
         self.df_filtered: pd.DataFrame = pd.DataFrame()
-        self.df_processed: pd.DataFrame = pd.DataFrame()
         # Sensor header suffixes
         self.imu_ang_headers: list[str] = ["q_x", "q_y", "q_z", "q_w"]
         self.imu_vel_headers: list[str] = ["w_x", "w_y", "w_z"]
@@ -46,22 +45,12 @@ class DataManager:
             "Z_3": 1,
             "Z_4": 1,
         }
-        # TODO Plot types
-        self.plot_type_headers: dict[PlotTypes, list[str]] = {
-            PlotTypes.GROUP_PLATFORM_COP: self.getCOP,
-            PlotTypes.GROUP_PLATFORM_FORCES: self.getForces,
-            PlotTypes.SENSOR_LOADCELL_FORCE: self.getForce,
-            PlotTypes.SENSOR_ENCODER_DISTANCE: self.getDistance,
-            PlotTypes.SENSOR_IMU_ANGLES: self.getIMUValues,
-            PlotTypes.SENSOR_IMU_VELOCITY: self.getIMUValues,
-            PlotTypes.SENSOR_IMU_ACCELERATION: self.getIMUValues,
-        }
 
     # Data load methods
 
     def loadData(self, time_list: list, sensor_groups: list[SensorGroup]) -> None:
-        self.time_list = time_list
-        self.sensor_names.clear()
+        self.timestamp_list = time_list
+        self.timeincr_list = [(t - time_list[0]) / 1000 for t in time_list]
         for group in sensor_groups:
             if not group.getRead():
                 continue
@@ -82,9 +71,11 @@ class DataManager:
                         self.df_calibrated[imu_name] = values
                     continue
                 self.df_raw[sensor.getName()] = sensor.getValues()
-                self.df_calibrated[sensor.getName()] = (
-                    sensor.getValues() * sensor.getSlope() + sensor.getIntercept()
-                )
+                slope = sensor.getSlope()
+                intercept = sensor.getIntercept()
+                self.df_calibrated[sensor.getName()] = [
+                    value * slope + intercept for value in sensor.getValues()
+                ]
 
     # Transforms values lists into separate variable lists.
     # Ex: [ti [gx, gy, gz]] -> [gx[ti], gy[ti], gz[ti]]
@@ -189,7 +180,7 @@ class DataManager:
 
     def formatDataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         # Format dataframe values to 0.000000e+00
-        df = df.applymap("{:.6e}".format)
+        df = df.map("{:.6e}".format)
         # Add timestamp values
         df.insert(0, "timestamp", self.timestamp_list)
         return df
