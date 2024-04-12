@@ -22,21 +22,41 @@ class PlotFigureWidget(QtWidgets.QWidget):
         self.layout().addWidget(self.toolbar)
         self.layout().addWidget(self.canvas)
 
+        # Plot style
+        self.colors = ["red", "blue", "black", "orange", "purple"]
+        self.linepx_main = 1.5
+
     def setupPlot(self, df: pd.DataFrame) -> None:
+        self.figure.clear()
         ax = self.figure.add_subplot(111)
         x_data = df.index if "times" not in df.columns else df["times"]
-        for column in df.columns:
+        for i, column in enumerate(df.columns):
             if column != "times":
-                ax.plot(x_data, df[column], label=column)
+                color = self.colors[i % len(self.colors)]
+                ax.plot(
+                    x_data,
+                    df[column],
+                    label=column,
+                    color=color,
+                    linewidth=self.linepx_main,
+                )
         ax.legend()
         self.canvas.draw()
 
     def setupRangedPlot(self, df: pd.DataFrame, idx1: int, idx2: int) -> None:
+        self.figure.clear()
         ax = self.figure.add_subplot(111)
         x_data = df.index if "times" not in df.columns else df["times"]
-        for column in df.columns:
+        for i, column in enumerate(df.columns):
             if column != "times":
-                ax.plot(x_data[idx1:idx2], df[column][idx1:idx2], label=column)
+                color = self.colors[i % len(self.colors)]
+                ax.plot(
+                    x_data[idx1:idx2],
+                    df[column][idx1:idx2],
+                    label=column,
+                    color=color,
+                    linewidth=self.linepx_main,
+                )
         ax.legend()
         self.canvas.draw()
 
