@@ -46,9 +46,15 @@ class DataManager:
             "Z_4": 1,
         }
 
+    def clearDataFrames(self) -> None:
+        self.df_raw: pd.DataFrame = pd.DataFrame()
+        self.df_calibrated: pd.DataFrame = pd.DataFrame()
+        self.df_filtered: pd.DataFrame = pd.DataFrame()
+
     # Data load methods
 
     def loadData(self, time_list: list, sensor_groups: list[SensorGroup]) -> None:
+        self.clearDataFrames()
         self.timestamp_list = time_list
         self.timeincr_list = [(t - time_list[0]) / 1000 for t in time_list]
         for group in sensor_groups:
