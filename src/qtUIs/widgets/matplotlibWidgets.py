@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 import matplotlib.patches as patches
 import math
@@ -21,18 +22,21 @@ class PlotFigureWidget(QtWidgets.QWidget):
         self.layout().addWidget(self.toolbar)
         self.layout().addWidget(self.canvas)
 
-    def setupPlot(self, data_dict: dict) -> None:
+    def setupPlot(self, df: pd.DataFrame) -> None:
         ax = self.figure.add_subplot(111)
-        for key, series in data_dict.items():
-            ax.plot(series.index, series.values, label=key)
+        x_data = df.index if "times" not in df.columns else df["times"]
+        for column in df.columns:
+            if column != "times":
+                ax.plot(x_data, df[column], label=column)
         ax.legend()
         self.canvas.draw()
 
-    def setupRangedPlot(self, data_dict: dict, idx1: int, idx2: int) -> None:
+    def setupRangedPlot(self, df: pd.DataFrame, idx1: int, idx2: int) -> None:
         ax = self.figure.add_subplot(111)
-        for key, series in data_dict.items():
-            new_series = series[idx1:idx2]
-            ax.plot(series.index, new_series.values, label=key)
+        x_data = df.index if "times" not in df.columns else df["times"]
+        for column in df.columns:
+            if column != "times":
+                ax.plot(x_data[idx1:idx2], df[column][idx1:idx2], label=column)
         ax.legend()
         self.canvas.draw()
 

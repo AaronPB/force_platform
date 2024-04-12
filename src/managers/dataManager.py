@@ -109,7 +109,7 @@ class DataManager:
         if plot_type == PlotTypes.GROUP_PLATFORM_FORCES:
             if len(sensor_names) != 12:
                 logger.error(
-                    f"Could not build COP plot!"
+                    f"Could not build forces plot!"
                     + "Need 12 sensors, only {len(sensor_names)} provided."
                 )
                 return None
@@ -143,30 +143,30 @@ class DataManager:
                 ranged_plot = True
 
         # Do process depending on requested plot type
-        data_dict: dict[str, list[float]] = {}
+        df: pd.DataFrame = pd.DataFrame()
         if plot_type == PlotTypes.SENSOR_LOADCELL_FORCE:
             sign = 1
             for key in self.forces_sign.keys():
                 if key in sensor_name:
                     sign = self.forces_sign[key]
                     break
-            data_dict = self.getForce(sensor_name, sign)
+            df = self.getForce(sensor_name, sign)
         elif plot_type == PlotTypes.SENSOR_ENCODER_DISTANCE:
-            data_dict = self.getDistance(sensor_name)
+            df = self.getDistance(sensor_name)
         elif plot_type == PlotTypes.SENSOR_IMU_ANGLES:
-            data_dict = self.getIMUAngles(sensor_name, self.imu_ang_headers)
+            df = self.getIMUAngles(sensor_name, self.imu_ang_headers)
         elif plot_type == PlotTypes.SENSOR_IMU_VELOCITY:
-            data_dict = self.getIMUValues(sensor_name, self.imu_vel_headers)
+            df = self.getIMUValues(sensor_name, self.imu_vel_headers)
         elif plot_type == PlotTypes.SENSOR_IMU_ACCELERATION:
-            data_dict = self.getIMUValues(sensor_name, self.imu_acc_headers)
+            df = self.getIMUValues(sensor_name, self.imu_acc_headers)
 
         # Setup widget and return
-        if not data_dict:
+        if not df:
             return plotter
         if ranged_plot:
-            plotter.setupRangedPlot(data_dict, idx1, idx2)
+            plotter.setupRangedPlot(df, idx1, idx2)
             return plotter
-        plotter.setupPlot(data_dict)
+        plotter.setupPlot(df)
         return plotter
 
     def getRawDataframe(self) -> pd.DataFrame:
@@ -174,9 +174,6 @@ class DataManager:
 
     def getCalibrateDataframe(self) -> pd.DataFrame:
         return self.formatDataframe(self.df_calibrated.copy(deep=True))
-
-    def getProcessedDataframe(self) -> pd.DataFrame:
-        return self.formatDataframe(self.df_processed.copy(deep=True))
 
     def formatDataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         # Format dataframe values to 0.000000e+00
@@ -195,55 +192,53 @@ class DataManager:
             self.df_filtered[col] = filtfilt(b, a, self.df_calibrated[col])
 
     # - Sensor methods
-    def getForce(self, sensor_name: str, sign: int) -> dict[str, list[float]]:
+    def getForce(self, sensor_name: str, sign: int) -> pd.DataFrame:
         df = self.df_filtered.loc[[sensor_name]].copy(deep=True)
         df *= sign
-        return df.to_dict(orient="index")
+        return df
 
-    def getDistance(self, sensor_name: str) -> dict[str, list[float]]:
-        return self.df_filtered.loc[[sensor_name]].to_dict(orient="index")
+    def getDistance(self, sensor_name: str) -> pd.DataFrame:
+        return self.df_filtered.loc[[sensor_name]]
 
-    def getIMUAngles(
-        self, sensor_name: str, suffix_list: list[str]
-    ) -> dict[str, list[float]]:
-        data_dict: dict[str, list[float]] = self.getIMUValues(sensor_name, suffix_list)
+    def getIMUAngles(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
+        df_quat: pd.DataFrame = self.getIMUValues(sensor_name, suffix_list)
         yaw_list = []
         pitch_list = []
         roll_list = []
         degrees_conv = float(180 / math.pi)
 
-        for i in range(len(self.df_calibrated)):
+        for _, row in df_quat.iterrows():
             quat = mrpt.math.CQuaternion_double_t(
-                data_dict[sensor_name + "_" + self.imu_ang_headers[3]][i],
-                data_dict[sensor_name + "_" + self.imu_ang_headers[0]][i],
-                data_dict[sensor_name + "_" + self.imu_ang_headers[1]][i],
-                data_dict[sensor_name + "_" + self.imu_ang_headers[2]][i],
+                row[sensor_name + "_" + self.imu_ang_headers[3]],
+                row[sensor_name + "_" + self.imu_ang_headers[0]],
+                row[sensor_name + "_" + self.imu_ang_headers[1]],
+                row[sensor_name + "_" + self.imu_ang_headers[2]],
             )
             pose = mrpt.poses.CPose3D(quat, 0, 0, 0)
             yaw_list.append(pose.yaw() * degrees_conv)
             pitch_list.append(pose.pitch() * degrees_conv)
             roll_list.append(pose.roll() * degrees_conv)
 
-        return {
-            sensor_name + "_yaw": yaw_list,
-            sensor_name + "_pitch": pitch_list,
-            sensor_name + "_roll": roll_list,
-        }
+        return pd.DataFrame(
+            {
+                sensor_name + "_yaw": yaw_list,
+                sensor_name + "_pitch": pitch_list,
+                sensor_name + "_roll": roll_list,
+            }
+        )
 
-    def getIMUValues(
-        self, sensor_name: str, suffix_list: list[str]
-    ) -> dict[str, list[float]]:
+    def getIMUValues(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
         imu_index_list: list[str] = []
         for suffix in suffix_list:
             imu_index_list.append(sensor_name + "_" + suffix)
-        return self.df_filtered.loc[imu_index_list].to_dict(orient="index")
+        return self.df_filtered.loc[imu_index_list]
 
     # - TODO Platform group methods
 
-    def getPlatformForces(self) -> dict[str, list[float]]:
+    def getPlatformForces(self) -> pd.DataFrame:
         pass
 
-    def getPlatformCOP(self) -> dict[str, list[float]]:
+    def getPlatformCOP(self) -> pd.DataFrame:
         pass
 
     # TODO Tare sensors
