@@ -76,6 +76,8 @@ class DataManager:
                 self.df_calibrated[sensor.getName()] = [
                     value * slope + intercept for value in sensor.getValues()
                 ]
+        # TODO Just for test purposes. Move to proper place in future.
+        self.applyButterFilter()
 
     # Transforms values lists into separate variable lists.
     # Ex: [ti [gx, gy, gz]] -> [gx[ti], gy[ti], gz[ti]]
@@ -127,12 +129,13 @@ class DataManager:
         plotter = PlotFigureWidget()
 
         # Check first if dataframe contains sensor_name
-        index_exist = False
-        for index in self.df_filtered.index:
-            if sensor_name in index:
-                index_exist = True
+        col_exist = False
+        for column in self.df_filtered.columns:
+            if sensor_name in column:
+                col_exist = True
                 break
-        if not index_exist:
+        if not col_exist:
+            print(self.df_filtered)
             logger.error(f"Sensor name {sensor_name} not found in dataframe results!")
             return plotter
 
@@ -161,7 +164,7 @@ class DataManager:
             df = self.getIMUValues(sensor_name, self.imu_acc_headers)
 
         # Setup widget and return
-        if not df:
+        if df.empty:
             return plotter
         if ranged_plot:
             plotter.setupRangedPlot(df, idx1, idx2)
@@ -193,12 +196,12 @@ class DataManager:
 
     # - Sensor methods
     def getForce(self, sensor_name: str, sign: int) -> pd.DataFrame:
-        df = self.df_filtered.loc[[sensor_name]].copy(deep=True)
+        df = self.df_filtered[sensor_name].copy(deep=True)
         df *= sign
         return df
 
     def getDistance(self, sensor_name: str) -> pd.DataFrame:
-        return self.df_filtered.loc[[sensor_name]]
+        return self.df_filtered[sensor_name]
 
     def getIMUAngles(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
         df_quat: pd.DataFrame = self.getIMUValues(sensor_name, suffix_list)
@@ -231,7 +234,7 @@ class DataManager:
         imu_index_list: list[str] = []
         for suffix in suffix_list:
             imu_index_list.append(sensor_name + "_" + suffix)
-        return self.df_filtered.loc[imu_index_list]
+        return self.df_filtered[imu_index_list]
 
     # - TODO Platform group methods
 

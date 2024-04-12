@@ -29,6 +29,9 @@ class PlotFigureWidget(QtWidgets.QWidget):
     def setupPlot(self, df: pd.DataFrame) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
+        # If only 1 col, make it also a df
+        if isinstance(df, pd.Series):
+            df = df.to_frame()
         x_data = df.index if "times" not in df.columns else df["times"]
         for i, column in enumerate(df.columns):
             if column != "times":
@@ -40,12 +43,16 @@ class PlotFigureWidget(QtWidgets.QWidget):
                     color=color,
                     linewidth=self.linepx_main,
                 )
+        ax.grid(True)
         ax.legend()
         self.canvas.draw()
 
     def setupRangedPlot(self, df: pd.DataFrame, idx1: int, idx2: int) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
+        # If only 1 col, make it also a df
+        if isinstance(df, pd.Series):
+            df = df.to_frame()
         x_data = df.index if "times" not in df.columns else df["times"]
         for i, column in enumerate(df.columns):
             if column != "times":
@@ -57,6 +64,7 @@ class PlotFigureWidget(QtWidgets.QWidget):
                     color=color,
                     linewidth=self.linepx_main,
                 )
+        ax.grid(True)
         ax.legend()
         self.canvas.draw()
 

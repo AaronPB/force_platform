@@ -188,6 +188,11 @@ class SensorPlotSelector(QtWidgets.QWidget):
         if sensor.getType() == STypes.SENSOR_IMU:
             pass
 
+    def updateSensorFigurePlot(self, plot_type: PlotTypes, sensor: Sensor) -> None:
+        clearWidgetsLayout(self.figure_layout)
+        widget = self.data_mngr.getSensorPlotWidget(plot_type, sensor.getName())
+        self.figure_layout.addWidget(widget)
+
     # Panel builders
 
     def buildSensorPanel(self, sensor: Sensor) -> QtWidgets.QWidget:
@@ -199,14 +204,31 @@ class SensorPlotSelector(QtWidgets.QWidget):
         if sensor.getType() in _sensor_types:
             sensor_icon = _sensor_types[sensor.getType()]
         type_label = customQT.createIconLabelBox(sensor_icon, QssLabels.SENSOR)
-        sensor_checkbox = customQT.createQPushButton(
+        sensor_btn = customQT.createQPushButton(
             title=sensor.getName(),
             qss_object=QssLabels.SENSOR,
             enabled=True,
         )
+        # Plot widget call
+        if sensor.getType() == STypes.SENSOR_LOADCELL:
+            sensor_btn.clicked.connect(
+                lambda *, plot_type=PlotTypes.SENSOR_LOADCELL_FORCE, sensor=sensor: self.updateSensorFigurePlot(
+                    plot_type, sensor
+                )
+            )
+        elif sensor.getType() == STypes.SENSOR_ENCODER:
+            sensor_btn.clicked.connect(
+                lambda *, plot_type=PlotTypes.SENSOR_ENCODER_DISTANCE, sensor=sensor: self.updateSensorFigurePlot(
+                    plot_type, sensor
+                )
+            )
+        elif sensor.getType() == STypes.SENSOR_IMU:
+            sensor_btn.clicked.connect(
+                lambda *, sensor=sensor: self.updatePlotSelectorLayout(sensor)
+            )
         # Build layout
         hbox_layout.addWidget(type_label)
-        hbox_layout.addWidget(sensor_checkbox)
+        hbox_layout.addWidget(sensor_btn)
         return widget
 
     def buildSensorGroupPanel(self, group: SensorGroup) -> QtWidgets.QWidget:
@@ -218,15 +240,15 @@ class SensorPlotSelector(QtWidgets.QWidget):
         if group.getType() in _sensor_group_types:
             group_icon = _sensor_group_types[group.getType()]
         type_label = customQT.createIconLabelBox(group_icon, QssLabels.SENSOR)
-        group_button = customQT.createQPushButton(
+        group_btn = customQT.createQPushButton(
             title=group.getName(),
             qss_object=QssLabels.SENSOR_GROUP,
             enabled=True,
         )
-        group_button.clicked.connect(
+        group_btn.clicked.connect(
             lambda *, group=group: self.updateSensorSelectorLayout(group)
         )
         # Build layout
         hbox_layout.addWidget(type_label)
-        hbox_layout.addWidget(group_button)
+        hbox_layout.addWidget(group_btn)
         return widget
