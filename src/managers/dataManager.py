@@ -3,8 +3,8 @@
 import math
 import numpy as np
 import pandas as pd
+from scipy.spatial.transform import Rotation
 from scipy.signal import butter, filtfilt
-from mrpt.pymrpt import mrpt
 from src.qtUIs.widgets.matplotlibWidgets import (
     PlotFigureWidget,
     PlotPlatformCOPWidget,
@@ -59,16 +59,15 @@ class DataManager:
             for sensor in group.getAvailableSensors().values():
                 if sensor.getType() == STypes.SENSOR_IMU:
                     values_list = self.getListedData(sensor)
-                    for suffix, values in enumerate(
+                    for i, suffix in enumerate(
                         self.imu_ang_headers
                         + self.imu_vel_headers
-                        + self.imu_acc_headers,
-                        values_list,
+                        + self.imu_acc_headers
                     ):
                         imu_name = sensor.getName() + "_" + suffix
-                        self.df_raw[imu_name] = values
+                        self.df_raw[imu_name] = values_list[i]
                         # No need to calibrate IMUs
-                        self.df_calibrated[imu_name] = values
+                        self.df_calibrated[imu_name] = values_list[i]
                     continue
                 self.df_raw[sensor.getName()] = sensor.getValues()
                 slope = sensor.getSlope()
@@ -83,7 +82,7 @@ class DataManager:
     # Ex: [ti [gx, gy, gz]] -> [gx[ti], gy[ti], gz[ti]]
     def getListedData(self, sensor: Sensor) -> list[list[float]]:
         main_list = sensor.getValues()
-        new_main_list: list[list[float]] = [[]]
+        new_main_list: list[list[float]] = [[] for _ in range(len(main_list[0]))]
         for value_list in main_list:
             for i, value in enumerate(value_list):
                 new_main_list[i].append(value)
@@ -205,36 +204,25 @@ class DataManager:
 
     def getIMUAngles(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
         df_quat: pd.DataFrame = self.getIMUValues(sensor_name, suffix_list)
-        yaw_list = []
-        pitch_list = []
-        roll_list = []
-        degrees_conv = float(180 / math.pi)
+        headers = [sensor_name + "_" + suffix for suffix in suffix_list]
 
-        for _, row in df_quat.iterrows():
-            quat = mrpt.math.CQuaternion_double_t(
-                row[sensor_name + "_" + self.imu_ang_headers[3]],
-                row[sensor_name + "_" + self.imu_ang_headers[0]],
-                row[sensor_name + "_" + self.imu_ang_headers[1]],
-                row[sensor_name + "_" + self.imu_ang_headers[2]],
-            )
-            pose = mrpt.poses.CPose3D(quat, 0, 0, 0)
-            yaw_list.append(pose.yaw() * degrees_conv)
-            pitch_list.append(pose.pitch() * degrees_conv)
-            roll_list.append(pose.roll() * degrees_conv)
+        rot = Rotation.from_quat(df_quat[headers].to_numpy())
+        euler_ang_deg = np.degrees(rot.as_euler("xyz"))
 
-        return pd.DataFrame(
-            {
-                sensor_name + "_yaw": yaw_list,
-                sensor_name + "_pitch": pitch_list,
-                sensor_name + "_roll": roll_list,
-            }
+        df_euler = pd.DataFrame(
+            euler_ang_deg,
+            columns=[
+                sensor_name + "_yaw",
+                sensor_name + "_pitch",
+                sensor_name + "_roll",
+            ],
         )
 
+        return df_euler
+
     def getIMUValues(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
-        imu_index_list: list[str] = []
-        for suffix in suffix_list:
-            imu_index_list.append(sensor_name + "_" + suffix)
-        return self.df_filtered[imu_index_list]
+        headers = [sensor_name + "_" + suffix for suffix in suffix_list]
+        return self.df_filtered[headers]
 
     # - TODO Platform group methods
 

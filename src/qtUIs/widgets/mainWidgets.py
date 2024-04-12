@@ -186,7 +186,27 @@ class SensorPlotSelector(QtWidgets.QWidget):
 
         # TODO
         if sensor.getType() == STypes.SENSOR_IMU:
-            pass
+            angle_widget = self.buildOptionPanel(
+                "IMU Angles", PlotTypes.SENSOR_IMU_ANGLES, sensor
+            )
+            velocity_widget = self.buildOptionPanel(
+                "IMU Angular velocity", PlotTypes.SENSOR_IMU_VELOCITY, sensor
+            )
+            acceleration_widget = self.buildOptionPanel(
+                "IMU Accelerations", PlotTypes.SENSOR_IMU_ACCELERATION, sensor
+            )
+            self.options_selector_layout.addWidget(angle_widget)
+            self.options_selector_layout.addWidget(velocity_widget)
+            self.options_selector_layout.addWidget(acceleration_widget)
+            return
+
+        if self.options_selector_layout.count() == 0:
+            self.options_selector_layout.addWidget(
+                customQT.createLabelBox(
+                    "No plot options!",
+                    QssLabels.STATUS_LABEL_WARN,
+                )
+            )
 
     def updateSensorFigurePlot(self, plot_type: PlotTypes, sensor: Sensor) -> None:
         clearWidgetsLayout(self.figure_layout)
@@ -194,6 +214,29 @@ class SensorPlotSelector(QtWidgets.QWidget):
         self.figure_layout.addWidget(widget)
 
     # Panel builders
+
+    def buildOptionPanel(
+        self, title: str, plot_type: PlotTypes, sensor: Sensor
+    ) -> QtWidgets.QWidget:
+        widget = QtWidgets.QWidget()
+        hbox_layout = QtWidgets.QHBoxLayout()
+        widget.setLayout(hbox_layout)
+        # Build elements
+        type_label = customQT.createIconLabelBox(IconPaths.GRAPH, QssLabels.SENSOR)
+        sensor_btn = customQT.createQPushButton(
+            title=title,
+            qss_object=QssLabels.SENSOR,
+            enabled=True,
+        )
+        sensor_btn.clicked.connect(
+            lambda *, plot_type=plot_type, sensor=sensor: self.updateSensorFigurePlot(
+                plot_type, sensor
+            )
+        )
+        # Build layout
+        hbox_layout.addWidget(type_label)
+        hbox_layout.addWidget(sensor_btn)
+        return widget
 
     def buildSensorPanel(self, sensor: Sensor) -> QtWidgets.QWidget:
         widget = QtWidgets.QWidget()
