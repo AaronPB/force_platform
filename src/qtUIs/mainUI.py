@@ -103,14 +103,13 @@ class MainUI(QtWidgets.QWidget):
         self.stop_button.setEnabled(False)
         self.tare_button.setEnabled(False)
 
-        # WIP - TODO
         tare_amount = self.cfg_mngr.getConfigValue(
             CfgPaths.RECORD_TARE_AMOUNT.value, 300
         )
         tare_interval_ms = self.cfg_mngr.getConfigValue(
             CfgPaths.RECORD_INTERVAL_MS.value, 100
         )
-        tare_time_ms = int(tare_amount / tare_interval_ms)
+        tare_time_ms = int(tare_amount * tare_interval_ms)
 
         self.tare_timer.start()
         QtCore.QTimer.singleShot(tare_time_ms, self.tare_timer.stop)
@@ -118,11 +117,7 @@ class MainUI(QtWidgets.QWidget):
         while self.tare_timer.isActive():
             QtCore.QCoreApplication.processEvents()
 
-        tare_range = tare_time_ms / tare_interval_ms
-        if tare_range < 0:
-            tare_range = 30
-
-        self.data_mngr.tareSensors(int(tare_range))
+        self.data_mngr.tareSensors(self.sensor_mngr, tare_amount)
 
         self.stop_button.setEnabled(True)
         self.tare_button.setEnabled(True)

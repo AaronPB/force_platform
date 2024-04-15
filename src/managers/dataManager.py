@@ -9,6 +9,7 @@ from src.qtUIs.widgets.matplotlibWidgets import (
     PlotFigureWidget,
     PlotPlatformCOPWidget,
 )
+from src.managers.sensorManager import SensorManager
 from src.handlers import SensorGroup, Sensor
 from src.enums.plotTypes import PlotTypes
 from src.enums.sensorTypes import SGTypes, STypes
@@ -238,7 +239,25 @@ class DataManager:
     def getPlatformCOP(self) -> pd.DataFrame:
         pass
 
-    # TODO Tare sensors
+    # Tare sensors
 
-    def tareSensors(self, sensor_list: list[Sensor]) -> None:
-        pass
+    def tareSensors(self, sensor_manager: SensorManager, last_values: int) -> None:
+        for group in sensor_manager.getGroups():
+            for sensor in group.getAvailableSensors().values():
+                # Only tare loadcells and encoders
+                if sensor.getType() not in [
+                    STypes.SENSOR_LOADCELL,
+                    STypes.SENSOR_ENCODER,
+                ]:
+                    continue
+                # Tare process
+                logger.debug(f"Tare sensor {sensor.getName()}")
+                slope = sensor.getSlope()
+                intercept = sensor.getIntercept()
+                calib_values = [
+                    value * slope + intercept
+                    for value in sensor.getValues()[-last_values:]
+                ]
+                new_intercept = float(sensor.getIntercept() - np.mean(calib_values))
+                logger.debug(f"From {intercept} to {new_intercept}")
+                sensor_manager.setSensorIntercept(sensor, new_intercept)

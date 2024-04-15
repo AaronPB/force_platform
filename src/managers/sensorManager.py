@@ -149,6 +149,7 @@ class SensorManager:
         self.platform_calib_ref = None
 
     # Setters and getters
+
     def setSensorRead(
         self,
         read: bool,
@@ -184,21 +185,47 @@ class SensorManager:
                 )
                 return
 
-    def tareSensors(self, mean_dict: dict[str, float]) -> None:
-        for sensor_id, mean in mean_dict.items():
-            for group_id in self.getPlatformGroups():
-                if sensor_id in group_id.getSensors().keys():
-                    sensor = group_id.getSensors()[sensor_id]
-                    intercept = float(sensor.getIntercept() - mean)
-                    sensor.setIntercept(intercept)
-                    self.config_mngr.setConfigValue(
-                        CfgPaths.SENSORS_SECTION.value
-                        + "."
-                        + sensor_id
-                        + "."
-                        + SParams.INTERCEPT.value,
-                        intercept,
-                    )
+    def setSensorSlopeByID(self, group_id: str, sensor_id: str, slope: float) -> None:
+        group = self.getGroup(group_id)
+        if group is None:
+            return
+        if sensor_id in group.getSensors().keys():
+            self.setSensorSlope(group.getSensors()[sensor_id], slope)
+
+    def setSensorSlope(self, sensor: Sensor, slope: float) -> None:
+        sensor.setSlope(slope)
+        self.config_mngr.setConfigValue(
+            CfgPaths.SENSORS_SECTION.value
+            + "."
+            + sensor.getID()
+            + "."
+            + SParams.CALIBRATION_SECTION.value
+            + "."
+            + SParams.SLOPE.value,
+            slope,
+        )
+
+    def setSensorInterceptByID(
+        self, group_id: str, sensor_id: str, intercept: float
+    ) -> None:
+        group = self.getGroup(group_id)
+        if group is None:
+            return
+        if sensor_id in group.getSensors().keys():
+            self.setSensorIntercept(group.getSensors()[sensor_id], intercept)
+
+    def setSensorIntercept(self, sensor: Sensor, intercept: float) -> None:
+        sensor.setIntercept(intercept)
+        self.config_mngr.setConfigValue(
+            CfgPaths.SENSORS_SECTION.value
+            + "."
+            + sensor.getID()
+            + "."
+            + SParams.CALIBRATION_SECTION.value
+            + "."
+            + SParams.INTERCEPT.value,
+            intercept,
+        )
 
     def getGroups(self) -> list[SensorGroup]:
         return self.sensor_groups
