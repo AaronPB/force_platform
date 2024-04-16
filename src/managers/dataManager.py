@@ -132,6 +132,27 @@ class DataManager:
             return None
         return None
 
+    def getPlotPreviewWidget(
+        self,
+        sensor_name: str,
+        idx1: int = 0,
+        idx2: int = 0,
+    ) -> PlotFigureWidget:
+        plotter = PlotFigureWidget(enable_toolbar=False)
+
+        # Check first if dataframe contains sensor_name
+        if sensor_name not in self.df_filtered.columns:
+            logger.error(f"Sensor name {sensor_name} not found in dataframe results!")
+            return plotter
+
+        df = self.df_filtered[sensor_name].copy(deep=True)
+
+        if self.isRangedPlot(idx1, idx2):
+            plotter.setupRangedPreviewPlot(df, idx1, idx2)
+            return plotter
+        plotter.setupPlot(df)
+        return plotter
+
     def getSensorPlotWidget(
         self,
         plot_type: PlotTypes,
@@ -173,6 +194,9 @@ class DataManager:
         # Setup widget and return
         if df.empty:
             return plotter
+        if isinstance(df, pd.Series):
+            df = df.to_frame()
+        df.insert(0, "times", self.timeincr_list)
         if self.isRangedPlot(idx1, idx2):
             plotter.setupRangedPlot(df, idx1, idx2)
             return plotter

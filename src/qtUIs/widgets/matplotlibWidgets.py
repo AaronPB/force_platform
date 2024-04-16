@@ -33,7 +33,8 @@ class PlotFigureWidget(QtWidgets.QWidget):
         if isinstance(df, pd.Series):
             df = df.to_frame()
         x_data = df.index if "times" not in df.columns else df["times"]
-        for i, column in enumerate(df.columns):
+        i = 0
+        for column in df.columns:
             if column != "times":
                 color = self.colors[i % len(self.colors)]
                 ax.plot(
@@ -43,6 +44,7 @@ class PlotFigureWidget(QtWidgets.QWidget):
                     color=color,
                     linewidth=self.linepx_main,
                 )
+                i += 1
         ax.grid(True)
         ax.legend()
         self.canvas.draw()
@@ -54,7 +56,8 @@ class PlotFigureWidget(QtWidgets.QWidget):
         if isinstance(df, pd.Series):
             df = df.to_frame()
         x_data = df.index if "times" not in df.columns else df["times"]
-        for i, column in enumerate(df.columns):
+        i = 0
+        for column in df.columns:
             if column != "times":
                 color = self.colors[i % len(self.colors)]
                 ax.plot(
@@ -64,6 +67,32 @@ class PlotFigureWidget(QtWidgets.QWidget):
                     color=color,
                     linewidth=self.linepx_main,
                 )
+                i += 1
+        ax.grid(True)
+        ax.legend()
+        self.canvas.draw()
+
+    def setupRangedPreviewPlot(self, df: pd.DataFrame, idx1: int, idx2: int) -> None:
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        # If only 1 col, make it also a df
+        if isinstance(df, pd.Series):
+            df = df.to_frame()
+        x_data = df.index if "times" not in df.columns else df["times"]
+        i = 0
+        for column in df.columns:
+            if column != "times":
+                color = self.colors[i % len(self.colors)]
+                ax.plot(
+                    x_data,
+                    df[column],
+                    label=column,
+                    color=color,
+                    linewidth=self.linepx_main,
+                )
+                i += 1
+        ax.axvline(x=x_data[idx1], color="blue", linestyle="--")
+        ax.axvline(x=x_data[idx2], color="blue", linestyle="--")
         ax.grid(True)
         ax.legend()
         self.canvas.draw()
