@@ -89,6 +89,9 @@ class MainUI(QtWidgets.QWidget):
         self.sensor_plotter.updateLayouts()
         self.test_mngr.testStop(self.file_mngr.getFileName())
 
+        # Update plot data settings
+        self.setDataSettings(True)
+
         if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
             self.file_mngr.saveDataToCSV(dataframe)
         if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
@@ -321,36 +324,31 @@ class MainUI(QtWidgets.QWidget):
 
         # - Data start and end points
         data_index_header = customQT.createLabelBox("Modify data range:")
-        data_index_layout = QtWidgets.QHBoxLayout()
-        self.data_start = QtWidgets.QLineEdit(self)
-        self.data_start.setText("0")
-        self.data_end = QtWidgets.QLineEdit(self)
-        self.data_end.setText("0")
-        data_index_layout.addWidget(self.data_start)
-        data_index_layout.addWidget(customQT.createLabelBox("-"))
-        data_index_layout.addWidget(self.data_end)
+        data_index_grid = QtWidgets.QGridLayout()
+        self.data_start = QtWidgets.QSpinBox()
+        self.data_end = QtWidgets.QSpinBox()
+        self.setDataSettings(False)
+        data_index_grid.addWidget(QtWidgets.QLabel("First index:"), 0, 0)
+        data_index_grid.addWidget(self.data_start, 0, 1)
+        data_index_grid.addWidget(QtWidgets.QLabel("Last index:"), 1, 0)
+        data_index_grid.addWidget(self.data_end, 1, 1)
 
         # - Butterworth filter options
         filter_header = customQT.createLabelBox("Modify Butterworth filter:")
         filter_grid = QtWidgets.QGridLayout()
-        filter_fs = customQT.createLabelBox("Sampling rate (Fs):")
         self.filter_fs_input = QtWidgets.QLineEdit(self)
         self.filter_fs_input.setText("100")
-        filter_fs_units = customQT.createLabelBox("Hz")
-        filter_fc = customQT.createLabelBox("Cutoff freq (Fc):")
         self.filter_fc_input = QtWidgets.QLineEdit(self)
         self.filter_fc_input.setText("5")
-        filter_fc_units = customQT.createLabelBox("Hz")
-        filter_order = customQT.createLabelBox("Order:")
         self.filter_order_input = QtWidgets.QLineEdit(self)
         self.filter_order_input.setText("6")
-        filter_grid.addWidget(filter_fs, 0, 0)
+        filter_grid.addWidget(QtWidgets.QLabel("Sampling rate (Fs):"), 0, 0)
         filter_grid.addWidget(self.filter_fs_input, 0, 1)
-        filter_grid.addWidget(filter_fs_units, 0, 2)
-        filter_grid.addWidget(filter_fc, 1, 0)
+        filter_grid.addWidget(QtWidgets.QLabel("Hz"), 0, 2)
+        filter_grid.addWidget(QtWidgets.QLabel("Cutoff freq (Fc):"), 1, 0)
         filter_grid.addWidget(self.filter_fc_input, 1, 1)
-        filter_grid.addWidget(filter_fc_units, 1, 2)
-        filter_grid.addWidget(filter_order, 2, 0)
+        filter_grid.addWidget(QtWidgets.QLabel("Hz"), 1, 2)
+        filter_grid.addWidget(QtWidgets.QLabel("Order:"), 2, 0)
         filter_grid.addWidget(self.filter_order_input, 2, 1)
 
         # - Recalculate button
@@ -371,7 +369,7 @@ class MainUI(QtWidgets.QWidget):
         data_options_container.setFixedWidth(400)
         data_options_layout.setAlignment(QtCore.Qt.AlignTop)
         data_options_layout.addWidget(data_index_header)
-        data_options_layout.addLayout(data_index_layout)
+        data_options_layout.addLayout(data_index_grid)
         data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
         data_options_layout.addWidget(filter_header)
         data_options_layout.addLayout(filter_grid)
@@ -416,7 +414,7 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout.addWidget(file_settings_group_box)
         vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_general_layout.addWidget(data_settings_group_box)
-        vbox_general_layout.addItem(QtWidgets.QSpacerItem(40, 40))
+        vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_general_layout.addWidget(sensors_group_box)
 
         return tab_widget
@@ -508,6 +506,19 @@ class MainUI(QtWidgets.QWidget):
             self.stop_button.setEnabled(enable)
             self.tare_button.setEnabled(enable)
         self.start_button.setEnabled(enable)
+
+    def setDataSettings(self, enable: bool = False) -> None:
+        self.data_start.setValue(0)
+        self.data_end.setValue(0)
+        if enable:
+            max_value = self.data_mngr.getDataSize()
+            self.data_start.setMinimum(0)
+            self.data_start.setMaximum(max_value - 1)
+            self.data_end.setMinimum(1)
+            self.data_end.setMaximum(max_value)
+            self.data_end.setValue(max_value)
+        self.data_start.setEnabled(enable)
+        self.data_end.setEnabled(enable)
 
     def getSensorInformation(self):
         sensor_panels = SensorSettings(self.sensor_mngr)
