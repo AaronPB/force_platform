@@ -135,6 +135,8 @@ class SensorPlotSelector(QtWidgets.QWidget):
         self.sensor_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
         self.options_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
         self.figure_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.idx1: int = 0
+        self.idx2: int = 0
 
     def setupLayouts(
         self,
@@ -157,6 +159,10 @@ class SensorPlotSelector(QtWidgets.QWidget):
                 QssLabels.STATUS_LABEL_WARN,
             )
         )
+
+    def setIndexes(self, idx1: int, idx2: int) -> None:
+        self.idx1 = idx1
+        self.idx2 = idx2
 
     def updateGroupSelectorLayout(self) -> None:
         clearWidgetsLayout(self.group_selector_layout)
@@ -210,7 +216,9 @@ class SensorPlotSelector(QtWidgets.QWidget):
 
     def updateSensorFigurePlot(self, plot_type: PlotTypes, sensor: Sensor) -> None:
         clearWidgetsLayout(self.figure_layout)
-        widget = self.data_mngr.getSensorPlotWidget(plot_type, sensor.getName())
+        widget = self.data_mngr.getSensorPlotWidget(
+            plot_type, sensor.getName(), self.idx1, self.idx2
+        )
         self.figure_layout.addWidget(widget)
 
     # Panel builders

@@ -82,8 +82,6 @@ class DataManager:
                 self.df_calibrated[sensor.getName()] = [
                     value * slope + intercept for value in sensor.getValues()
                 ]
-        # TODO Just for test purposes. Move to proper place in future.
-        self.applyButterFilter()
 
     # Transforms values lists into separate variable lists.
     # Ex: [ti [gx, gy, gz]] -> [gx[ti], gy[ti], gz[ti]]
@@ -95,7 +93,16 @@ class DataManager:
                 new_main_list[i].append(value)
         return new_main_list
 
+    def isRangedPlot(self, idx1: int, idx2: int) -> bool:
+        if idx1 != 0 or idx2 != 0:
+            if idx2 > idx1 and idx1 >= 0 and idx2 <= len(self.df_filtered):
+                return True
+        return False
+
     # Getters
+
+    def getDataSize(self) -> int:
+        return len(self.df_raw)
 
     def getGroupPlotWidget(
         self,
@@ -145,12 +152,6 @@ class DataManager:
             logger.error(f"Sensor name {sensor_name} not found in dataframe results!")
             return plotter
 
-        # Check input ranges values
-        ranged_plot = False
-        if idx1 != 0 or idx2 != 0:
-            if idx2 > idx1 and idx1 >= 0 and idx2 <= len(self.df_filtered):
-                ranged_plot = True
-
         # Do process depending on requested plot type
         df: pd.DataFrame = pd.DataFrame()
         if plot_type == PlotTypes.SENSOR_LOADCELL_FORCE:
@@ -172,7 +173,7 @@ class DataManager:
         # Setup widget and return
         if df.empty:
             return plotter
-        if ranged_plot:
+        if self.isRangedPlot(idx1, idx2):
             plotter.setupRangedPlot(df, idx1, idx2)
             return plotter
         plotter.setupPlot(df)

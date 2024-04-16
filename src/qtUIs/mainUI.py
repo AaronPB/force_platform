@@ -67,6 +67,7 @@ class MainUI(QtWidgets.QWidget):
 
         self.start_button.setEnabled(False)
         self.sensors_connect_button.setEnabled(False)
+        self.update_results_button.setEnabled(False)
         self.calibration_button.setEnabled(False)
         self.test_mngr.testStart(self.file_mngr.getFileName())
         self.tare_button.setEnabled(True)
@@ -80,18 +81,24 @@ class MainUI(QtWidgets.QWidget):
     def stopTest(self):
         self.tare_button.setEnabled(False)
         self.stop_button.setEnabled(False)
+
+        # Stop test
         self.test_timer.stop()
+        self.test_mngr.testStop(self.file_mngr.getFileName())
+
+        # Get results from recorded data
         self.data_mngr.loadData(
             self.test_mngr.getTestTimes(), self.sensor_mngr.getGroups()
         )
+        self.loadResults()
         dataframe = self.data_mngr.getCalibrateDataframe()
         dataframe_raw = self.data_mngr.getRawDataframe()
-        self.sensor_plotter.updateLayouts()
-        self.test_mngr.testStop(self.file_mngr.getFileName())
 
-        # Update plot data settings
+        # Update plot options and data settings
+        self.sensor_plotter.updateLayouts()
         self.setDataSettings(True)
 
+        # Save dataframes
         if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
             self.file_mngr.saveDataToCSV(dataframe)
         if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
@@ -100,6 +107,7 @@ class MainUI(QtWidgets.QWidget):
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
         self.sensors_connect_button.setEnabled(True)
+        self.update_results_button.setEnabled(True)
 
     @QtCore.Slot()
     def tareSensors(self):
@@ -336,12 +344,15 @@ class MainUI(QtWidgets.QWidget):
         # - Butterworth filter options
         filter_header = customQT.createLabelBox("Modify Butterworth filter:")
         filter_grid = QtWidgets.QGridLayout()
-        self.filter_fs_input = QtWidgets.QLineEdit(self)
-        self.filter_fs_input.setText("100")
-        self.filter_fc_input = QtWidgets.QLineEdit(self)
-        self.filter_fc_input.setText("5")
-        self.filter_order_input = QtWidgets.QLineEdit(self)
-        self.filter_order_input.setText("6")
+        self.filter_fs_input = QtWidgets.QSpinBox()
+        self.filter_fs_input.setMaximum(200)
+        self.filter_fs_input.setValue(100)
+        self.filter_fc_input = QtWidgets.QSpinBox()
+        self.filter_fc_input.setMaximum(10)
+        self.filter_fc_input.setValue(5)
+        self.filter_order_input = QtWidgets.QSpinBox()
+        self.filter_order_input.setMaximum(10)
+        self.filter_order_input.setValue(6)
         filter_grid.addWidget(QtWidgets.QLabel("Sampling rate (Fs):"), 0, 0)
         filter_grid.addWidget(self.filter_fs_input, 0, 1)
         filter_grid.addWidget(QtWidgets.QLabel("Hz"), 0, 2)
@@ -352,8 +363,11 @@ class MainUI(QtWidgets.QWidget):
         filter_grid.addWidget(self.filter_order_input, 2, 1)
 
         # - Recalculate button
-        recalculate_button = customQT.createQPushButton(
-            "Recalculate", QssLabels.CONTROL_PANEL_BTN, enabled=False
+        self.update_results_button = customQT.createQPushButton(
+            "Apply changes",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=False,
+            connect_fn=self.loadResults,
         )
 
         # - Data preview
@@ -374,7 +388,7 @@ class MainUI(QtWidgets.QWidget):
         data_options_layout.addWidget(filter_header)
         data_options_layout.addLayout(filter_grid)
         data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
-        data_options_layout.addWidget(recalculate_button)
+        data_options_layout.addWidget(self.update_results_button)
 
         data_settings_layout.addWidget(data_options_container)
         data_settings_layout.addLayout(self.data_settings_preview)
@@ -528,3 +542,12 @@ class MainUI(QtWidgets.QWidget):
         sensor_panels.updateLayout(
             self.hbox_defaults, self.sensor_mngr.getDefaultGroups()
         )
+
+    def loadResults(self):
+        idx1 = self.data_start.value()
+        idx2 = self.data_end.value()
+        self.sensor_plotter.setIndexes(idx1, idx2)
+        butter_fs = self.filter_fs_input.value()
+        butter_fc = self.filter_fc_input.value()
+        butter_order = self.filter_order_input.value()
+        self.data_mngr.applyButterFilter(butter_fs, butter_fc, butter_order)
