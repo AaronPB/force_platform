@@ -231,13 +231,57 @@ class DataManager:
         headers = [sensor_name + "_" + suffix for suffix in suffix_list]
         return self.df_filtered[headers]
 
-    # - TODO Platform group methods
+    # - Platform group methods
 
-    def getPlatformForces(self) -> pd.DataFrame:
-        pass
+    # Expected input format: name_1, name_2, name_3, name_4
+    # Output: x1, x2, x3, x4
+    def getPlatformForces(self, sensor_names: list[str]) -> pd.DataFrame:
+        df_list: list[pd.DataFrame] = []
+        for sensor_name in sensor_names:
+            sign = 1
+            for key in self.forces_sign.keys():
+                if key in sensor_name:
+                    sign = self.forces_sign[key]
+                    break
+            df_list.append(self.getForce(sensor_name, sign))
+        return pd.concat(df_list)
 
-    def getPlatformCOP(self) -> pd.DataFrame:
-        pass
+    # Expected input dataframe format:
+    # z1, z2, z3, z4, x1, x2, x3, x4, y1, y2, y3, y4
+    def getPlatformCOP(self, df_forces: pd.DataFrame) -> pd.DataFrame:
+        # Platform dimensions
+        lx = 508  # mm
+        ly = 308  # mm
+        h = 20  # mm
+        # Get sum forces
+        fx = df_forces.iloc[:, 4:8].sum(axis=1)
+        fy = df_forces.iloc[:, 8:13].sum(axis=1)
+        fz = df_forces.iloc[:, 0:4].sum(axis=1)
+        # Operate
+        mx = (
+            ly
+            / 2
+            * (
+                -df_forces.iloc[:, 0]
+                - df_forces.iloc[:, 1]
+                + df_forces.iloc[:, 2]
+                + df_forces.iloc[:, 3]
+            )
+        )
+        my = (
+            lx
+            / 2
+            * (
+                -df_forces.iloc[:, 0]
+                + df_forces.iloc[:, 1]
+                + df_forces.iloc[:, 2]
+                - df_forces.iloc[:, 3]
+            )
+        )
+        # Get COP
+        cop_x = (-h * fx - my) / fz
+        cop_y = (-h * fy + mx) / fz
+        return cop_x, cop_y
 
     # Tare sensors
 
