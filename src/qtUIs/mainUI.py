@@ -278,10 +278,10 @@ class MainUI(QtWidgets.QWidget):
         vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # File management
-        settings_group_box = QtWidgets.QGroupBox("File settings")
-        settings_grid_layout = QtWidgets.QGridLayout()
-        settings_group_box.setLayout(settings_grid_layout)
-        settings_grid_layout.setAlignment(QtCore.Qt.AlignTop)
+        file_settings_group_box = QtWidgets.QGroupBox("File settings")
+        file_settings_grid_layout = QtWidgets.QGridLayout()
+        file_settings_group_box.setLayout(file_settings_grid_layout)
+        file_settings_grid_layout.setAlignment(QtCore.Qt.AlignTop)
         # - Config file
         config_label = customQT.createLabelBox("Configuration file:")
         config_button = customQT.createQPushButton(
@@ -302,64 +302,22 @@ class MainUI(QtWidgets.QWidget):
             "Save name", enabled=True, connect_fn=self.setTestName
         )
         self.test_name_input = QtWidgets.QLineEdit(self)
-        # Build grid layout
-        settings_grid_layout.addWidget(config_label, 0, 0)
-        settings_grid_layout.addWidget(self.config_path, 0, 1)
-        settings_grid_layout.addWidget(config_button, 0, 2)
-        settings_grid_layout.addWidget(test_folder_label, 1, 0)
-        settings_grid_layout.addWidget(self.test_folder_path, 1, 1)
-        settings_grid_layout.addWidget(test_folder_button, 1, 2)
-        settings_grid_layout.addWidget(test_name_label, 2, 0)
-        settings_grid_layout.addWidget(self.test_name_input, 2, 1)
-        settings_grid_layout.addWidget(test_name_button, 2, 2)
+        # - Build grid layout
+        file_settings_grid_layout.addWidget(config_label, 0, 0)
+        file_settings_grid_layout.addWidget(self.config_path, 0, 1)
+        file_settings_grid_layout.addWidget(config_button, 0, 2)
+        file_settings_grid_layout.addWidget(test_folder_label, 1, 0)
+        file_settings_grid_layout.addWidget(self.test_folder_path, 1, 1)
+        file_settings_grid_layout.addWidget(test_folder_button, 1, 2)
+        file_settings_grid_layout.addWidget(test_name_label, 2, 0)
+        file_settings_grid_layout.addWidget(self.test_name_input, 2, 1)
+        file_settings_grid_layout.addWidget(test_name_button, 2, 2)
 
-        # Sensor table information
-        sensors_group_box = QtWidgets.QGroupBox("Sensor information")
-        sensors_vbox_layout = QtWidgets.QVBoxLayout()
-        sensors_group_box.setLayout(sensors_vbox_layout)
-        sensors_vbox_layout.setAlignment(QtCore.Qt.AlignTop)
-        # - Connection button and progress bar
-        connect_grid_layout = QtWidgets.QGridLayout()
-        self.sensors_connect_button = customQT.createQPushButton(
-            "Connect selected sensors", enabled=True, connect_fn=self.connectSensors
-        )
-        self.sensors_connection_progressbar = QtWidgets.QProgressBar()
-        self.sensors_connection_progressbar.setValue(0)
-        connect_grid_layout.addWidget(self.sensors_connect_button, 0, 0)
-        connect_grid_layout.addWidget(self.sensors_connection_progressbar, 0, 1)
-        # - Sensors grid
-        sensors_layout = QtWidgets.QVBoxLayout()
-        group_box_platforms = QtWidgets.QGroupBox("Platforms")
-        group_box_defaults = QtWidgets.QGroupBox("Other sensor groups")
-        self.hbox_platforms = QtWidgets.QHBoxLayout()
-        self.hbox_defaults = QtWidgets.QHBoxLayout()
-        self.hbox_platforms.setAlignment(QtCore.Qt.AlignTop)
-        self.hbox_defaults.setAlignment(QtCore.Qt.AlignTop)
-        group_box_platforms.setLayout(self.hbox_platforms)
-        group_box_defaults.setLayout(self.hbox_defaults)
-        sensors_layout.addWidget(group_box_platforms)
-        sensors_layout.addWidget(group_box_defaults)
-        # Build sensor information layout
-        sensors_vbox_layout.addLayout(connect_grid_layout)
-        sensors_vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        sensors_vbox_layout.addLayout(sensors_layout)
-
-        # Build main tab vbox
-        vbox_general_layout.addWidget(settings_group_box)
-        vbox_general_layout.addItem(QtWidgets.QSpacerItem(40, 40))
-        vbox_general_layout.addWidget(sensors_group_box)
-
-        return tab_widget
-
-    def loadTabFigures(self) -> QtWidgets.QWidget:
-        tab_widget = QtWidgets.QWidget()
-        vbox_general_layout = QtWidgets.QVBoxLayout()
-        tab_widget.setLayout(vbox_general_layout)
-        vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
-
-        # Top sensor selector and data options
-        top_grid_layout = QtWidgets.QGridLayout()
-        data_options_box = QtWidgets.QGroupBox("Data options")
+        # TODO WIP Results data settings
+        data_settings_group_box = QtWidgets.QGroupBox("Results settings")
+        data_settings_layout = QtWidgets.QHBoxLayout()
+        data_settings_group_box.setLayout(data_settings_layout)
+        data_settings_layout.setAlignment(QtCore.Qt.AlignTop)
 
         # - Data start and end points
         data_index_header = customQT.createLabelBox("Modify data range:")
@@ -400,7 +358,79 @@ class MainUI(QtWidgets.QWidget):
             "Recalculate", QssLabels.CONTROL_PANEL_BTN, enabled=False
         )
 
-        # - Sensor selectors
+        # - Data preview
+        self.data_settings_preview = QtWidgets.QVBoxLayout()
+        self.data_settings_preview.addWidget(
+            customQT.createLabelBox(
+                "First preform a test to generate a preview",
+                QssLabels.STATUS_LABEL_WARN,
+            )
+        )
+
+        # -  Build layout
+        data_options_container = QtWidgets.QWidget()
+        data_options_layout = QtWidgets.QVBoxLayout()
+        data_options_container.setLayout(data_options_layout)
+        data_options_container.setFixedWidth(400)
+        data_options_layout.setAlignment(QtCore.Qt.AlignTop)
+        data_options_layout.addWidget(data_index_header)
+        data_options_layout.addLayout(data_index_layout)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
+        data_options_layout.addWidget(filter_header)
+        data_options_layout.addLayout(filter_grid)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
+        data_options_layout.addWidget(recalculate_button)
+
+        data_settings_layout.addWidget(data_options_container)
+        data_settings_layout.addLayout(self.data_settings_preview)
+
+        # Sensor table information
+        sensors_group_box = QtWidgets.QGroupBox("Sensor information")
+        sensors_vbox_layout = QtWidgets.QVBoxLayout()
+        sensors_group_box.setLayout(sensors_vbox_layout)
+        sensors_vbox_layout.setAlignment(QtCore.Qt.AlignTop)
+        # - Connection button and progress bar
+        connect_grid_layout = QtWidgets.QGridLayout()
+        self.sensors_connect_button = customQT.createQPushButton(
+            "Connect selected sensors", enabled=True, connect_fn=self.connectSensors
+        )
+        self.sensors_connection_progressbar = QtWidgets.QProgressBar()
+        self.sensors_connection_progressbar.setValue(0)
+        connect_grid_layout.addWidget(self.sensors_connect_button, 0, 0)
+        connect_grid_layout.addWidget(self.sensors_connection_progressbar, 0, 1)
+        # - Sensors grid
+        sensors_layout = QtWidgets.QVBoxLayout()
+        group_box_platforms = QtWidgets.QGroupBox("Platforms")
+        group_box_defaults = QtWidgets.QGroupBox("Other sensor groups")
+        self.hbox_platforms = QtWidgets.QHBoxLayout()
+        self.hbox_defaults = QtWidgets.QHBoxLayout()
+        self.hbox_platforms.setAlignment(QtCore.Qt.AlignTop)
+        self.hbox_defaults.setAlignment(QtCore.Qt.AlignTop)
+        group_box_platforms.setLayout(self.hbox_platforms)
+        group_box_defaults.setLayout(self.hbox_defaults)
+        sensors_layout.addWidget(group_box_platforms)
+        sensors_layout.addWidget(group_box_defaults)
+        # Build sensor information layout
+        sensors_vbox_layout.addLayout(connect_grid_layout)
+        sensors_vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        sensors_vbox_layout.addLayout(sensors_layout)
+
+        # Build main tab vbox
+        vbox_general_layout.addWidget(file_settings_group_box)
+        vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_general_layout.addWidget(data_settings_group_box)
+        vbox_general_layout.addItem(QtWidgets.QSpacerItem(40, 40))
+        vbox_general_layout.addWidget(sensors_group_box)
+
+        return tab_widget
+
+    def loadTabFigures(self) -> QtWidgets.QWidget:
+        tab_widget = QtWidgets.QWidget()
+        vbox_general_layout = QtWidgets.QVBoxLayout()
+        tab_widget.setLayout(vbox_general_layout)
+        vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
+
+        # Top sensor selector
         selector_box = QtWidgets.QGroupBox("Sensor selector")
         selector_layout = QtWidgets.QHBoxLayout()
         selector_box.setLayout(selector_layout)
@@ -421,22 +451,6 @@ class MainUI(QtWidgets.QWidget):
         selector_layout.addWidget(group_box_sensors)
         selector_layout.addWidget(group_box_options)
 
-        # - Build top grid layout
-        data_options_layout = QtWidgets.QVBoxLayout()
-        data_options_box.setLayout(data_options_layout)
-        data_options_box.setFixedWidth(400)
-        data_options_layout.setAlignment(QtCore.Qt.AlignTop)
-        data_options_layout.addWidget(data_index_header)
-        data_options_layout.addLayout(data_index_layout)
-        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
-        data_options_layout.addWidget(filter_header)
-        data_options_layout.addLayout(filter_grid)
-        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
-        data_options_layout.addWidget(recalculate_button)
-
-        top_grid_layout.addWidget(data_options_box, 0, 0)
-        top_grid_layout.addWidget(selector_box, 0, 1)
-
         # Figure layout
         figure_box = QtWidgets.QGroupBox("Figure")
         self.figure_layout = QtWidgets.QVBoxLayout()
@@ -449,7 +463,7 @@ class MainUI(QtWidgets.QWidget):
         )
 
         # Build general layout
-        vbox_general_layout.addLayout(top_grid_layout)
+        vbox_general_layout.addWidget(selector_box)
         vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_general_layout.addWidget(figure_box)
 
