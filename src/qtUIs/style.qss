@@ -3,6 +3,12 @@
     font-size: 16px;
 }
 
+QLabel#preview_box {
+    background-color: gray;
+    color: white;
+    padding: 15px;
+}
+
 QLabel#status_info {
     background-color: #326295;
     color: white;

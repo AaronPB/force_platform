@@ -8,6 +8,8 @@ class QssLabels(Enum):
     TITLE_LABEL = "title"
     AUTHOR_COPYRIGHT_LABEL = "author_copy"
 
+    PREVIEW_BOX = "preview_box"
+
     STATUS_LABEL_INFO = "status_info"
     STATUS_LABEL_OK = "status_ok"
     STATUS_LABEL_WARN = "status_warn"

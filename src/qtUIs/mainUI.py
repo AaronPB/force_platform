@@ -361,10 +361,7 @@ class MainUI(QtWidgets.QWidget):
         # - Data preview
         self.data_settings_preview = QtWidgets.QVBoxLayout()
         self.data_settings_preview.addWidget(
-            customQT.createLabelBox(
-                "First preform a test to generate a preview",
-                QssLabels.STATUS_LABEL_WARN,
-            )
+            customQT.createLabelBox("", QssLabels.PREVIEW_BOX)
         )
 
         # -  Build layout
