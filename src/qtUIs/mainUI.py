@@ -181,6 +181,15 @@ class MainUI(QtWidgets.QWidget):
         self.updateTestStatus()
         self.sensors_connect_button.setEnabled(True)
 
+    @QtCore.Slot()
+    def changePlotRange(self):
+        if self.sender() is self.data_start:
+            self.data_end.setMinimum(self.data_start.value() + 1)
+            return
+        if self.sender() is self.data_end:
+            self.data_start.setMaximum(self.data_end.value() - 1)
+            return
+
     # UI section loaders
 
     # - Control Panel
@@ -278,7 +287,12 @@ class MainUI(QtWidgets.QWidget):
             self.loadTabSettings(), QtGui.QIcon(IconPaths.SETTINGS.value), "Settings"
         )
         tabular_panel.addTab(
-            self.loadTabFigures(), QtGui.QIcon(IconPaths.GRAPH.value), "Figures"
+            self.loadTabFigures(), QtGui.QIcon(IconPaths.GRAPH.value), "Sensor figures"
+        )
+        tabular_panel.addTab(
+            self.loadTabPlatformFigures(),
+            QtGui.QIcon(IconPaths.GRAPH.value),
+            "Platform figures",
         )
         return tabular_panel
 
@@ -334,7 +348,9 @@ class MainUI(QtWidgets.QWidget):
         data_index_header = customQT.createLabelBox("Modify data range:")
         data_index_grid = QtWidgets.QGridLayout()
         self.data_start = QtWidgets.QSpinBox()
+        self.data_start.valueChanged.connect(self.changePlotRange)
         self.data_end = QtWidgets.QSpinBox()
+        self.data_end.valueChanged.connect(self.changePlotRange)
         self.setDataSettings(False)
         data_index_grid.addWidget(QtWidgets.QLabel("First index:"), 0, 0)
         data_index_grid.addWidget(self.data_start, 0, 1)
@@ -427,63 +443,112 @@ class MainUI(QtWidgets.QWidget):
         # Build main tab vbox
         vbox_general_layout.addWidget(file_settings_group_box)
         vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        vbox_general_layout.addWidget(data_settings_group_box)
-        vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_general_layout.addWidget(sensors_group_box)
+        vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_general_layout.addWidget(data_settings_group_box)
 
         return tab_widget
 
     def loadTabFigures(self) -> QtWidgets.QWidget:
         tab_widget = QtWidgets.QWidget()
-        vbox_general_layout = QtWidgets.QVBoxLayout()
-        tab_widget.setLayout(vbox_general_layout)
-        vbox_general_layout.setAlignment(QtCore.Qt.AlignTop)
+        hbox_general_layout = QtWidgets.QHBoxLayout()
+        tab_widget.setLayout(hbox_general_layout)
 
-        # Top sensor selector
-        selector_box = QtWidgets.QGroupBox("Sensor selector")
-        selector_layout = QtWidgets.QHBoxLayout()
-        selector_box.setLayout(selector_layout)
+        # Group selector panel
+        selector_panel_box = QtWidgets.QGroupBox("Sensor selector")
+        vbox_selector_layout = QtWidgets.QVBoxLayout()
+        selector_panel_box.setLayout(vbox_selector_layout)
+        vbox_selector_layout.setAlignment(QtCore.Qt.AlignTop)
+        selector_panel_box.setFixedWidth(300)
+        # - Info panel
+        self.status_sensor_figs = customQT.createLabelBox(
+            "First preform a test",
+            QssLabels.STATUS_LABEL_WARN,
+        )
+        # - Group combo box
+        self.group_combo_box = QtWidgets.QComboBox()
+        # - Options container
+        self.sensor_option_selector = QtWidgets.QVBoxLayout()
+        self.sensor_option_selector.setAlignment(QtCore.Qt.AlignTop)
 
-        group_box_sensor_groups = QtWidgets.QGroupBox("Select group")
-        group_box_sensors = QtWidgets.QGroupBox("Select sensor")
-        group_box_options = QtWidgets.QGroupBox("Select option")
-        self.vbox_selector_groups = QtWidgets.QVBoxLayout()
-        self.vbox_selector_sensors = QtWidgets.QVBoxLayout()
-        self.vbox_selector_options = QtWidgets.QVBoxLayout()
-        self.vbox_selector_groups.setAlignment(QtCore.Qt.AlignTop)
-        self.vbox_selector_sensors.setAlignment(QtCore.Qt.AlignTop)
-        self.vbox_selector_options.setAlignment(QtCore.Qt.AlignTop)
-        group_box_sensor_groups.setLayout(self.vbox_selector_groups)
-        group_box_sensors.setLayout(self.vbox_selector_sensors)
-        group_box_options.setLayout(self.vbox_selector_options)
-        selector_layout.addWidget(group_box_sensor_groups)
-        selector_layout.addWidget(group_box_sensors)
-        selector_layout.addWidget(group_box_options)
+        # - Build selector layout
+        vbox_selector_layout.addWidget(self.status_sensor_figs)
+        vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select platform group"))
+        vbox_selector_layout.addWidget(self.group_combo_box)
+        vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select figure option"))
+        vbox_selector_layout.addLayout(self.sensor_option_selector)
 
         # Figure layout
         figure_box = QtWidgets.QGroupBox("Figure")
-        self.figure_layout = QtWidgets.QVBoxLayout()
-        figure_box.setLayout(self.figure_layout)
-        self.figure_layout.addWidget(
-            customQT.createLabelBox(
-                "First preform a test and select a plot option from the sensor selector panel",
-                QssLabels.STATUS_LABEL_WARN,
-            )
-        )
+        self.sensor_figure_layout = QtWidgets.QVBoxLayout()
+        figure_box.setLayout(self.sensor_figure_layout)
 
         # Build general layout
-        vbox_general_layout.addWidget(selector_box)
-        vbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        vbox_general_layout.addWidget(figure_box)
+        hbox_general_layout.addWidget(selector_panel_box)
+        hbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        hbox_general_layout.addWidget(figure_box)
 
         # Define selector class
         self.sensor_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
         self.sensor_plotter.setupLayouts(
-            self.vbox_selector_groups,
-            self.vbox_selector_sensors,
-            self.vbox_selector_options,
-            self.figure_layout,
+            self.group_combo_box,
+            self.sensor_option_selector,
+            self.sensor_figure_layout,
         )
+
+        return tab_widget
+
+    def loadTabPlatformFigures(self) -> QtWidgets.QWidget:
+        tab_widget = QtWidgets.QWidget()
+        hbox_general_layout = QtWidgets.QHBoxLayout()
+        tab_widget.setLayout(hbox_general_layout)
+
+        # Group selector panel
+        selector_panel_box = QtWidgets.QGroupBox("Platform selector")
+        vbox_selector_layout = QtWidgets.QVBoxLayout()
+        selector_panel_box.setLayout(vbox_selector_layout)
+        vbox_selector_layout.setAlignment(QtCore.Qt.AlignTop)
+        selector_panel_box.setFixedWidth(300)
+        # - Info panel
+        self.status_platform_figs = customQT.createLabelBox(
+            "First preform a test",
+            QssLabels.STATUS_LABEL_WARN,
+        )
+        # - Group combo box
+        self.platform_combo_box = QtWidgets.QComboBox()
+        # - Options container
+        self.platform_option_selector = QtWidgets.QVBoxLayout()
+        self.platform_option_selector.setAlignment(QtCore.Qt.AlignTop)
+
+        # - Build selector layout
+        vbox_selector_layout.addWidget(self.status_platform_figs)
+        vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select platform group"))
+        vbox_selector_layout.addWidget(self.platform_combo_box)
+        vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select figure option"))
+        vbox_selector_layout.addLayout(self.platform_option_selector)
+
+        # Figure layout
+        figure_box = QtWidgets.QGroupBox("Figure")
+        self.platform_figure_layout = QtWidgets.QVBoxLayout()
+        figure_box.setLayout(self.platform_figure_layout)
+
+        # Build general layout
+        hbox_general_layout.addWidget(selector_panel_box)
+        hbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
+        hbox_general_layout.addWidget(figure_box)
+
+        # TODO Define selector class
+        # self.sensor_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
+        # self.sensor_plotter.setupLayouts(
+        #     self.vbox_selector_groups,
+        #     self.vbox_selector_sensors,
+        #     self.vbox_selector_options,
+        #     self.figure_layout,
+        # )
 
         return tab_widget
 
@@ -551,3 +616,18 @@ class MainUI(QtWidgets.QWidget):
         butter_fc = self.filter_fc_input.value()
         butter_order = self.filter_order_input.value()
         self.data_mngr.applyButterFilter(butter_fs, butter_fc, butter_order)
+        # TODO test
+        self.updatePlotPreview(idx1, idx2)
+
+    def resetDataSettings(self):
+        self.setDataSettings()
+        self.loadResults()
+
+    # TODO Move to widgets. Just for testing
+    def updatePlotPreview(self, idx1, idx2) -> None:
+        for i in reversed(range(self.data_settings_preview.count())):
+            widget = self.data_settings_preview.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+        new_plot = self.data_mngr.getPlotPreviewWidget("P1_LoadCell_Z_1", idx1, idx2)
+        self.data_settings_preview.addWidget(new_plot)

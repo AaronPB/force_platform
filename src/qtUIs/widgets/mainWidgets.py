@@ -131,8 +131,7 @@ class SensorPlotSelector(QtWidgets.QWidget):
     def __init__(self, sensor_manager: SensorManager, data_manager: DataManager):
         self.sensor_mngr: SensorManager = sensor_manager
         self.data_mngr: DataManager = data_manager
-        self.groups_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
-        self.sensor_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.group_combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
         self.options_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
         self.figure_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
         self.idx1: int = 0
@@ -140,79 +139,73 @@ class SensorPlotSelector(QtWidgets.QWidget):
 
     def setupLayouts(
         self,
-        group_selector: QtWidgets.QBoxLayout,
-        sensor_selector: QtWidgets.QBoxLayout,
-        sensor_options_selector: QtWidgets.QBoxLayout,
+        combo_box: QtWidgets.QComboBox,
+        options_selector: QtWidgets.QBoxLayout,
         figure: QtWidgets.QBoxLayout,
     ) -> None:
-        self.group_selector_layout = group_selector
-        self.sensor_selector_layout = sensor_selector
-        self.options_selector_layout = sensor_options_selector
+        self.group_combo_box = combo_box
+        self.group_combo_box.currentIndexChanged.connect(self.buildOptionsLayout)
+        self.options_selector_layout = options_selector
         self.figure_layout = figure
 
     def updateLayouts(self) -> None:
-        self.updateGroupSelectorLayout()
+        self.setupComboBox()
         clearWidgetsLayout(self.figure_layout)
-        self.figure_layout.addWidget(
-            customQT.createLabelBox(
-                "Select a plot option from the sensor selector panel",
-                QssLabels.STATUS_LABEL_WARN,
-            )
-        )
 
     def setIndexes(self, idx1: int, idx2: int) -> None:
         self.idx1 = idx1
         self.idx2 = idx2
 
-    def updateGroupSelectorLayout(self) -> None:
-        clearWidgetsLayout(self.group_selector_layout)
-        clearWidgetsLayout(self.sensor_selector_layout)
+    def setupComboBox(self) -> None:
         clearWidgetsLayout(self.options_selector_layout)
-
         for group in self.sensor_mngr.getGroups():
             if not group.getRead():
                 continue
             if group.getStatus() == SGStatus.ERROR:
                 continue
-            self.group_selector_layout.addWidget(self.buildSensorGroupPanel(group))
+            icon_path = IconPaths.DEFAULT_GROUP_ICON
+            if group.getType() in _sensor_group_types:
+                icon_path = _sensor_group_types[group.getType()]
+            self.group_combo_box.addItem(QtGui.QIcon(icon_path.value), group.getName())
 
-    def updateSensorSelectorLayout(self, sensor_group: SensorGroup) -> None:
-        clearWidgetsLayout(self.sensor_selector_layout)
+    def updateSelectorLayout(self, sensor_group: SensorGroup) -> None:
         clearWidgetsLayout(self.options_selector_layout)
-
-        # TODO build special plot options
-        if sensor_group.getType() == SGTypes.GROUP_PLATFORM:
-            pass
-
         for sensor in sensor_group.getAvailableSensors().values():
-            self.sensor_selector_layout.addWidget(self.buildSensorPanel(sensor))
-
-    def updatePlotSelectorLayout(self, sensor: Sensor) -> None:
-        clearWidgetsLayout(self.options_selector_layout)
-
-        # TODO
-        if sensor.getType() == STypes.SENSOR_IMU:
-            angle_widget = self.buildOptionPanel(
-                "IMU Angles", PlotTypes.SENSOR_IMU_ANGLES, sensor
-            )
-            velocity_widget = self.buildOptionPanel(
-                "IMU Angular velocity", PlotTypes.SENSOR_IMU_VELOCITY, sensor
-            )
-            acceleration_widget = self.buildOptionPanel(
-                "IMU Accelerations", PlotTypes.SENSOR_IMU_ACCELERATION, sensor
-            )
-            self.options_selector_layout.addWidget(angle_widget)
-            self.options_selector_layout.addWidget(velocity_widget)
-            self.options_selector_layout.addWidget(acceleration_widget)
-            return
-
-        if self.options_selector_layout.count() == 0:
-            self.options_selector_layout.addWidget(
-                customQT.createLabelBox(
-                    "No plot options!",
-                    QssLabels.STATUS_LABEL_WARN,
+            if sensor.getType() == STypes.SENSOR_LOADCELL:
+                widget = self.buildOptionPanel(
+                    f"{sensor.getName()} Force",
+                    PlotTypes.SENSOR_LOADCELL_FORCE,
+                    sensor,
                 )
-            )
+                self.options_selector_layout.addWidget(widget)
+                continue
+            if sensor.getType() == STypes.SENSOR_ENCODER:
+                widget = self.buildOptionPanel(
+                    f"{sensor.getName()} Distance",
+                    PlotTypes.SENSOR_ENCODER_DISTANCE,
+                    sensor,
+                )
+                self.options_selector_layout.addWidget(widget)
+                continue
+            if sensor.getType() == STypes.SENSOR_IMU:
+                angle_widget = self.buildOptionPanel(
+                    f"{sensor.getName()} Angles",
+                    PlotTypes.SENSOR_IMU_ANGLES,
+                    sensor,
+                )
+                velocity_widget = self.buildOptionPanel(
+                    f"{sensor.getName()} Angular velocity",
+                    PlotTypes.SENSOR_IMU_VELOCITY,
+                    sensor,
+                )
+                acceleration_widget = self.buildOptionPanel(
+                    f"{sensor.getName()} Accelerations",
+                    PlotTypes.SENSOR_IMU_ACCELERATION,
+                    sensor,
+                )
+                self.options_selector_layout.addWidget(angle_widget)
+                self.options_selector_layout.addWidget(velocity_widget)
+                self.options_selector_layout.addWidget(acceleration_widget)
 
     def updateSensorFigurePlot(self, plot_type: PlotTypes, sensor: Sensor) -> None:
         clearWidgetsLayout(self.figure_layout)
@@ -221,6 +214,7 @@ class SensorPlotSelector(QtWidgets.QWidget):
         )
         self.figure_layout.addWidget(widget)
 
+    # TODO WIP Merge both functions
     # Panel builders
 
     def buildOptionPanel(
@@ -303,3 +297,10 @@ class SensorPlotSelector(QtWidgets.QWidget):
         hbox_layout.addWidget(type_label)
         hbox_layout.addWidget(group_btn)
         return widget
+
+    # Sensor buttons click actions
+
+    @QtCore.Slot()
+    def buildOptionsLayout(self, index):
+        logger.debug(f"User select option {index}")
+        self.updateSelectorLayout(self.sensor_mngr.getGroups()[index])
