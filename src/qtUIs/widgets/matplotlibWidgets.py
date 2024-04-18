@@ -92,7 +92,7 @@ class PlotFigureWidget(QtWidgets.QWidget):
                 )
                 i += 1
         ax.axvline(x=x_data[idx1], color="blue", linestyle="--")
-        ax.axvline(x=x_data[idx2], color="blue", linestyle="--")
+        ax.axvline(x=x_data[idx2-1], color="blue", linestyle="--")
         ax.grid(True)
         ax.legend()
         self.canvas.draw()

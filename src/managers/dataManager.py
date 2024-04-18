@@ -138,7 +138,7 @@ class DataManager:
         idx1: int = 0,
         idx2: int = 0,
     ) -> PlotFigureWidget:
-        plotter = PlotFigureWidget(enable_toolbar=False)
+        plotter = PlotFigureWidget()
 
         # Check first if dataframe contains sensor_name
         if sensor_name not in self.df_filtered.columns:
