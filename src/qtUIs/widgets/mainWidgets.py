@@ -127,6 +127,52 @@ class SensorSettings:
         dialog_window.exec_()
 
 
+class PreviewPlotSelector(QtWidgets.QWidget):
+    def __init__(self, data_manager: DataManager):
+        self.data_mngr: DataManager = data_manager
+        self.combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
+        self.figure_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.idx1: int = 0
+        self.idx2: int = 0
+
+    def setupLayouts(
+        self,
+        combo_box: QtWidgets.QComboBox,
+        figure: QtWidgets.QBoxLayout,
+    ) -> None:
+        self.combo_box = combo_box
+        self.combo_box.currentTextChanged.connect(self.buildPlotPreview)
+        self.figure_layout = figure
+
+    def updateLayouts(self) -> None:
+        self.setupComboBox()
+
+    def updatePreview(self, idx1: int, idx2: int) -> None:
+        self.idx1 = idx1
+        self.idx2 = idx2
+        self.updateSensorFigurePlot(self.combo_box.currentText())
+
+    def setupComboBox(self) -> None:
+        data_keys = self.data_mngr.getCalibrateDataframe().to_dict().keys()
+        # Avoid timestamp in combo box options
+        data_iterator = iter(data_keys)
+        next(data_iterator)
+        for key in data_iterator:
+            self.combo_box.addItem(key)
+
+    def updateSensorFigurePlot(self, sensor_name: str) -> None:
+        clearWidgetsLayout(self.figure_layout)
+        widget = self.data_mngr.getPlotPreviewWidget(sensor_name, self.idx1, self.idx2)
+        self.figure_layout.addWidget(widget)
+
+    # Sensor buttons click actions
+
+    @QtCore.Slot()
+    def buildPlotPreview(self, option):
+        logger.debug(f"User select option {option}")
+        self.updateSensorFigurePlot(option)
+
+
 class SensorPlotSelector(QtWidgets.QWidget):
     def __init__(self, sensor_manager: SensorManager, data_manager: DataManager):
         self.sensor_mngr: SensorManager = sensor_manager
@@ -248,3 +294,92 @@ class SensorPlotSelector(QtWidgets.QWidget):
     def buildOptionsLayout(self, index):
         logger.debug(f"User select option {index}")
         self.updateSelectorLayout(self.sensor_mngr.getGroups()[index])
+
+
+class PlatformPlotSelector(QtWidgets.QWidget):
+    def __init__(self, sensor_manager: SensorManager, data_manager: DataManager):
+        self.sensor_mngr: SensorManager = sensor_manager
+        self.data_mngr: DataManager = data_manager
+        self.group_combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
+        self.options_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.figure_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.idx1: int = 0
+        self.idx2: int = 0
+
+    def setupLayouts(
+        self,
+        combo_box: QtWidgets.QComboBox,
+        options_selector: QtWidgets.QBoxLayout,
+        figure: QtWidgets.QBoxLayout,
+    ) -> None:
+        self.group_combo_box = combo_box
+        self.group_combo_box.currentIndexChanged.connect(self.buildOptionsLayout)
+        self.options_selector_layout = options_selector
+        self.figure_layout = figure
+
+    def updateLayouts(self) -> None:
+        self.setupComboBox()
+        clearWidgetsLayout(self.figure_layout)
+
+    def setIndexes(self, idx1: int, idx2: int) -> None:
+        self.idx1 = idx1
+        self.idx2 = idx2
+
+    def setupComboBox(self) -> None:
+        clearWidgetsLayout(self.options_selector_layout)
+        for group in self.sensor_mngr.getGroups():
+            if not group.getRead():
+                continue
+            if group.getStatus() == SGStatus.ERROR:
+                continue
+            icon_path = IconPaths.DEFAULT_GROUP_ICON
+            if group.getType() in _sensor_group_types:
+                icon_path = _sensor_group_types[group.getType()]
+            self.group_combo_box.addItem(QtGui.QIcon(icon_path.value), group.getName())
+
+    def updateSelectorLayout(self, sensor_group: SensorGroup) -> None:
+        clearWidgetsLayout(self.options_selector_layout)
+        # TODO
+
+    def updateSensorFigurePlot(self, plot_type: PlotTypes, sensor: Sensor) -> None:
+        clearWidgetsLayout(self.figure_layout)
+        # TODO
+        widget = self.data_mngr.getSensorPlotWidget(
+            plot_type, sensor.getName(), self.idx1, self.idx2
+        )
+        self.figure_layout.addWidget(widget)
+
+    # Panel builders
+
+    def buildOptionPanel(
+        self, title: str, plot_type: PlotTypes, sensor: Sensor
+    ) -> QtWidgets.QWidget:
+        widget = QtWidgets.QWidget()
+        hbox_layout = QtWidgets.QHBoxLayout()
+        widget.setLayout(hbox_layout)
+        # Build elements
+        sensor_icon = IconPaths.GRAPH
+        if sensor.getType() in _sensor_types:
+            sensor_icon = _sensor_types[sensor.getType()]
+        type_label = customQT.createIconLabelBox(sensor_icon, QssLabels.SENSOR)
+        sensor_btn = customQT.createQPushButton(
+            title=title,
+            qss_object=QssLabels.SENSOR,
+            enabled=True,
+        )
+        sensor_btn.clicked.connect(
+            lambda *, plot_type=plot_type, sensor=sensor: self.updateSensorFigurePlot(
+                plot_type, sensor
+            )
+        )
+        # Build layout
+        hbox_layout.addWidget(type_label)
+        hbox_layout.addWidget(sensor_btn)
+        return widget
+
+    # Sensor buttons click actions
+
+    @QtCore.Slot()
+    def buildOptionsLayout(self, index):
+        logger.debug(f"User select option {index}")
+        # TODO self.updateSelectorLayout(self.sensor_mngr.getGroups()[index])

@@ -9,7 +9,12 @@ from src.managers.fileManager import FileManager
 from src.managers.dataManager import DataManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
-from src.qtUIs.widgets.mainWidgets import SensorSettings, SensorPlotSelector
+from src.qtUIs.widgets.mainWidgets import (
+    SensorSettings,
+    PreviewPlotSelector,
+    SensorPlotSelector,
+    PlatformPlotSelector,
+)
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -67,7 +72,7 @@ class MainUI(QtWidgets.QWidget):
 
         self.start_button.setEnabled(False)
         self.sensors_connect_button.setEnabled(False)
-        self.update_results_button.setEnabled(False)
+        self.setDataSettings(False)
         self.calibration_button.setEnabled(False)
         self.test_mngr.testStart(self.file_mngr.getFileName())
         self.tare_button.setEnabled(True)
@@ -90,11 +95,12 @@ class MainUI(QtWidgets.QWidget):
         self.data_mngr.loadData(
             self.test_mngr.getTestTimes(), self.sensor_mngr.getGroups()
         )
-        self.loadResults()
         dataframe = self.data_mngr.getCalibrateDataframe()
         dataframe_raw = self.data_mngr.getRawDataframe()
 
         # Update plot options and data settings
+        self.updateDataSettings(range=False)
+        self.preview_plotter.updateLayouts()
         self.sensor_plotter.updateLayouts()
         self.setDataSettings(True)
 
@@ -107,7 +113,6 @@ class MainUI(QtWidgets.QWidget):
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
         self.sensors_connect_button.setEnabled(True)
-        self.update_results_button.setEnabled(True)
 
     @QtCore.Slot()
     def tareSensors(self):
@@ -338,36 +343,48 @@ class MainUI(QtWidgets.QWidget):
         file_settings_grid_layout.addWidget(self.test_name_input, 2, 1)
         file_settings_grid_layout.addWidget(test_name_button, 2, 2)
 
-        # TODO WIP Results data settings
+        # Results data settings
         data_settings_group_box = QtWidgets.QGroupBox("Results settings")
         data_settings_layout = QtWidgets.QHBoxLayout()
         data_settings_group_box.setLayout(data_settings_layout)
         data_settings_layout.setAlignment(QtCore.Qt.AlignTop)
 
+        # - Plot preview selector and layout
+        preview_selector_grid = QtWidgets.QGridLayout()
+        sensor_combo_box = QtWidgets.QComboBox()
+        data_settings_preview = QtWidgets.QVBoxLayout()
+        data_settings_preview.addWidget(
+            customQT.createLabelBox("", QssLabels.PREVIEW_BOX)
+        )
+        self.preview_plotter = PreviewPlotSelector(self.data_mngr)
+        self.preview_plotter.setupLayouts(sensor_combo_box, data_settings_preview)
+        preview_selector_grid.addWidget(QtWidgets.QLabel("Select data preview:"), 0, 0)
+        preview_selector_grid.addWidget(sensor_combo_box, 0, 1)
+
         # - Data start and end points
-        data_index_header = customQT.createLabelBox("Modify data range:")
         data_index_grid = QtWidgets.QGridLayout()
         self.data_start = QtWidgets.QSpinBox()
         self.data_start.valueChanged.connect(self.changePlotRange)
         self.data_end = QtWidgets.QSpinBox()
         self.data_end.valueChanged.connect(self.changePlotRange)
-        self.setDataSettings(False)
         data_index_grid.addWidget(QtWidgets.QLabel("First index:"), 0, 0)
         data_index_grid.addWidget(self.data_start, 0, 1)
-        data_index_grid.addWidget(QtWidgets.QLabel("Last index:"), 1, 0)
-        data_index_grid.addWidget(self.data_end, 1, 1)
+        data_index_grid.addWidget(QtWidgets.QLabel("Last index:"), 0, 2)
+        data_index_grid.addWidget(self.data_end, 0, 3)
 
         # - Butterworth filter options
-        filter_header = customQT.createLabelBox("Modify Butterworth filter:")
         filter_grid = QtWidgets.QGridLayout()
         self.filter_fs_input = QtWidgets.QSpinBox()
         self.filter_fs_input.setMaximum(200)
+        self.filter_fs_input.setMinimum(2)
         self.filter_fs_input.setValue(100)
         self.filter_fc_input = QtWidgets.QSpinBox()
-        self.filter_fc_input.setMaximum(10)
+        self.filter_fc_input.setMaximum(100)
+        self.filter_fc_input.setMinimum(2)
         self.filter_fc_input.setValue(5)
         self.filter_order_input = QtWidgets.QSpinBox()
         self.filter_order_input.setMaximum(10)
+        self.filter_order_input.setMinimum(2)
         self.filter_order_input.setValue(6)
         filter_grid.addWidget(QtWidgets.QLabel("Sampling rate (Fs):"), 0, 0)
         filter_grid.addWidget(self.filter_fs_input, 0, 1)
@@ -378,19 +395,32 @@ class MainUI(QtWidgets.QWidget):
         filter_grid.addWidget(QtWidgets.QLabel("Order:"), 2, 0)
         filter_grid.addWidget(self.filter_order_input, 2, 1)
 
-        # - Recalculate button
+        # - Edit buttons
+        buttons_layout = QtWidgets.QHBoxLayout()
         self.update_results_button = customQT.createQPushButton(
             "Apply changes",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=False,
-            connect_fn=self.loadResults,
+            connect_fn=self.updateDataSettings,
         )
+        self.reset_results_settings_button = customQT.createQPushButton(
+            "Reset",
+            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
+            enabled=False,
+            connect_fn=self.resetDataSettings,
+        )
+        self.save_results_button = customQT.createQPushButton(
+            "Save",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=False,
+            # TODO connect_fn=self.updateDataSettings,
+        )
+        buttons_layout.addWidget(self.reset_results_settings_button)
+        buttons_layout.addWidget(self.update_results_button)
+        buttons_layout.addWidget(self.save_results_button)
 
-        # - Data preview
-        self.data_settings_preview = QtWidgets.QVBoxLayout()
-        self.data_settings_preview.addWidget(
-            customQT.createLabelBox("", QssLabels.PREVIEW_BOX)
-        )
+        # - Disable edit options
+        self.setDataSettings(False)
 
         # -  Build layout
         data_options_container = QtWidgets.QWidget()
@@ -398,16 +428,18 @@ class MainUI(QtWidgets.QWidget):
         data_options_container.setLayout(data_options_layout)
         data_options_container.setFixedWidth(400)
         data_options_layout.setAlignment(QtCore.Qt.AlignTop)
-        data_options_layout.addWidget(data_index_header)
+        data_options_layout.addLayout(preview_selector_grid)
+        data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
+        data_options_layout.addWidget(QtWidgets.QLabel("Modify data range:"))
         data_options_layout.addLayout(data_index_grid)
         data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
-        data_options_layout.addWidget(filter_header)
+        data_options_layout.addWidget(QtWidgets.QLabel("Modify Butterworth filter:"))
         data_options_layout.addLayout(filter_grid)
         data_options_layout.addItem(QtWidgets.QSpacerItem(10, 10))
-        data_options_layout.addWidget(self.update_results_button)
+        data_options_layout.addLayout(buttons_layout)
 
         data_settings_layout.addWidget(data_options_container)
-        data_settings_layout.addLayout(self.data_settings_preview)
+        data_settings_layout.addLayout(data_settings_preview)
 
         # Sensor table information
         sensors_group_box = QtWidgets.QGroupBox("Sensor information")
@@ -474,7 +506,7 @@ class MainUI(QtWidgets.QWidget):
         # - Build selector layout
         vbox_selector_layout.addWidget(self.status_sensor_figs)
         vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select platform group"))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select sensor group"))
         vbox_selector_layout.addWidget(self.group_combo_box)
         vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_selector_layout.addWidget(QtWidgets.QLabel("Select figure option"))
@@ -541,14 +573,13 @@ class MainUI(QtWidgets.QWidget):
         hbox_general_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         hbox_general_layout.addWidget(figure_box)
 
-        # TODO Define selector class
-        # self.sensor_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
-        # self.sensor_plotter.setupLayouts(
-        #     self.vbox_selector_groups,
-        #     self.vbox_selector_sensors,
-        #     self.vbox_selector_options,
-        #     self.figure_layout,
-        # )
+        # Define selector class
+        self.platform_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
+        self.platform_plotter.setupLayouts(
+            self.platform_combo_box,
+            self.platform_option_selector,
+            self.platform_figure_layout,
+        )
 
         return tab_widget
 
@@ -587,6 +618,9 @@ class MainUI(QtWidgets.QWidget):
         self.start_button.setEnabled(enable)
 
     def setDataSettings(self, enable: bool = False) -> None:
+        self.reset_results_settings_button.setEnabled(enable)
+        self.update_results_button.setEnabled(enable)
+        self.save_results_button.setEnabled(enable)
         self.data_start.setValue(0)
         self.data_end.setValue(0)
         if enable:
@@ -608,26 +642,19 @@ class MainUI(QtWidgets.QWidget):
             self.hbox_defaults, self.sensor_mngr.getDefaultGroups()
         )
 
-    def loadResults(self):
-        idx1 = self.data_start.value()
-        idx2 = self.data_end.value()
-        self.sensor_plotter.setIndexes(idx1, idx2)
-        butter_fs = self.filter_fs_input.value()
-        butter_fc = self.filter_fc_input.value()
-        butter_order = self.filter_order_input.value()
-        self.data_mngr.applyButterFilter(butter_fs, butter_fc, butter_order)
-        # TODO test
-        self.updatePlotPreview(idx1, idx2)
+    def updateDataSettings(self, range: bool = True, filter: bool = True):
+        if filter:
+            butter_fs = self.filter_fs_input.value()
+            butter_fc = self.filter_fc_input.value()
+            butter_order = self.filter_order_input.value()
+            self.data_mngr.applyButterFilter(butter_fs, butter_fc, butter_order)
+        if range:
+            idx1 = self.data_start.value()
+            idx2 = self.data_end.value()
+            self.sensor_plotter.setIndexes(idx1, idx2)
+            self.preview_plotter.updatePreview(idx1, idx2)
 
     def resetDataSettings(self):
-        self.setDataSettings()
-        self.loadResults()
-
-    # TODO Move to widgets. Just for testing
-    def updatePlotPreview(self, idx1, idx2) -> None:
-        for i in reversed(range(self.data_settings_preview.count())):
-            widget = self.data_settings_preview.itemAt(i).widget()
-            if widget is not None:
-                widget.deleteLater()
-        new_plot = self.data_mngr.getPlotPreviewWidget("P1_LoadCell_Z_1", idx1, idx2)
-        self.data_settings_preview.addWidget(new_plot)
+        self.setDataSettings(True)
+        # Only ranges
+        self.updateDataSettings(filter=False)
