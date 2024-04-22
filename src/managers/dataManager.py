@@ -7,6 +7,7 @@ from scipy.spatial.transform import Rotation
 from scipy.signal import butter, filtfilt
 from src.qtUIs.widgets.matplotlibWidgets import (
     PlotFigureWidget,
+    PlotPlatformForcesWidget,
     PlotPlatformCOPWidget,
 )
 from src.managers.sensorManager import SensorManager
@@ -110,26 +111,66 @@ class DataManager:
         sensor_names: list[str],
         idx1: int = 0,
         idx2: int = 0,
-    ) -> None:
-        # WIP
-        if plot_type == PlotTypes.GROUP_PLATFORM_COP:
-            if len(sensor_names) != 12:
-                logger.error(
-                    f"Could not build COP plot!"
-                    + "Need 12 sensors, only {len(sensor_names)} provided."
+    ) -> PlotPlatformForcesWidget | PlotPlatformCOPWidget | None:
+        # Platform groups
+        if (
+            plot_type == PlotTypes.GROUP_PLATFORM_COP
+            or plot_type == PlotTypes.GROUP_PLATFORM_FORCES
+        ):
+            # Make forces dataframes
+            df_fx = pd.DataFrame()
+            df_fy = pd.DataFrame()
+            df_fz = pd.DataFrame()
+            for sensor_name in sensor_names:
+                sign = 1
+                for key in self.forces_sign.keys():
+                    if key in sensor_name:
+                        sign = self.forces_sign[key]
+                        break
+                if "X_" in sensor_name:
+                    df_fx[sensor_name] = self.getForce(sensor_name, sign)
+                    continue
+                if "Y_" in sensor_name:
+                    df_fy[sensor_name] = self.getForce(sensor_name, sign)
+                    continue
+                if "Z_" in sensor_name:
+                    df_fz[sensor_name] = self.getForce(sensor_name, sign)
+                    continue
+                logger.warning(
+                    f"Could not recognize sensor {sensor_name}."
+                    + " Needs X_, Y_ or Z_ in name to be identified."
                 )
-                return None
-            # TODO process to build COP graph
-            return None
-        if plot_type == PlotTypes.GROUP_PLATFORM_FORCES:
-            if len(sensor_names) != 12:
-                logger.error(
-                    f"Could not build forces plot!"
-                    + "Need 12 sensors, only {len(sensor_names)} provided."
-                )
-                return None
-            # TODO process to build forces graph
-            return None
+            if plot_type == PlotTypes.GROUP_PLATFORM_COP:
+                if len(df_fx) != 4:
+                    logger.error(
+                        "Could not build COP plot!"
+                        + f"Need 4 X sensors, only {len(df_fx)} provided."
+                    )
+                    return
+                if len(df_fy) != 4:
+                    logger.error(
+                        "Could not build COP plot!"
+                        + f"Need 4 Y sensors, only {len(df_fy)} provided."
+                    )
+                if len(df_fz) != 4:
+                    logger.error(
+                        "Could not build COP plot!"
+                        + f"Need 4 Z sensors, only {len(df_fz)} provided."
+                    )
+                # TODO WIP
+                cop = self.getPlatformCOP(df_fx, df_fy, df_fz)
+                ellipse_params = self.getEllipseFromCOP(cop[0], cop[1])
+                plotter = PlotPlatformCOPWidget()
+                plotter.setupPlot(cop, ellipse_params)
+            if plot_type == PlotTypes.GROUP_PLATFORM_FORCES:
+                plotter = PlotPlatformForcesWidget()
+                if self.isRangedPlot(idx1, idx2):
+                    plotter.setupRangedPlot(
+                        self.timeincr_list, df_fx, df_fy, df_fz, idx1, idx2
+                    )
+                    return plotter
+                plotter.setupPlot(self.timeincr_list, df_fx, df_fy, df_fz)
+                return plotter
         return None
 
     def getPlotPreviewWidget(
@@ -271,42 +312,72 @@ class DataManager:
             df_list.append(self.getForce(sensor_name, sign))
         return pd.concat(df_list)
 
-    # Expected input dataframe format:
-    # z1, z2, z3, z4, x1, x2, x3, x4, y1, y2, y3, y4
-    def getPlatformCOP(self, df_forces: pd.DataFrame) -> pd.DataFrame:
+    def getPlatformCOP(
+        self, df_fx: pd.DataFrame, df_fy: pd.DataFrame, df_fz: pd.DataFrame
+    ) -> tuple[pd.Series, pd.Series]:
         # Platform dimensions
         lx = 508  # mm
         ly = 308  # mm
         h = 20  # mm
         # Get sum forces
-        fx = df_forces.iloc[:, 4:8].sum(axis=1)
-        fy = df_forces.iloc[:, 8:13].sum(axis=1)
-        fz = df_forces.iloc[:, 0:4].sum(axis=1)
+        fx = df_fx.sum(axis=1)
+        fy = df_fy.sum(axis=1)
+        fz = df_fz.sum(axis=1)
         # Operate
         mx = (
             ly
             / 2
             * (
-                -df_forces.iloc[:, 0]
-                - df_forces.iloc[:, 1]
-                + df_forces.iloc[:, 2]
-                + df_forces.iloc[:, 3]
+                -df_fz.iloc[:, 0]
+                - df_fz.iloc[:, 1]
+                + df_fz.iloc[:, 2]
+                + df_fz.iloc[:, 3]
             )
         )
         my = (
             lx
             / 2
             * (
-                -df_forces.iloc[:, 0]
-                + df_forces.iloc[:, 1]
-                + df_forces.iloc[:, 2]
-                - df_forces.iloc[:, 3]
+                -df_fz.iloc[:, 0]
+                + df_fz.iloc[:, 1]
+                + df_fz.iloc[:, 2]
+                - df_fz.iloc[:, 3]
             )
         )
         # Get COP
         cop_x = (-h * fx - my) / fz
         cop_y = (-h * fy + mx) / fz
-        return cop_x, cop_y
+        cop_x = cop_x - np.mean(cop_x)
+        cop_y = cop_x - np.mean(cop_y)
+        return [cop_x, cop_y]
+
+    def getEllipseFromCOP(
+        self, copx: np.array, copy: np.array
+    ) -> tuple[np.array, np.array, float]:
+
+        cov_matrix = np.cov(copx, copy)
+
+        # Eigen vectors and angular rotation
+        D, V = np.linalg.eig(cov_matrix)
+        theta = np.arctan2(V[1, 0], V[0, 0])
+
+        ellipse_axis = np.sqrt(D)
+
+        # Ellipse params
+        a = ellipse_axis[0]
+        b = ellipse_axis[1]
+        area = np.pi * a * b
+        x0 = np.mean(copx)
+        y0 = np.mean(copy)
+
+        # Ellipse angle in rads
+        phi = np.linspace(0, 2 * np.pi, 100)
+
+        # Ellipse coords
+        x = x0 + a * np.cos(phi) * np.cos(theta) - b * np.sin(phi) * np.sin(theta)
+        y = y0 + a * np.cos(phi) * np.sin(theta) + b * np.sin(phi) * np.cos(theta)
+
+        return x, y, area
 
     # Tare sensors
 

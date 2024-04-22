@@ -203,6 +203,7 @@ class SensorPlotSelector(QtWidgets.QWidget):
         self.idx2 = idx2
 
     def setupComboBox(self) -> None:
+        self.group_combo_box.clear()
         clearWidgetsLayout(self.options_selector_layout)
         for group in self.sensor_mngr.getGroups():
             if not group.getRead():
@@ -326,50 +327,67 @@ class PlatformPlotSelector(QtWidgets.QWidget):
         self.idx2 = idx2
 
     def setupComboBox(self) -> None:
+        self.group_combo_box.clear()
         clearWidgetsLayout(self.options_selector_layout)
-        for group in self.sensor_mngr.getGroups():
+        for group in self.sensor_mngr.getPlatformGroups():
             if not group.getRead():
                 continue
             if group.getStatus() == SGStatus.ERROR:
                 continue
-            icon_path = IconPaths.DEFAULT_GROUP_ICON
-            if group.getType() in _sensor_group_types:
-                icon_path = _sensor_group_types[group.getType()]
-            self.group_combo_box.addItem(QtGui.QIcon(icon_path.value), group.getName())
+            self.group_combo_box.addItem(
+                QtGui.QIcon(IconPaths.PLATFORM_ICON.value), group.getName()
+            )
 
     def updateSelectorLayout(self, sensor_group: SensorGroup) -> None:
         clearWidgetsLayout(self.options_selector_layout)
-        # TODO
+        sensor_list = [
+            sensor.getName() for sensor in sensor_group.getAvailableSensors().values()
+        ]
+        self.options_selector_layout.addWidget(
+            self.buildOptionPanel(
+                "Total forces", PlotTypes.GROUP_PLATFORM_FORCES, sensor_list
+            )
+        )
+        cop_widget = self.buildOptionPanel(
+            "Platform COP", PlotTypes.GROUP_PLATFORM_COP, sensor_list, False
+        )
+        if sensor_group.getSize() == 12:
+            cop_widget = self.buildOptionPanel(
+                "Platform COP", PlotTypes.GROUP_PLATFORM_COP, sensor_list
+            )
+        self.options_selector_layout.addWidget(cop_widget)
 
-    def updateSensorFigurePlot(self, plot_type: PlotTypes, sensor: Sensor) -> None:
+    def updateSensorFigurePlot(
+        self, plot_type: PlotTypes, sensor_list: list[str]
+    ) -> None:
         clearWidgetsLayout(self.figure_layout)
-        # TODO
-        widget = self.data_mngr.getSensorPlotWidget(
-            plot_type, sensor.getName(), self.idx1, self.idx2
+        widget = self.data_mngr.getGroupPlotWidget(
+            plot_type, sensor_list, self.idx1, self.idx2
         )
         self.figure_layout.addWidget(widget)
 
     # Panel builders
 
     def buildOptionPanel(
-        self, title: str, plot_type: PlotTypes, sensor: Sensor
+        self,
+        title: str,
+        plot_type: PlotTypes,
+        sensor_list: list[str],
+        enable: bool = True,
     ) -> QtWidgets.QWidget:
         widget = QtWidgets.QWidget()
         hbox_layout = QtWidgets.QHBoxLayout()
         widget.setLayout(hbox_layout)
         # Build elements
-        sensor_icon = IconPaths.GRAPH
-        if sensor.getType() in _sensor_types:
-            sensor_icon = _sensor_types[sensor.getType()]
-        type_label = customQT.createIconLabelBox(sensor_icon, QssLabels.SENSOR)
+        type_label = customQT.createIconLabelBox(IconPaths.GRAPH, QssLabels.SENSOR)
         sensor_btn = customQT.createQPushButton(
             title=title,
             qss_object=QssLabels.SENSOR,
-            enabled=True,
+            enabled=enable,
         )
         sensor_btn.clicked.connect(
-            lambda *, plot_type=plot_type, sensor=sensor: self.updateSensorFigurePlot(
-                plot_type, sensor
+            lambda *, plot_type=plot_type, sensor_list=sensor_list: self.updateSensorFigurePlot(
+                plot_type, sensor_list
             )
         )
         # Build layout
@@ -382,4 +400,4 @@ class PlatformPlotSelector(QtWidgets.QWidget):
     @QtCore.Slot()
     def buildOptionsLayout(self, index):
         logger.debug(f"User select option {index}")
-        # TODO self.updateSelectorLayout(self.sensor_mngr.getGroups()[index])
+        self.updateSelectorLayout(self.sensor_mngr.getPlatformGroups()[index])

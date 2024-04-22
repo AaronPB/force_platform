@@ -8,6 +8,7 @@ from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT,
 )
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 
 class PlotFigureWidget(QtWidgets.QWidget):
@@ -92,131 +93,140 @@ class PlotFigureWidget(QtWidgets.QWidget):
                 )
                 i += 1
         ax.axvline(x=x_data[idx1], color="blue", linestyle="--")
-        ax.axvline(x=x_data[idx2-1], color="blue", linestyle="--")
+        ax.axvline(x=x_data[idx2 - 1], color="blue", linestyle="--")
         ax.grid(True)
         ax.legend()
         self.canvas.draw()
 
 
 class PlotPlatformForcesWidget(QtWidgets.QWidget):
-    def __init__(self, group_name: str):
+    def __init__(self):
         super(PlotPlatformForcesWidget, self).__init__()
 
-        self.figure = Figure()
+        self.figure: Figure = Figure()
         self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+
         self.setLayout(QtWidgets.QVBoxLayout())
+        self.layout().addWidget(self.toolbar)
         self.layout().addWidget(self.canvas)
 
-        self.group_name = group_name
+        # Plot style
+        self.sum_color = "red"
+        self.colors = ["blue", "black", "orange", "purple"]
+        self.linepx_main = 3
+        self.linepx_second = 1
 
-        self.setup()
+        # Setup Axes
+        self.ax_fz = self.figure.add_subplot(311)
+        self.ax_fx = self.figure.add_subplot(312, sharex=self.ax_fz)
+        self.ax_fy = self.figure.add_subplot(313, sharex=self.ax_fz)
+        self.ax_fz.set_ylabel("Forces Z (kg)")
+        self.ax_fx.set_ylabel("Forces X (kg)")
+        self.ax_fy.set_ylabel("Forces Y (kg)")
+        self.ax_fy.set_xlabel("Time (s)")
 
-    def setup(self):
-        self.ax1 = self.figure.add_subplot(311)
-        self.ax2 = self.figure.add_subplot(312, sharex=self.ax1)
-        self.ax3 = self.figure.add_subplot(313, sharex=self.ax1)
-        self.lines_ax1 = []
-        self.lines_ax2 = []
-        self.lines_ax3 = []
-
-        self.lines_defined = False
-        self.ax1.set_title(f"Forces - {self.group_name}")
-        self.ax1.set_ylabel("Forces Z (kg)")
-        self.ax2.set_ylabel("Forces X (kg)")
-        self.ax3.set_ylabel("Forces Y (kg)")
-        self.ax3.set_xlabel("Time (s)")
-        for ax in [self.ax1, self.ax2, self.ax3]:
-            ax.grid(True)
+    def setupPlot(
+        self,
+        times: list[float],
+        df_fx: pd.DataFrame,
+        df_fy: pd.DataFrame,
+        df_fz: pd.DataFrame,
+    ) -> None:
+        self.plotAxes(self.ax_fz, times, df_fz)
+        self.plotAxes(self.ax_fx, times, df_fx)
+        self.plotAxes(self.ax_fy, times, df_fy)
         self.canvas.draw()
 
-    def defineLines(self, ax, lines_ax: list, names: list):
-        for name in names:
-            (line,) = ax.plot(0, 0, label=name)
-            lines_ax.append(line)
-        lines_ax.append(line)
-        ax.legend(loc="upper right")
-        self.lines_defined = True
-
-    def update(
-        self, times_np: np.ndarray, forces_x: dict, forces_y: dict, forces_z: dict
-    ):
-        if not self.lines_defined:
-            self.defineLines(self.ax1, self.lines_ax1, list(forces_z.keys()))
-            self.defineLines(self.ax2, self.lines_ax2, list(forces_x.keys()))
-            self.defineLines(self.ax3, self.lines_ax3, list(forces_y.keys()))
-
-        for i, values_np in enumerate(forces_z.values()):
-            self.lines_ax1[i].set_data(times_np, values_np)
-        for i, values_np in enumerate(forces_x.values()):
-            self.lines_ax2[i].set_data(times_np, values_np)
-        for i, values_np in enumerate(forces_y.values()):
-            self.lines_ax3[i].set_data(times_np, values_np)
-
-        for ax in [self.ax1, self.ax2, self.ax3]:
-            ax.relim()
-            ax.autoscale_view()
-
+    def setupRangedPlot(
+        self,
+        times: list[float],
+        df_fx: pd.DataFrame,
+        df_fy: pd.DataFrame,
+        df_fz: pd.DataFrame,
+        idx1: int,
+        idx2: int,
+    ) -> None:
+        self.plotAxes(self.ax_fz, times[idx1:idx2], df_fz[idx1:idx2])
+        self.plotAxes(self.ax_fx, times[idx1:idx2], df_fx[idx1:idx2])
+        self.plotAxes(self.ax_fy, times[idx1:idx2], df_fy[idx1:idx2])
         self.canvas.draw()
 
-    def clear(self):
-        self.figure.clear()
-        self.setup()
-
-
-class PlotPlatformCOPWidget(QtWidgets.QWidget):
-    def __init__(self, group_name: str):
-        super(PlotPlatformCOPWidget, self).__init__()
-
-        self.figure = Figure()
-        self.canvas = FigureCanvas(self.figure)
-        self.setLayout(QtWidgets.QVBoxLayout())
-        self.layout().addWidget(self.canvas)
-
-        self.group_name = group_name
-        self.last_indexes = 20
-
-        self.setup()
-
-    def setup(self):
-        self.ax = self.figure.add_subplot()
-        self.ax.set_title(f"COP - {self.group_name}")
-        self.ax.set_xlabel("Medio-Lateral Motion (mm)")
-        self.ax.set_ylabel("Anterior-Posterior Motion (mm)")
-        self.ax.grid(True)
-        (self.line_total,) = self.ax.plot(0, 0, label="Recorded values", color="blue")
-        (self.line_last,) = self.ax.plot(
-            0, 0, label=f"Last {self.last_indexes} values", color="red"
+    def plotAxes(self, ax: Axes, times: list[float], df: pd.DataFrame) -> None:
+        if df.empty:
+            return
+        ax.plot(
+            times,
+            df.sum(axis=1),
+            label="Sum",
+            color=self.sum_color,
+            linewidth=self.linepx_main,
         )
-        self.ax.legend(loc="upper right")
+        # If only 1 col, make it also a df
+        if isinstance(df, pd.Series):
+            df = df.to_frame()
+        i = 0
+        for column in df.columns:
+            color = self.colors[i % len(self.colors)]
+            ax.plot(
+                times,
+                df[column],
+                label=column,
+                color=color,
+                linewidth=self.linepx_second,
+            )
+            i += 1
+        ax.grid(True)
+        ax.legend(loc="upper right")
 
-        # Platform rectangle patch (mm)
+
+# TODO Test
+class PlotPlatformCOPWidget(QtWidgets.QWidget):
+    def __init__(self):
+        self.figure: Figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+
+        self.setLayout(QtWidgets.QVBoxLayout())
+        self.layout().addWidget(self.toolbar)
+        self.layout().addWidget(self.canvas)
+
+        # Plot style
+        self.ellipse_color = "red"
+        self.ellipse_linepx = 3
+        self.cop_color = "blue"
+        self.cop_line_px = 1
+
+        self.setup()
+
+    def setupPlot(
+        self,
+        cop: tuple[pd.Series, pd.Series],
+        ellipse: tuple[np.array, np.array, float],
+    ) -> None:
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        ax.set_xlabel("Medio-Lateral Motion (mm)")
+        ax.set_ylabel("Anterior-Posterior Motion (mm)")
+        ax.grid(True)
+
+        # Platform patch
         x_len = 600
         y_len = 400
         rectangle = patches.Rectangle(
             (-x_len / 2, -y_len / 2), x_len, y_len, edgecolor="blue", facecolor="none"
         )
-        self.ax.add_patch(rectangle)
+        ax.add_patch(rectangle)
 
-        # Last pose circle
-        self.circle = patches.Circle(
-            (0, 0), 6, edgecolor="#326295", facecolor="white", linewidth=2.0
-        )
-        self.ax.add_patch(self.circle)
+        # TODO WIP Ellipse patch
+        # ellipse = patches.Ellipse(
+        #     (-x_len / 2, -y_len / 2), x_len, y_len, edgecolor="blue", facecolor="none"
+        # )
+        # ax.add_patch(ellipse)
 
+        # Plot COP and draw
+        ax.plot(cop[0], cop[1])
         self.canvas.draw()
-
-    def update(self, cop_x_np: np.ndarray, cop_y_np: np.ndarray):
-        self.line_total.set_data(cop_x_np, cop_y_np)
-        self.line_last.set_data(
-            cop_x_np[-self.last_indexes :], cop_y_np[-self.last_indexes :]
-        )
-        self.circle.set_center([cop_x_np[-1:], cop_y_np[-1:]])
-
-        self.canvas.draw()
-
-    def clear(self):
-        self.figure.clear()
-        self.setup()
 
 
 class PlotEncoderWidget(QtWidgets.QWidget):
