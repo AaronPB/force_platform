@@ -102,6 +102,7 @@ class MainUI(QtWidgets.QWidget):
         self.updateDataSettings(range=False)
         self.preview_plotter.updateLayouts()
         self.sensor_plotter.updateLayouts()
+        self.platform_plotter.updateLayouts()
         self.setDataSettings(True)
 
         # Save dataframes
@@ -574,7 +575,7 @@ class MainUI(QtWidgets.QWidget):
         hbox_general_layout.addWidget(figure_box)
 
         # Define selector class
-        self.platform_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
+        self.platform_plotter = PlatformPlotSelector(self.sensor_mngr, self.data_mngr)
         self.platform_plotter.setupLayouts(
             self.platform_combo_box,
             self.platform_option_selector,
