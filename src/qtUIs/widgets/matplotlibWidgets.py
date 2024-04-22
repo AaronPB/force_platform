@@ -25,6 +25,8 @@ class PlotFigureWidget(QtWidgets.QWidget):
 
         # Plot style
         self.colors = ["red", "blue", "black", "orange", "purple"]
+        self.markers = ["x", "o", "^", "s", "D"]
+        self.markers_amount = 10
         self.linepx_main = 1.5
 
     def setupPlot(self, df: pd.DataFrame) -> None:
@@ -38,12 +40,15 @@ class PlotFigureWidget(QtWidgets.QWidget):
         for column in df.columns:
             if column != "times":
                 color = self.colors[i % len(self.colors)]
+                marker = self.markers[i % len(self.markers)]
                 ax.plot(
                     x_data,
                     df[column],
                     label=column,
                     color=color,
                     linewidth=self.linepx_main,
+                    marker=marker,
+                    markevery=len(df) // self.markers_amount,
                 )
                 i += 1
         ax.grid(True)
@@ -61,12 +66,15 @@ class PlotFigureWidget(QtWidgets.QWidget):
         for column in df.columns:
             if column != "times":
                 color = self.colors[i % len(self.colors)]
+                marker = self.markers[i % len(self.markers)]
                 ax.plot(
                     x_data[idx1:idx2],
                     df[column][idx1:idx2],
                     label=column,
                     color=color,
                     linewidth=self.linepx_main,
+                    marker=marker,
+                    markevery=(idx2 - idx1) // self.markers_amount,
                 )
                 i += 1
         ax.grid(True)
@@ -84,12 +92,15 @@ class PlotFigureWidget(QtWidgets.QWidget):
         for column in df.columns:
             if column != "times":
                 color = self.colors[i % len(self.colors)]
+                marker = self.markers[i % len(self.markers)]
                 ax.plot(
                     x_data,
                     df[column],
                     label=column,
                     color=color,
                     linewidth=self.linepx_main,
+                    marker=marker,
+                    markevery=len(df) // self.markers_amount,
                 )
                 i += 1
         ax.axvline(x=x_data[idx1], color="blue", linestyle="--")
@@ -114,6 +125,8 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         # Plot style
         self.sum_color = "red"
         self.colors = ["blue", "black", "orange", "purple"]
+        self.markers = ["o", "^", "s", "D"]
+        self.markers_amount = 10
         self.linepx_main = 3
         self.linepx_second = 1
 
@@ -168,12 +181,15 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         i = 0
         for column in df.columns:
             color = self.colors[i % len(self.colors)]
+            marker = self.markers[i % len(self.markers)]
             ax.plot(
                 times,
                 df[column],
                 label=column,
                 color=color,
                 linewidth=self.linepx_second,
+                marker=marker,
+                markevery=len(df) // self.markers_amount,
             )
             i += 1
         ax.grid(True)
