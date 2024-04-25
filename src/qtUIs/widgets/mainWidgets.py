@@ -174,12 +174,12 @@ class PreviewPlotSelector(QtWidgets.QWidget):
 
 
 class SensorPlotSelector(QtWidgets.QWidget):
-    def __init__(self, sensor_manager: SensorManager, data_manager: DataManager):
-        self.sensor_mngr: SensorManager = sensor_manager
+    def __init__(self, data_manager: DataManager):
         self.data_mngr: DataManager = data_manager
         self.group_combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
         self.options_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
         self.figure_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.group_list: list[SensorGroup] = []
         self.idx1: int = 0
         self.idx2: int = 0
 
@@ -194,7 +194,8 @@ class SensorPlotSelector(QtWidgets.QWidget):
         self.options_selector_layout = options_selector
         self.figure_layout = figure
 
-    def updateLayouts(self) -> None:
+    def updateLayouts(self, group_list: list[SensorGroup]) -> None:
+        self.group_list = group_list
         self.setupComboBox()
         clearWidgetsLayout(self.figure_layout)
 
@@ -205,7 +206,7 @@ class SensorPlotSelector(QtWidgets.QWidget):
     def setupComboBox(self) -> None:
         self.group_combo_box.clear()
         clearWidgetsLayout(self.options_selector_layout)
-        for group in self.sensor_mngr.getGroups():
+        for group in self.group_list:
             if not group.getRead():
                 continue
             if group.getStatus() == SGStatus.ERROR:
@@ -294,16 +295,16 @@ class SensorPlotSelector(QtWidgets.QWidget):
     @QtCore.Slot()
     def buildOptionsLayout(self, index):
         logger.debug(f"User select option {index}")
-        self.updateSelectorLayout(self.sensor_mngr.getGroups()[index])
+        self.updateSelectorLayout(self.group_list[index])
 
 
 class PlatformPlotSelector(QtWidgets.QWidget):
-    def __init__(self, sensor_manager: SensorManager, data_manager: DataManager):
-        self.sensor_mngr: SensorManager = sensor_manager
+    def __init__(self, data_manager: DataManager):
         self.data_mngr: DataManager = data_manager
         self.group_combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
         self.options_selector_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
         self.figure_layout: QtWidgets.QBoxLayout = QtWidgets.QVBoxLayout()
+        self.group_list: list[SensorGroup] = []
         self.idx1: int = 0
         self.idx2: int = 0
 
@@ -318,7 +319,8 @@ class PlatformPlotSelector(QtWidgets.QWidget):
         self.options_selector_layout = options_selector
         self.figure_layout = figure
 
-    def updateLayouts(self) -> None:
+    def updateLayouts(self, group_list: list[SensorGroup]) -> None:
+        self.group_list = group_list
         self.setupComboBox()
         clearWidgetsLayout(self.figure_layout)
 
@@ -329,7 +331,7 @@ class PlatformPlotSelector(QtWidgets.QWidget):
     def setupComboBox(self) -> None:
         self.group_combo_box.clear()
         clearWidgetsLayout(self.options_selector_layout)
-        for group in self.sensor_mngr.getPlatformGroups():
+        for group in self.group_list:
             if not group.getRead():
                 continue
             if group.getStatus() == SGStatus.ERROR:
@@ -400,4 +402,4 @@ class PlatformPlotSelector(QtWidgets.QWidget):
     @QtCore.Slot()
     def buildOptionsLayout(self, index):
         logger.debug(f"User select option {index}")
-        self.updateSelectorLayout(self.sensor_mngr.getPlatformGroups()[index])
+        self.updateSelectorLayout(self.group_list[index])
