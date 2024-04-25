@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from loguru import logger
-from src.managers.configManager import ConfigManager
 from src.handlers.sensorGroup import SensorGroup
 from src.handlers.sensor import Sensor
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SParams, SGParams
 from src.enums.sensorTypes import STypes, SGTypes
+from typing import Protocol
 
 # Required param keys for sensor handlers
 group_keys = [SGParams.NAME, SGParams.TYPE, SGParams.READ, SGParams.SENSOR_LIST]
@@ -16,9 +16,15 @@ encoder_conn_keys = [SParams.SERIAL, SParams.CHANNEL]
 taobotics_conn_keys = [SParams.SERIAL]
 
 
+class ConfigYAMLHandler(Protocol):
+    def setConfigValue(self, key_path: str, value) -> None: ...
+
+    def getConfigValue(self, key_path: str, default_value=None): ...
+
+
 class SensorManager:
-    def __init__(self, config_manager: ConfigManager) -> None:
-        self.config_mngr = config_manager
+    def __init__(self, config_manager: ConfigYAMLHandler) -> None:
+        self.config_mngr: ConfigYAMLHandler = config_manager
         self.config_sensors: dict = {}
 
         self.sensor_groups: list[SensorGroup] = []
