@@ -15,6 +15,7 @@ from src.qtUIs.widgets.mainWidgets import (
     SensorPlotSelector,
     PlatformPlotSelector,
 )
+from src.qtUIs.dataImporter import DataTester
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -101,8 +102,8 @@ class MainUI(QtWidgets.QWidget):
         # Update plot options and data settings
         self.updateDataSettings(range=False)
         self.preview_plotter.updateLayouts()
-        self.sensor_plotter.updateLayouts()
-        self.platform_plotter.updateLayouts()
+        self.sensor_plotter.updateLayouts(self.sensor_mngr.getGroups())
+        self.platform_plotter.updateLayouts(self.sensor_mngr.getPlatformGroups())
         self.setDataSettings(True)
 
         # Save dataframes
@@ -196,6 +197,21 @@ class MainUI(QtWidgets.QWidget):
             self.data_start.setMaximum(self.data_end.value() - 1)
             return
 
+    @QtCore.Slot()
+    def enableTestData(self):
+        tester = DataTester()
+        tester.overrideManagers(self.sensor_mngr, self.data_mngr)
+
+        # Update plot options and data settings
+        self.updateDataSettings(range=False)
+        self.preview_plotter.updateLayouts()
+        self.sensor_plotter.updateLayouts(self.sensor_mngr.getGroups())
+        self.platform_plotter.updateLayouts(self.sensor_mngr.getPlatformGroups())
+        self.setDataSettings(True)
+
+        self.setControlPanelButtons(False)
+        self.datatester_button.setEnabled(False)
+
     # UI section loaders
 
     # - Control Panel
@@ -242,6 +258,12 @@ class MainUI(QtWidgets.QWidget):
             enabled=True,
             connect_fn=self.calibrateSensors,
         )
+        self.datatester_button = customQT.createQPushButton(
+            "Graph tester",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=True,
+            connect_fn=self.enableTestData,
+        )
         self.close_button = customQT.createQPushButton(
             "Close",
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
@@ -280,6 +302,7 @@ class MainUI(QtWidgets.QWidget):
                 20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
             )
         )
+        vbox_layout.addWidget(self.datatester_button)
         vbox_layout.addWidget(self.close_button)
         vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_layout.addLayout(credits_layout)
@@ -524,7 +547,7 @@ class MainUI(QtWidgets.QWidget):
         hbox_general_layout.addWidget(figure_box)
 
         # Define selector class
-        self.sensor_plotter = SensorPlotSelector(self.sensor_mngr, self.data_mngr)
+        self.sensor_plotter = SensorPlotSelector(self.data_mngr)
         self.sensor_plotter.setupLayouts(
             self.group_combo_box,
             self.sensor_option_selector,
@@ -575,7 +598,7 @@ class MainUI(QtWidgets.QWidget):
         hbox_general_layout.addWidget(figure_box)
 
         # Define selector class
-        self.platform_plotter = PlatformPlotSelector(self.sensor_mngr, self.data_mngr)
+        self.platform_plotter = PlatformPlotSelector(self.data_mngr)
         self.platform_plotter.setupLayouts(
             self.platform_combo_box,
             self.platform_option_selector,
