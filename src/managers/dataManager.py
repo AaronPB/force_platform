@@ -111,7 +111,7 @@ class DataManager:
         sensor_names: list[str],
         idx1: int = 0,
         idx2: int = 0,
-    ) -> PlotPlatformForcesWidget | PlotPlatformCOPWidget | None:
+    ) -> PlotPlatformForcesWidget | PlotPlatformCOPWidget | PlotFigureWidget:
         # Platform groups
         if (
             plot_type == PlotTypes.GROUP_PLATFORM_COP
@@ -141,27 +141,30 @@ class DataManager:
                     + " Needs X_, Y_ or Z_ in name to be identified."
                 )
             if plot_type == PlotTypes.GROUP_PLATFORM_COP:
-                if len(df_fx) != 4:
+                plotter = PlotPlatformCOPWidget()
+                if df_fx.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
                         + f"Need 4 X sensors, only {len(df_fx)} provided."
                     )
-                    return
-                if len(df_fy) != 4:
+                    return plotter
+                if df_fy.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
                         + f"Need 4 Y sensors, only {len(df_fy)} provided."
                     )
-                if len(df_fz) != 4:
+                    return plotter
+                if df_fz.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
                         + f"Need 4 Z sensors, only {len(df_fz)} provided."
                     )
+                    return plotter
                 # TODO WIP
                 cop = self.getPlatformCOP(df_fx, df_fy, df_fz)
                 ellipse_params = self.getEllipseFromCOP(cop[0], cop[1])
-                plotter = PlotPlatformCOPWidget()
                 plotter.setupPlot(cop, ellipse_params)
+                return plotter
             if plot_type == PlotTypes.GROUP_PLATFORM_FORCES:
                 plotter = PlotPlatformForcesWidget()
                 if self.isRangedPlot(idx1, idx2):
@@ -171,7 +174,7 @@ class DataManager:
                     return plotter
                 plotter.setupPlot(self.timeincr_list, df_fx, df_fy, df_fz)
                 return plotter
-        return None
+        return PlotFigureWidget()
 
     def getPlotPreviewWidget(
         self,
