@@ -225,6 +225,7 @@ class DataManager:
 
         # Do process depending on requested plot type
         df: pd.DataFrame = pd.DataFrame()
+        y_label: str = ""
         if plot_type == PlotTypes.SENSOR_LOADCELL_FORCE:
             sign = 1
             for key in self.forces_sign.keys():
@@ -232,14 +233,19 @@ class DataManager:
                     sign = self.forces_sign[key]
                     break
             df = self.getForce(sensor_name, sign)
+            y_label = "Weight (kg)"
         elif plot_type == PlotTypes.SENSOR_ENCODER_DISTANCE:
             df = self.getDistance(sensor_name)
+            y_label = "Distance (mm)"
         elif plot_type == PlotTypes.SENSOR_IMU_ANGLES:
             df = self.getIMUAngles(sensor_name, self.imu_ang_headers)
+            y_label = "Angle (deg)"
         elif plot_type == PlotTypes.SENSOR_IMU_VELOCITY:
             df = self.getIMUValues(sensor_name, self.imu_vel_headers)
+            y_label = "Angular velocity (rad/s)"
         elif plot_type == PlotTypes.SENSOR_IMU_ACCELERATION:
             df = self.getIMUValues(sensor_name, self.imu_acc_headers)
+            y_label = "Linear acceleration (m/s2)"
 
         # Setup widget and return
         if df.empty:
@@ -248,9 +254,9 @@ class DataManager:
             df = df.to_frame()
         df.insert(0, "times", self.timeincr_list)
         if self.isRangedPlot(idx1, idx2):
-            plotter.setupRangedPlot(df, idx1, idx2)
+            plotter.setupRangedPlot(df, idx1, idx2, ("Time (s)", y_label))
             return plotter
-        plotter.setupPlot(df)
+        plotter.setupPlot(df, ("Time (s)", y_label))
         return plotter
 
     def getRawDataframe(self) -> pd.DataFrame:

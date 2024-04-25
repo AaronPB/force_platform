@@ -29,7 +29,7 @@ class PlotFigureWidget(QtWidgets.QWidget):
         self.markers_amount = 10
         self.linepx_main = 1.5
 
-    def setupPlot(self, df: pd.DataFrame) -> None:
+    def setupPlot(self, df: pd.DataFrame, axis_labels: tuple[str, str] = None) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         # If only 1 col, make it also a df
@@ -52,10 +52,19 @@ class PlotFigureWidget(QtWidgets.QWidget):
                 )
                 i += 1
         ax.grid(True)
+        if axis_labels:
+            ax.set_xlabel(axis_labels[0])
+            ax.set_ylabel(axis_labels[1])
         ax.legend()
         self.canvas.draw()
 
-    def setupRangedPlot(self, df: pd.DataFrame, idx1: int, idx2: int) -> None:
+    def setupRangedPlot(
+        self,
+        df: pd.DataFrame,
+        idx1: int,
+        idx2: int,
+        axis_labels: tuple[str, str] = None,
+    ) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         # If only 1 col, make it also a df
@@ -78,10 +87,13 @@ class PlotFigureWidget(QtWidgets.QWidget):
                 )
                 i += 1
         ax.grid(True)
+        if axis_labels:
+            ax.set_xlabel(axis_labels[0])
+            ax.set_ylabel(axis_labels[1])
         ax.legend()
         self.canvas.draw()
 
-    def setupRangedPreviewPlot(self, df: pd.DataFrame, idx1: int, idx2: int) -> None:
+    def setupRangedPreviewPlot(self, df: pd.DataFrame, idx1: int, idx2: int, axis_labels: tuple[str, str] = None) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         # If only 1 col, make it also a df
@@ -106,6 +118,9 @@ class PlotFigureWidget(QtWidgets.QWidget):
         ax.axvline(x=x_data[idx1], color="blue", linestyle="--")
         ax.axvline(x=x_data[idx2 - 1], color="blue", linestyle="--")
         ax.grid(True)
+        if axis_labels:
+            ax.set_xlabel(axis_labels[0])
+            ax.set_ylabel(axis_labels[1])
         ax.legend()
         self.canvas.draw()
 
