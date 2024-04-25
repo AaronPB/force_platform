@@ -142,6 +142,7 @@ class DataManager:
                 )
             if plot_type == PlotTypes.GROUP_PLATFORM_COP:
                 plotter = PlotPlatformCOPWidget()
+                # Check shapes
                 if df_fx.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
@@ -160,13 +161,14 @@ class DataManager:
                         + f"Need 4 Z axis sensors, only {df_fz.shape[1]} provided."
                     )
                     return plotter
-                # TODO WIP
+                # Get COP and build plot
                 if self.isRangedPlot(idx1, idx2):
                     df_fx = df_fx[idx1:idx2]
                     df_fy = df_fy[idx1:idx2]
                     df_fz = df_fz[idx1:idx2]
                 cop = self.getPlatformCOP(df_fx, df_fy, df_fz)
-                ellipse_params = self.getEllipseFromCOP(cop[0], cop[1])
+                # Invert COP axis for ellipse cause plot is inverted
+                ellipse_params = self.getEllipseFromCOP((cop[1], cop[0]))
                 plotter.setupPlot(cop, ellipse_params)
                 return plotter
             if plot_type == PlotTypes.GROUP_PLATFORM_FORCES:
@@ -359,10 +361,10 @@ class DataManager:
         return [cop_x, cop_y]
 
     def getEllipseFromCOP(
-        self, copx: np.array, copy: np.array
-    ) -> tuple[np.array, np.array, float]:
+        self, cop: tuple[pd.Series, pd.Series]
+    ) -> tuple[float, float, float, float]:
 
-        cov_matrix = np.cov(copx, copy)
+        cov_matrix = np.cov(cop[0], cop[1])
 
         # Eigen vectors and angular rotation
         D, V = np.linalg.eig(cov_matrix)
@@ -374,17 +376,8 @@ class DataManager:
         a = ellipse_axis[0]
         b = ellipse_axis[1]
         area = np.pi * a * b
-        x0 = np.mean(copx)
-        y0 = np.mean(copy)
 
-        # Ellipse angle in rads
-        phi = np.linspace(0, 2 * np.pi, 100)
-
-        # Ellipse coords
-        x = x0 + a * np.cos(phi) * np.cos(theta) - b * np.sin(phi) * np.sin(theta)
-        y = y0 + a * np.cos(phi) * np.sin(theta) + b * np.sin(phi) * np.cos(theta)
-
-        return x, y, area
+        return a, b, theta, area
 
     # Tare sensors
 

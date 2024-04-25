@@ -218,7 +218,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
     def setupPlot(
         self,
         cop: tuple[pd.Series, pd.Series],
-        ellipse: tuple[np.array, np.array, float],
+        ellipse_params: tuple[float, float, float, float],
     ) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
@@ -234,11 +234,27 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         )
         ax.add_patch(rectangle)
 
-        # TODO WIP Ellipse patch
-        # ellipse = patches.Ellipse(
-        #     (-x_len / 2, -y_len / 2), x_len, y_len, edgecolor="blue", facecolor="none"
-        # )
-        # ax.add_patch(ellipse)
+        # Ellipse patch
+        ellipse = patches.Ellipse(
+            xy=(np.mean(cop[1]), np.mean(cop[0])),
+            width=2 * ellipse_params[0],  # a
+            height=2 * ellipse_params[1],  # b
+            angle=np.degrees(ellipse_params[2]),  # phi
+            edgecolor="red",
+            facecolor="red",
+            alpha=0.3,
+        )
+        ax.add_patch(ellipse)
+        area = ellipse_params[3] / 100  # From mm2 to cm2
+        ax.text(
+            0,
+            0,
+            f"Area: {area:.2f} cm2",
+            ha="center",
+            va="center",
+            color="black",
+            fontsize=12,
+        )
 
         # Plot COP and draw
         ax.plot(cop[1], cop[0])
