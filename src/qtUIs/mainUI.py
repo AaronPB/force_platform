@@ -676,6 +676,7 @@ class MainUI(QtWidgets.QWidget):
             idx1 = self.data_start.value()
             idx2 = self.data_end.value()
             self.sensor_plotter.setIndexes(idx1, idx2)
+            self.platform_plotter.setIndexes(idx1, idx2)
             self.preview_plotter.updatePreview(idx1, idx2)
 
     def resetDataSettings(self):

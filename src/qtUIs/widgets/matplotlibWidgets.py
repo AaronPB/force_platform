@@ -199,6 +199,8 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
 # TODO Test
 class PlotPlatformCOPWidget(QtWidgets.QWidget):
     def __init__(self):
+        super(PlotPlatformCOPWidget, self).__init__()
+
         self.figure: Figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
@@ -213,8 +215,6 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.cop_color = "blue"
         self.cop_line_px = 1
 
-        self.setup()
-
     def setupPlot(
         self,
         cop: tuple[pd.Series, pd.Series],
@@ -227,8 +227,8 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         ax.grid(True)
 
         # Platform patch
-        x_len = 600
-        y_len = 400
+        x_len = 400
+        y_len = 600
         rectangle = patches.Rectangle(
             (-x_len / 2, -y_len / 2), x_len, y_len, edgecolor="blue", facecolor="none"
         )
@@ -241,7 +241,7 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         # ax.add_patch(ellipse)
 
         # Plot COP and draw
-        ax.plot(cop[0], cop[1])
+        ax.plot(cop[1], cop[0])
         self.canvas.draw()
 
 

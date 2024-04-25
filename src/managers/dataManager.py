@@ -29,8 +29,8 @@ class DataManager:
         self.df_calibrated: pd.DataFrame = pd.DataFrame()
         self.df_filtered: pd.DataFrame = pd.DataFrame()
         # Sensor header suffixes
-        self.imu_ang_headers: list[str] = ["q_x", "q_y", "q_z", "q_w"]
-        self.imu_vel_headers: list[str] = ["w_x", "w_y", "w_z"]
+        self.imu_ang_headers: list[str] = ["qx", "qy", "qz", "qw"]
+        self.imu_vel_headers: list[str] = ["wx", "wy", "wz"]
         self.imu_acc_headers: list[str] = ["x_acc", "y_acc", "z_acc"]
         # WIP Platform loadcell sensors orientation
         self.forces_sign: dict[str, int] = {
@@ -145,22 +145,26 @@ class DataManager:
                 if df_fx.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
-                        + f"Need 4 X sensors, only {len(df_fx)} provided."
+                        + f"Need 4 X axis sensors, only {df_fx.shape[1]} provided."
                     )
                     return plotter
                 if df_fy.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
-                        + f"Need 4 Y sensors, only {len(df_fy)} provided."
+                        + f"Need 4 Y axis sensors, only {df_fy.shape[1]} provided."
                     )
                     return plotter
                 if df_fz.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
-                        + f"Need 4 Z sensors, only {len(df_fz)} provided."
+                        + f"Need 4 Z axis sensors, only {df_fz.shape[1]} provided."
                     )
                     return plotter
                 # TODO WIP
+                if self.isRangedPlot(idx1, idx2):
+                    df_fx = df_fx[idx1:idx2]
+                    df_fy = df_fy[idx1:idx2]
+                    df_fz = df_fz[idx1:idx2]
                 cop = self.getPlatformCOP(df_fx, df_fy, df_fz)
                 ellipse_params = self.getEllipseFromCOP(cop[0], cop[1])
                 plotter.setupPlot(cop, ellipse_params)
@@ -351,7 +355,7 @@ class DataManager:
         cop_x = (-h * fx - my) / fz
         cop_y = (-h * fy + mx) / fz
         cop_x = cop_x - np.mean(cop_x)
-        cop_y = cop_x - np.mean(cop_y)
+        cop_y = cop_y - np.mean(cop_y)
         return [cop_x, cop_y]
 
     def getEllipseFromCOP(
