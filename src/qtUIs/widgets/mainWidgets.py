@@ -153,6 +153,7 @@ class PreviewPlotSelector(QtWidgets.QWidget):
         self.updateSensorFigurePlot(self.combo_box.currentText())
 
     def setupComboBox(self) -> None:
+        self.combo_box.clear()
         data_keys = self.data_mngr.getCalibrateDataframe().to_dict().keys()
         # Avoid timestamp in combo box options
         data_iterator = iter(data_keys)
@@ -169,6 +170,8 @@ class PreviewPlotSelector(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def buildPlotPreview(self, option):
+        if not option:
+            return
         logger.debug(f"User select option {option}")
         self.updateSensorFigurePlot(option)
 
@@ -294,6 +297,8 @@ class SensorPlotSelector(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def buildOptionsLayout(self, index):
+        if index == -1:
+            return
         logger.debug(f"User select option {index}")
         self.updateSelectorLayout(self.group_list[index])
 
@@ -401,5 +406,7 @@ class PlatformPlotSelector(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def buildOptionsLayout(self, index):
+        if index == -1:
+            return
         logger.debug(f"User select option {index}")
         self.updateSelectorLayout(self.group_list[index])
