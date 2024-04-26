@@ -23,15 +23,16 @@ class ConfigYAMLHandler(Protocol):
 
 
 class SensorManager:
-    def __init__(self, config_manager: ConfigYAMLHandler) -> None:
-        self.config_mngr: ConfigYAMLHandler = config_manager
+    def __init__(self) -> None:
+        self.config_mngr: ConfigYAMLHandler
         self.config_sensors: dict = {}
 
         self.sensor_groups: list[SensorGroup] = []
         self.loadcell_calib_ref: Sensor = None
         self.platform_calib_ref: Sensor = None
 
-    def setup(self) -> None:
+    def setup(self, config_manager: ConfigYAMLHandler) -> None:
+        self.config_mngr = config_manager
         self.config_sensors = self.config_mngr.getConfigValue(
             CfgPaths.SENSORS_SECTION.value, {}
         )

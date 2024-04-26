@@ -35,17 +35,12 @@ class DataTester:
     def overrideManagers(
         self, sensor_manager: SensorManager, data_manager: DataManager
     ) -> None:
-        # Sensor manager
-        mock_sensor_mngr = SensorManager(self.cfg_mngr)
-        mock_sensor_mngr.setup()
-        sensor_manager.config_mngr = self.cfg_mngr
-        sensor_manager.config_sensors = mock_sensor_mngr.config_sensors
-        sensor_manager.sensor_groups = mock_sensor_mngr.sensor_groups
-        # - Modify sensor status to available
+        sensor_manager.setup(self.cfg_mngr)
+        # Modify sensor status to available
         for group in sensor_manager.getGroups():
             for sensor in group.getSensors().values():
                 sensor.status = SStatus.AVAILABLE
-        # Data manager
+        # Replace imported data
         time_list = self.df.iloc[:, 0]
         data_manager.df_raw = self.df_raw.iloc[:, 1:]
         data_manager.df_calibrated = self.df.iloc[:, 1:]

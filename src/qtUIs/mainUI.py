@@ -43,9 +43,8 @@ class MainUI(QtWidgets.QWidget):
 
     def initManagers(self) -> None:
         self.file_mngr = FileManager(self.cfg_mngr)
-        self.sensor_mngr.setup()
+        self.sensor_mngr.setup(self.cfg_mngr)
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
-        # TODO data_mngr
 
         self.test_timer = QtCore.QTimer(self)
         self.test_timer.timeout.connect(self.test_mngr.testRegisterValues)
