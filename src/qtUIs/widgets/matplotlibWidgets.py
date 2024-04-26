@@ -93,7 +93,13 @@ class PlotFigureWidget(QtWidgets.QWidget):
         ax.legend()
         self.canvas.draw()
 
-    def setupRangedPreviewPlot(self, df: pd.DataFrame, idx1: int, idx2: int, axis_labels: tuple[str, str] = None) -> None:
+    def setupRangedPreviewPlot(
+        self,
+        df: pd.DataFrame,
+        idx1: int,
+        idx2: int,
+        axis_labels: tuple[str, str] = None,
+    ) -> None:
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         # If only 1 col, make it also a df
