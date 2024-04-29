@@ -95,8 +95,6 @@ class MainUI(QtWidgets.QWidget):
         self.data_mngr.loadData(
             self.test_mngr.getTestTimes(), self.sensor_mngr.getGroups()
         )
-        dataframe = self.data_mngr.getCalibrateDataframe()
-        dataframe_raw = self.data_mngr.getRawDataframe()
 
         # Update plot options and data settings
         self.updateDataSettings(range=False)
@@ -106,10 +104,7 @@ class MainUI(QtWidgets.QWidget):
         self.setDataSettings(True)
 
         # Save dataframes
-        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
-            self.file_mngr.saveDataToCSV(dataframe)
-        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
-            self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
+        self.saveResults()
 
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
@@ -210,6 +205,37 @@ class MainUI(QtWidgets.QWidget):
 
         self.setControlPanelButtons(False)
         self.datatester_button.setEnabled(False)
+
+    @QtCore.Slot()
+    def updateDataSettings(self, range: bool = True, filter: bool = True):
+        if filter:
+            butter_fs = self.filter_fs_input.value()
+            butter_fc = self.filter_fc_input.value()
+            butter_order = self.filter_order_input.value()
+            self.data_mngr.applyButterFilter(butter_fs, butter_fc, butter_order)
+        if range:
+            idx1 = self.data_start.value()
+            idx2 = self.data_end.value()
+            self.sensor_plotter.setIndexes(idx1, idx2)
+            self.platform_plotter.setIndexes(idx1, idx2)
+            self.preview_plotter.updatePreview(idx1, idx2)
+
+    @QtCore.Slot()
+    def resetDataSettings(self):
+        self.setDataSettings(True)
+        # Only ranges
+        self.updateDataSettings(filter=False)
+
+    @QtCore.Slot()
+    def saveResults(self):
+        idx1 = self.data_start.value()
+        idx2 = self.data_end.value()
+        dataframe = self.data_mngr.getCalibrateDataframe(idx1, idx2)
+        dataframe_raw = self.data_mngr.getRawDataframe(idx1, idx2)
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
+            self.file_mngr.saveDataToCSV(dataframe)
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
+            self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
 
     # UI section loaders
 
@@ -436,7 +462,7 @@ class MainUI(QtWidgets.QWidget):
             "Save",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=False,
-            # TODO connect_fn=self.updateDataSettings,
+            connect_fn=self.saveResults,
         )
         buttons_layout.addWidget(self.reset_results_settings_button)
         buttons_layout.addWidget(self.update_results_button)
@@ -515,11 +541,6 @@ class MainUI(QtWidgets.QWidget):
         selector_panel_box.setLayout(vbox_selector_layout)
         vbox_selector_layout.setAlignment(QtCore.Qt.AlignTop)
         selector_panel_box.setFixedWidth(300)
-        # - Info panel
-        self.status_sensor_figs = customQT.createLabelBox(
-            "First preform a test",
-            QssLabels.STATUS_LABEL_WARN,
-        )
         # - Group combo box
         self.group_combo_box = QtWidgets.QComboBox()
         # - Options container
@@ -527,8 +548,6 @@ class MainUI(QtWidgets.QWidget):
         self.sensor_option_selector.setAlignment(QtCore.Qt.AlignTop)
 
         # - Build selector layout
-        vbox_selector_layout.addWidget(self.status_sensor_figs)
-        vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_selector_layout.addWidget(QtWidgets.QLabel("Select sensor group"))
         vbox_selector_layout.addWidget(self.group_combo_box)
         vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
@@ -566,11 +585,6 @@ class MainUI(QtWidgets.QWidget):
         selector_panel_box.setLayout(vbox_selector_layout)
         vbox_selector_layout.setAlignment(QtCore.Qt.AlignTop)
         selector_panel_box.setFixedWidth(300)
-        # - Info panel
-        self.status_platform_figs = customQT.createLabelBox(
-            "First preform a test",
-            QssLabels.STATUS_LABEL_WARN,
-        )
         # - Group combo box
         self.platform_combo_box = QtWidgets.QComboBox()
         # - Options container
@@ -578,8 +592,6 @@ class MainUI(QtWidgets.QWidget):
         self.platform_option_selector.setAlignment(QtCore.Qt.AlignTop)
 
         # - Build selector layout
-        vbox_selector_layout.addWidget(self.status_platform_figs)
-        vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
         vbox_selector_layout.addWidget(QtWidgets.QLabel("Select platform group"))
         vbox_selector_layout.addWidget(self.platform_combo_box)
         vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
@@ -664,21 +676,3 @@ class MainUI(QtWidgets.QWidget):
         sensor_panels.updateLayout(
             self.hbox_defaults, self.sensor_mngr.getDefaultGroups()
         )
-
-    def updateDataSettings(self, range: bool = True, filter: bool = True):
-        if filter:
-            butter_fs = self.filter_fs_input.value()
-            butter_fc = self.filter_fc_input.value()
-            butter_order = self.filter_order_input.value()
-            self.data_mngr.applyButterFilter(butter_fs, butter_fc, butter_order)
-        if range:
-            idx1 = self.data_start.value()
-            idx2 = self.data_end.value()
-            self.sensor_plotter.setIndexes(idx1, idx2)
-            self.platform_plotter.setIndexes(idx1, idx2)
-            self.preview_plotter.updatePreview(idx1, idx2)
-
-    def resetDataSettings(self):
-        self.setDataSettings(True)
-        # Only ranges
-        self.updateDataSettings(filter=False)

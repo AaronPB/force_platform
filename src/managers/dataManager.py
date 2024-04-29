@@ -259,17 +259,23 @@ class DataManager:
         plotter.setupPlot(df, ("Time (s)", y_label))
         return plotter
 
-    def getRawDataframe(self) -> pd.DataFrame:
-        return self.formatDataframe(self.df_raw.copy(deep=True))
+    def getRawDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
+        return self.formatDataframe(self.df_raw.copy(deep=True), idx1, idx2)
 
-    def getCalibrateDataframe(self) -> pd.DataFrame:
-        return self.formatDataframe(self.df_calibrated.copy(deep=True))
+    def getCalibrateDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
+        return self.formatDataframe(self.df_raw.copy(deep=True), idx1, idx2)
 
-    def formatDataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    def formatDataframe(
+        self, df: pd.DataFrame, idx1: int = 0, idx2: int = 0
+    ) -> pd.DataFrame:
+        timestamp = self.timestamp_list.copy()
+        if self.isRangedPlot(idx1, idx2):
+            timestamp = timestamp[idx1:idx2]
+            df = df.iloc[idx1:idx2]
         # Format dataframe values to 0.000000e+00
         df = df.map("{:.6e}".format)
         # Add timestamp values
-        df.insert(0, "timestamp", self.timestamp_list)
+        df.insert(0, "timestamp", timestamp)
         return df
 
     # Data process methods
