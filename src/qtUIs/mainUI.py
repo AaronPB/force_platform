@@ -232,6 +232,8 @@ class MainUI(QtWidgets.QWidget):
         idx2 = self.data_end.value()
         dataframe = self.data_mngr.getCalibrateDataframe(idx1, idx2)
         dataframe_raw = self.data_mngr.getRawDataframe(idx1, idx2)
+
+        self.file_mngr.checkFileName()
         if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
             self.file_mngr.saveDataToCSV(dataframe)
         if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
