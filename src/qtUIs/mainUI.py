@@ -203,7 +203,19 @@ class MainUI(QtWidgets.QWidget):
         self.platform_plotter.updateLayouts(self.sensor_mngr.getPlatformGroups())
         self.setDataSettings(True)
 
+        # Update status text
+        self.status_label.setParent(None)
+        self.status_label = customQT.createLabelBox(
+            "Pre-recorded test\nloaded", QssLabels.STATUS_LABEL_INFO
+        )
+        close_recommendation = customQT.createLabelBox(
+            "Close the program\nto reset", QssLabels.STATUS_LABEL_WARN
+        )
+        self.status_vbox_layout.addWidget(self.status_label)
+        self.status_vbox_layout.addWidget(close_recommendation)
+
         self.setControlPanelButtons(False)
+        self.calibration_button.setEnabled(False)
         self.datatester_button.setEnabled(False)
 
     @QtCore.Slot()
