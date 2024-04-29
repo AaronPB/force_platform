@@ -44,9 +44,7 @@ def test_load_custom_config(config_manager: ConfigManager) -> None:
     # Check that custom path has been saved in default config
     config_manager.selected_config_path = DEFAULT_CONFIG_PATH
     config_manager.loadConfig(DEFAULT_CONFIG_PATH)
-    saved_path = config_manager.getConfigValue(
-        CfgPaths.GENERAL_CUSTOM_CONFIG_PATH.value, None
-    )
+    saved_path = config_manager.getConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
     assert os.path.samefile(saved_path, CUSTOM_CONFIG_PATH)
 
 
@@ -64,9 +62,7 @@ def test_load_other_custom_config_from_custom(config_manager: ConfigManager) -> 
     # Check that custom path has been updated in default config
     config_manager.selected_config_path = DEFAULT_CONFIG_PATH
     config_manager.loadConfig(DEFAULT_CONFIG_PATH)
-    saved_path = config_manager.getConfigValue(
-        CfgPaths.GENERAL_CUSTOM_CONFIG_PATH.value, None
-    )
+    saved_path = config_manager.getConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
     assert os.path.samefile(saved_path, OTHER_CUSTOM_CONFIG_PATH)
 
 
@@ -78,7 +74,5 @@ def test_load_default_config_from_custom(config_manager: ConfigManager) -> None:
     if not os.path.samefile(config_manager.getCurrentFilePath(), CUSTOM_CONFIG_PATH):
         config_manager.loadConfigFile(CUSTOM_CONFIG_PATH)
     config_manager.loadConfigFile(DEFAULT_CONFIG_PATH)
-    saved_path = config_manager.getConfigValue(
-        CfgPaths.GENERAL_CUSTOM_CONFIG_PATH.value, None
-    )
+    saved_path = config_manager.getConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
     assert saved_path == None
