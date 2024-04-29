@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.patches as patches
 import math
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT,
@@ -217,7 +217,6 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         ax.legend(loc="upper right")
 
 
-# TODO Test
 class PlotPlatformCOPWidget(QtWidgets.QWidget):
     def __init__(self):
         super(PlotPlatformCOPWidget, self).__init__()
@@ -225,10 +224,18 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.figure: Figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        self.top_bar = QtWidgets.QGridLayout()
+        self.results_bar = QtWidgets.QHBoxLayout()
+        self.results_bar.setAlignment(QtCore.Qt.AlignBottom)
 
-        self.setLayout(QtWidgets.QVBoxLayout())
-        self.layout().addWidget(self.toolbar)
-        self.layout().addWidget(self.canvas)
+        self.top_bar.addWidget(self.toolbar, 0, 0)
+        self.top_bar.addLayout(self.results_bar, 0, 1)
+
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.addLayout(self.top_bar)
+        main_layout.addWidget(self.canvas, stretch=1)
+
+        self.setLayout(main_layout)
 
         # Plot style
         self.ellipse_color = "red"
@@ -251,7 +258,11 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         x_len = 400
         y_len = 600
         rectangle = patches.Rectangle(
-            (-x_len / 2, -y_len / 2), x_len, y_len, edgecolor="blue", facecolor="none"
+            (-x_len / 2, -y_len / 2),
+            x_len,
+            y_len,
+            edgecolor="blue",
+            facecolor="none",
         )
         ax.add_patch(rectangle)
 
@@ -261,9 +272,10 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
             width=2 * ellipse_params[0],  # a
             height=2 * ellipse_params[1],  # b
             angle=np.degrees(ellipse_params[2]),  # phi
-            edgecolor="red",
-            facecolor="red",
+            edgecolor=self.ellipse_color,
+            facecolor=self.ellipse_color,
             alpha=0.3,
+            linewidth=self.ellipse_linepx,
         )
         ax.add_patch(ellipse)
         area = ellipse_params[3] / 100  # From mm2 to cm2
@@ -278,8 +290,11 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         )
 
         # Plot COP and draw
-        ax.plot(cop[1], cop[0])
+        ax.plot(cop[1], cop[0], color=self.cop_color, linewidth=self.cop_line_px)
         self.canvas.draw()
+
+        # Add results
+        self.results_bar.addWidget(QtWidgets.QLabel(f"Ellipse area: {area:.2f} cm2"))
 
 
 class PlotRegressionWidget(QtWidgets.QWidget):
