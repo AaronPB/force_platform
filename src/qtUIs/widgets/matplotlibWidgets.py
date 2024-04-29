@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.patches as patches
-import math
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT,
@@ -224,12 +223,11 @@ class PlotPlatformCOPWidget(QtWidgets.QWidget):
         self.figure: Figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
-        self.top_bar = QtWidgets.QGridLayout()
+        self.top_bar = QtWidgets.QHBoxLayout()
         self.results_bar = QtWidgets.QHBoxLayout()
-        self.results_bar.setAlignment(QtCore.Qt.AlignBottom)
 
-        self.top_bar.addWidget(self.toolbar, 0, 0)
-        self.top_bar.addLayout(self.results_bar, 0, 1)
+        self.top_bar.addWidget(self.toolbar)
+        self.top_bar.addLayout(self.results_bar)
 
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.addLayout(self.top_bar)
