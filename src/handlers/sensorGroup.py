@@ -41,14 +41,14 @@ class SensorGroup:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
             results = list(executor.map(lambda sensor: sensor.connect(), sensors_list))
-            self.is_group_active = any(results)
+            self.active = any(results)
 
     def register(self) -> None:
         [sensor.registerValue() for sensor in self.sensors.values()]
 
     def stop(self) -> None:
         [sensor.disconnect() for sensor in list(self.sensors.values())]
-        self.is_group_active = False
+        self.active = False
 
     # Setters and getters
 
