@@ -410,3 +410,52 @@ class PlatformPlotSelector(QtWidgets.QWidget):
             return
         logger.debug(f"User select option {index}")
         self.updateSelectorLayout(self.group_list[index])
+
+
+class CalibrationSelector(QtWidgets.QWidget):
+    def __init__(self):
+        self.group_combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
+        self.sensor_combo_box: QtWidgets.QComboBox = QtWidgets.QComboBox()
+        self.group_list: list[SensorGroup] = []
+
+    def setupLayouts(
+        self,
+        group_combo_box: QtWidgets.QComboBox,
+        sensor_combo_box: QtWidgets.QComboBox,
+    ) -> None:
+        self.group_combo_box = group_combo_box
+        self.group_combo_box.currentIndexChanged.connect(self.buildSensorComboBox)
+        self.sensor_combo_box = sensor_combo_box
+
+    def updateLayouts(self, group_list: list[SensorGroup]) -> None:
+        self.group_list = group_list
+        self.setupGroupComboBox()
+
+    def setupGroupComboBox(self) -> None:
+        self.group_combo_box.clear()
+        for group in self.group_list:
+            if not group.getRead():
+                continue
+            if group.getStatus() == SGStatus.ERROR:
+                continue
+            self.group_combo_box.addItem(
+                QtGui.QIcon(IconPaths.PLATFORM_ICON.value), group.getName()
+            )
+
+    def setupSensorComboBox(self, sensor_group: SensorGroup) -> None:
+        self.sensor_combo_box.clear()
+        for sensor in sensor_group.getAvailableSensors().values():
+            if sensor.getType() != STypes.SENSOR_LOADCELL:
+                continue
+            self.sensor_combo_box.addItem(
+                QtGui.QIcon(IconPaths.LOADCELL_ICON.value), sensor.getName()
+            )
+
+    # Sensor buttons click actions
+
+    @QtCore.Slot()
+    def buildSensorComboBox(self, index):
+        if index == -1:
+            return
+        logger.debug(f"User select option {index}")
+        self.setupSensorComboBox(self.group_list[index])

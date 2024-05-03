@@ -3,10 +3,9 @@
 from src.enums.qssLabels import QssLabels
 from src.enums.uiResources import ImagePaths, IconPaths
 from src.managers.configManager import ConfigManager
-from src.managers.calibrationManager import CalibrationManager
 from src.managers.sensorManager import SensorManager
+from src.qtUIs.widgets.mainWidgets import CalibrationSelector
 from src.qtUIs.widgets import customQtLoaders as customQT
-from src.qtUIs.widgets.calibrationPanelWidget import CalibrationPanelWidget
 from PySide6 import QtWidgets, QtGui, QtCore
 
 
@@ -27,6 +26,7 @@ class CalibrationUI(QtWidgets.QWidget):
         # self.getSensorInformation() TODO
 
     def updateUI(self) -> None:
+        self.calibration_selector.updateLayouts(self.sensor_mngr.getPlatformGroups())
         # TODO
         # self.initManagers()
         # self.calib_widget.loadManager(self.calib_mngr)
@@ -34,7 +34,8 @@ class CalibrationUI(QtWidgets.QWidget):
         pass
 
     def initManagers(self) -> None:
-        self.calib_mngr = CalibrationManager(self.cfg_mngr, self.sensor_mngr)
+        # self.calib_mngr = CalibrationManager(self.cfg_mngr, self.sensor_mngr)
+        pass
 
     def initUI(self):
         self.main_layout = QtWidgets.QHBoxLayout()
@@ -53,12 +54,16 @@ class CalibrationUI(QtWidgets.QWidget):
     @QtCore.Slot()
     def calibratePlatform(self):
         platform_name = self.platform_selector.currentText()
+        if platform_name is None:
+            return
         # TODO
         pass
 
     @QtCore.Slot()
     def calibrateSensor(self):
         sensor_name = self.sensor_selector.currentText()
+        if sensor_name is None:
+            return
         # TODO
         pass
 
@@ -107,6 +112,10 @@ class CalibrationUI(QtWidgets.QWidget):
         # Platform and sensor selector
         self.platform_selector = QtWidgets.QComboBox()
         self.sensor_selector = QtWidgets.QComboBox()
+        self.calibration_selector = CalibrationSelector()
+        self.calibration_selector.setupLayouts(
+            self.platform_selector, self.sensor_selector
+        )
         # Author and version label
         credits_layout = QtWidgets.QHBoxLayout()
         credits_layout.setAlignment(QtCore.Qt.AlignLeft)
