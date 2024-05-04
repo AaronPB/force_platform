@@ -2,8 +2,11 @@
 
 from src.enums.qssLabels import QssLabels
 from src.enums.uiResources import ImagePaths, IconPaths
+from src.enums.configPaths import ConfigPaths
 from src.managers.configManager import ConfigManager
 from src.managers.sensorManager import SensorManager
+from src.managers.calibrationManager import SensorCalibrationManager
+from src.qtUIs.widgets.calibrationPanelWidget import SensorCalibrationPanelWidget
 from src.qtUIs.widgets.mainWidgets import CalibrationSelector
 from src.qtUIs.widgets import customQtLoaders as customQT
 from PySide6 import QtWidgets, QtGui, QtCore
@@ -21,31 +24,27 @@ class CalibrationUI(QtWidgets.QWidget):
         self.cfg_mngr = config_manager
         self.sensor_mngr = sensor_manager
 
-        # self.initManagers() TODO
         self.initUI()
-        # self.getSensorInformation() TODO
 
     def updateUI(self) -> None:
         self.calibration_selector.updateLayouts(self.sensor_mngr.getPlatformGroups())
-        # TODO
-        # self.initManagers()
-        # self.calib_widget.loadManager(self.calib_mngr)
-        # self.getSensorInformation()
-        pass
-
-    def initManagers(self) -> None:
-        # self.calib_mngr = CalibrationManager(self.cfg_mngr, self.sensor_mngr)
+        if self.platform_selector.count() > 0:
+            # TODO
+            pass
+        if self.sensor_selector.count() > 0:
+            self.sensor_calibrate_button.setEnabled(True)
         pass
 
     def initUI(self):
         self.main_layout = QtWidgets.QHBoxLayout()
 
         # Load UI layouts
-        # self.calib_widget = CalibrationPanelWidget() TODO
         self.settings_panel = self.loadInfoPanel()
+        self.panel_layout = QtWidgets.QVBoxLayout()
+        self.panel_layout.addWidget(QtWidgets.QWidget())
 
         self.main_layout.addWidget(self.settings_panel)
-        self.main_layout.addWidget(QtWidgets.QWidget())  # TODO calib panel
+        self.main_layout.addLayout(self.panel_layout)
 
         self.setLayout(self.main_layout)
 
@@ -53,22 +52,49 @@ class CalibrationUI(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def calibratePlatform(self):
-        platform_name = self.platform_selector.currentText()
-        if platform_name is None:
+        platform_group = self.calibration_selector.getSelectedGroup()
+        if not platform_group:
             return
         # TODO
         pass
 
     @QtCore.Slot()
     def calibrateSensor(self):
-        sensor_name = self.sensor_selector.currentText()
-        if sensor_name is None:
+        sensor = self.calibration_selector.getSelectedSensor()
+        if not sensor:
             return
-        # TODO
-        pass
+        record_interval: int = self.cfg_mngr.getConfigValue(
+            ConfigPaths.CALIBRATION_INTERVAL_MS.value, 10
+        )
+        record_amount: int = self.cfg_mngr.getConfigValue(
+            ConfigPaths.CALIBRATION_DATA_AMOUNT.value, 300
+        )
+        calib_mngr = SensorCalibrationManager()
+        calib_mngr.setup(
+            sensor,
+            self.sensor_mngr.getSensorCalibRef(),
+            record_interval,
+            record_amount,
+        )
+        # Clear panel layout
+        for i in reversed(range(self.panel_layout.count())):
+            widget = self.panel_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+        # Build layout with new calibration panel
+        sensor_calib_panel = SensorCalibrationPanelWidget(
+            self.sensor_mngr, calib_mngr, sensor.getName(), sensor.getProperties()
+        )
+        self.panel_layout.addWidget(sensor_calib_panel)
 
     @QtCore.Slot()
     def goToMainUI(self):
+        # Clear panel layout
+        for i in reversed(range(self.panel_layout.count())):
+            widget = self.panel_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+        self.panel_layout.addWidget(QtWidgets.QWidget())
         self.stacked_widget.setCurrentIndex(0)
 
     # UI section loaders

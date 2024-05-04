@@ -459,3 +459,20 @@ class CalibrationSelector(QtWidgets.QWidget):
             return
         logger.debug(f"User select option {index}")
         self.setupSensorComboBox(self.group_list[index])
+
+    # Getters
+
+    def getSelectedGroup(self) -> SensorGroup:
+        index = self.group_combo_box.currentIndex()
+        return self.group_list[index]
+
+    def getSelectedSensor(self) -> Sensor | None:
+        group_index = self.group_combo_box.currentIndex()
+        sensor_name = self.sensor_combo_box.currentText()
+        group = self.group_list[group_index]
+        selected_sensor = None
+        for sensor in group.getAvailableSensors().values():
+            if sensor.getName() == sensor_name:
+                selected_sensor = sensor
+                break
+        return selected_sensor

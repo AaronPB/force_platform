@@ -39,6 +39,8 @@ class SensorCalibrationManager:
     ) -> None:
         self.sensor = sensor
         self.ref_sensor = ref_sensor
+        self.checkConnection(self.sensor)
+        self.checkConnection(self.ref_sensor)
         self.record_interval_ms = record_interval_ms
         self.record_amount = record_amount
 
@@ -97,14 +99,11 @@ class SensorCalibrationManager:
             self.ref_value = np.mean(ref_values)
         if not self.ref_value:
             return
-        sensor_values = self.sensor.values()
+        sensor_values = self.sensor.getValues()
         sensor_mean = np.mean(sensor_values)
         sensor_std = np.std(sensor_values)
         new_measurement = [self.ref_value, sensor_mean, sensor_std, len(sensor_values)]
-        self.measurements_df.append(
-            pd.Series(new_measurement, index=self.measurements_df.columns),
-            ignore_index=True,
-        )
+        self.measurements_df.loc[len(self.measurements_df)] = new_measurement
 
     def removeMeasurement(self, index: int) -> None:
         self.measurements_df.drop(index=index, inplace=True)
@@ -117,16 +116,50 @@ class SensorCalibrationManager:
             + f"slope: {self.sensor.getSlope():.4f}; intercept: {self.sensor.getIntercept():.4f}"
         )
 
+    def clearValues(self) -> None:
+        self.measurements_df.drop(self.measurements_df.index, inplace=True)
+        self.sensor_slope: float = 1
+        self.sensor_intercept: float = 0
+        self.calib_score: float = 1
+
     # Setters and getters
+
+    def refSensorConnected(self) -> bool:
+        if not self.ref_sensor:
+            return False
+        return self.ref_sensor.getStatus() == SStatus.AVAILABLE
+
+    def getRecordInterval(self) -> int:
+        return self.record_interval_ms
+
+    def getRecordDuration(self) -> int:
+        return int(self.record_interval_ms * self.record_amount)
 
     def getLastValues(self) -> list:
         return self.measurements_df.iloc[-1].tolist()
 
     def getResults(self) -> list[float]:
-        features = self.measurements_df["sensor_mean"]
-        targets = self.measurements_df["ref_value"]
+        features = self.measurements_df["sensor_mean"].to_numpy().reshape(-1, 1)
+        targets = self.measurements_df["ref_value"].to_numpy().reshape(-1, 1)
         model = LinearRegression().fit(features, targets)
-        self.sensor_slope = np.array(model.coef_[0]).item()
-        self.sensor_intercept = model.intercept_.item()
+        self.sensor_slope = float(model.coef_[0])
+        self.sensor_intercept = float(model.intercept_)
         self.calib_score = model.score(features, targets)
         return [self.sensor_slope, self.sensor_intercept, self.calib_score]
+
+    # Plot data arrays
+
+    def getValuesArrays(self):
+        return (
+            self.measurements_df["sensor_mean"].to_numpy(),
+            self.measurements_df["ref_value"].to_numpy(),
+        )
+
+    def getRegressionArrays(self):
+        return (
+            self.measurements_df["sensor_mean"].to_numpy(),
+            (
+                self.measurements_df["sensor_mean"] * self.sensor_slope
+                + self.sensor_intercept
+            ).to_numpy(),
+        )
