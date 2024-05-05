@@ -62,7 +62,7 @@ To obtain platform graphs such as **total forces** or **COP values**; sensors mu
 
 Being $n = \{1, 2, 3, 4\}$ depending on the sensor location in the platform:
 
-![platform](images/platform.png)
+![platform](../images/platform.png)
 
 
 ## Calibration sensors section
