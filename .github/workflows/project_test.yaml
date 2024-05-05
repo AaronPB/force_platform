@@ -21,21 +21,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Phidget
-        run: |
-          curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash - &&\
-          sudo apt-get install -y libphidget22
-
-      - name: Install MRPT
-        run: |
-          sudo add-apt-repository ppa:joseluisblancoc/mrpt
-          sudo apt install libmrpt-dev mrpt-apps
-          sudo apt install python3-pymrpt
-
-      - name: Install project dev requirements
+      - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          pip install loguru pyyaml pandas
+          pip install pytest pytest-cov
       
       - name: Run project tests
         run: python -m pytest tests/ --cov

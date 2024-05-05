@@ -3,6 +3,7 @@
 from loguru import logger
 from src.handlers.sensorGroup import SensorGroup
 from src.handlers.sensor import Sensor
+from src.handlers import drivers
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SParams, SGParams
 from src.enums.sensorTypes import STypes, SGTypes
@@ -117,7 +118,8 @@ class SensorManager:
                 f"Sensor {id} does not have a valid sensor type! Not loaded."
             )
             return None
-        # Check sensor type required keys
+        # Check sensor type required keys and setup
+        sensor = Sensor()
         if content[SParams.TYPE.value] == STypes.SENSOR_LOADCELL.name:
             if not all(
                 key.value in content[SParams.CONNECTION_SECTION.value].keys()
@@ -127,7 +129,9 @@ class SensorManager:
                     f"Sensor {id} does not have the required loadcell connection keys! Not loaded."
                 )
                 return None
-        elif content[SParams.TYPE.value] == STypes.SENSOR_ENCODER.name:
+            sensor.setup(id, content, drivers.PhidgetLoadCell)
+            return sensor
+        if content[SParams.TYPE.value] == STypes.SENSOR_ENCODER.name:
             if not all(
                 key.value in content[SParams.CONNECTION_SECTION.value].keys()
                 for key in encoder_conn_keys
@@ -136,7 +140,9 @@ class SensorManager:
                     f"Sensor {id} does not have the required encoder connection keys! Not loaded."
                 )
                 return None
-        elif content[SParams.TYPE.value] == STypes.SENSOR_IMU.name:
+            sensor.setup(id, content, drivers.PhidgetEncoder)
+            return sensor
+        if content[SParams.TYPE.value] == STypes.SENSOR_IMU.name:
             if not all(
                 key.value in content[SParams.CONNECTION_SECTION.value].keys()
                 for key in taobotics_conn_keys
@@ -145,10 +151,12 @@ class SensorManager:
                     f"Sensor {id} does not have the required taobotics connection keys! Not loaded."
                 )
                 return None
-        # Setup sensor
-        sensor = Sensor()
-        sensor.setup(id, content, STypes[content[SParams.TYPE.value]].value)
-        return sensor
+            sensor.setup(id, content, drivers.TaoboticsIMU)
+            return sensor
+        logger.error(
+            f"Sensor type {content[SParams.TYPE.value]} is not a sensor type! Not loaded."
+        )
+        return None
 
     def clearSensors(self) -> None:
         self.sensor_groups.clear()
