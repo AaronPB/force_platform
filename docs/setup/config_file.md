@@ -4,7 +4,7 @@
 
 Config main content:
 - [Settings section](#settings-section)
-- [Sensor groups section](#sensor-group-section)
+- [Sensor groups section](#sensor-groups-section)
 	- [Platform groups](#platform-groups)
 - [Calibration sensors section](#calibration-sensors-section)
 - [Sensors section](#sensors-section)
