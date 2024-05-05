@@ -2,28 +2,34 @@
 
 from PySide6 import QtWidgets, QtCore
 from src.enums.qssLabels import QssLabels
-from src.managers.calibrationManager import CalibrationManager
+from src.managers.sensorManager import SensorManager
+from src.managers.calibrationManager import SensorCalibrationManager
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.matplotlibWidgets import PlotRegressionWidget
 
 
-class CalibrationPanelWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super(CalibrationPanelWidget, self).__init__()
-        self.calib_mngr: CalibrationManager
-        self.ref_sensor = False
-        self.recording_timer: QtCore.QTimer
+class SensorCalibrationPanelWidget(QtWidgets.QWidget):
+    def __init__(
+        self,
+        sensor_manager: SensorManager,
+        sensor_calibration_manager: SensorCalibrationManager,
+        sensor_name: str,
+        sensor_properties: str,
+    ):
+        super(SensorCalibrationPanelWidget, self).__init__()
+        self.sensor_mngr = sensor_manager
+        self.calib_mngr = sensor_calibration_manager
+        self.recording_timer = QtCore.QTimer(self)
+        self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
+
+        self.sensor_name = sensor_name
+        self.sensor_properties = sensor_properties
 
         self.setLayout(self.loadLayout())
 
+        self.enableButtons(True)
+
     # UI section loaders
-
-    def loadManager(self, calib_mngr: CalibrationManager):
-        self.calib_mngr = calib_mngr
-        self.ref_sensor = False
-
-        self.recording_timer = QtCore.QTimer(self)
-        self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
 
     def loadLayout(self) -> QtWidgets.QVBoxLayout:
         main_layout = QtWidgets.QVBoxLayout()
@@ -36,10 +42,11 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.vbox_sensor_info_layout = QtWidgets.QVBoxLayout()
         self.vbox_sensor_info_layout.setAlignment(QtCore.Qt.AlignTop)
         group_box_sensor_info.setLayout(self.vbox_sensor_info_layout)
-        self.sensor_info_label = customQT.createLabelBox(
-            "Select an available sensor", QssLabels.STATUS_LABEL_WARN
+        sensor_info_label = customQT.createLabelBox(
+            f"Name: {self.sensor_name}\nProperties: {self.sensor_properties}",
+            QssLabels.STATUS_LABEL_INFO,
         )
-        self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
+        self.vbox_sensor_info_layout.addWidget(sensor_info_label)
 
         group_box_general_buttons = QtWidgets.QGroupBox("Manage results")
         self.grid_buttons_layout = QtWidgets.QGridLayout()
@@ -162,15 +169,15 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     def recordData(self):
         test_value = float(self.test_value_input.text())
         self.enableButtons(False)
-        self.calib_mngr.startRecording()
-        self.recording_timer.start(self.calib_mngr.getCalibTestInterval())
+        self.calib_mngr.startMeasurement(ref_value=test_value)
+        self.recording_timer.start(self.calib_mngr.getRecordInterval())
         QtCore.QTimer.singleShot(
-            self.calib_mngr.getCalibDuration(), self.recording_timer.stop
+            self.calib_mngr.getRecordDuration(), self.recording_timer.stop
         )
         while self.recording_timer.isActive():
             QtCore.QCoreApplication.processEvents()
-        self.calib_mngr.stopRecording()
-        values = self.calib_mngr.getValues(test_value)
+        self.calib_mngr.stopMeasurement()
+        values = self.calib_mngr.getLastValues()
         self.addMeasurementRow(values[0], values[1], values[2], values[3])
         sensor_values, test_values = self.calib_mngr.getValuesArrays()
         self.plot_widget.updateScatter(sensor_values, test_values)
@@ -179,15 +186,15 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def recordDataWithSensor(self):
         self.enableButtons(False)
-        self.calib_mngr.startRecording(auto=True)
-        self.recording_timer.start(self.calib_mngr.getCalibTestInterval())
+        self.calib_mngr.startMeasurement(use_ref_sensor=True)
+        self.recording_timer.start(self.calib_mngr.getRecordInterval())
         QtCore.QTimer.singleShot(
-            self.calib_mngr.getCalibDuration(), self.recording_timer.stop
+            self.calib_mngr.getRecordDuration(), self.recording_timer.stop
         )
         while self.recording_timer.isActive():
             QtCore.QCoreApplication.processEvents()
-        self.calib_mngr.stopRecording()
-        values = self.calib_mngr.getValues()
+        self.calib_mngr.stopMeasurement()
+        values = self.calib_mngr.getLastValues()
         self.addMeasurementRow(values[0], values[1], values[2], values[3])
         sensor_values, test_values = self.calib_mngr.getValuesArrays()
         self.plot_widget.updateScatter(sensor_values, test_values)
@@ -199,14 +206,14 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         selected_row = self.measurements_widget.currentRow()
         if selected_row >= 0:
             self.measurements_widget.removeRow(selected_row)
-            self.calib_mngr.removeValueSet(selected_row)
+            self.calib_mngr.removeMeasurement(selected_row)
         sensor_values, test_values = self.calib_mngr.getValuesArrays()
         self.plot_widget.updateScatter(sensor_values, test_values)
         self.enableButtons(True)
 
     @QtCore.Slot()
     def generateResults(self):
-        results = self.calib_mngr.getRegressionResults()
+        results = self.calib_mngr.getResults()
         self.updateResultsTable(results[0], results[1], results[2])
         sensor_values, calib_values = self.calib_mngr.getRegressionArrays()
         self.plot_widget.updateRegression(sensor_values, calib_values)
@@ -214,39 +221,16 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def saveResults(self):
-        self.calib_mngr.saveResults()
+        self.calib_mngr.saveResults(self.sensor_mngr)
         self.save_button.setEnabled(False)
 
     @QtCore.Slot()
     def clearValues(self):
         self.enableButtons(False)
         self.clearCalibrationTest()
-        self.checkReferenceSensor()
         self.enableButtons(True)
 
     # Widget functions
-
-    def selectPlatformSensor(self, index, platform):
-        self.enableButtons(False)
-        self.clearCalibrationTest()
-        sensor_info = ["Name error", "Properties error"]
-        if platform == 1:
-            sensor_info = self.calib_mngr.calibrateP1Sensor(index)
-        if platform == 2:
-            sensor_info = self.calib_mngr.calibrateP2Sensor(index)
-        if sensor_info[0] == "Name error":
-            print("Could not load desired sensor!")
-            return
-        self.updateSensorInformation(sensor_info[0], sensor_info[1])
-        self.checkReferenceSensor()
-        self.enableButtons(True)
-
-    def updateSensorInformation(self, name: str, properties: str):
-        self.sensor_info_label.setParent(None)
-        self.sensor_info_label = customQT.createLabelBox(
-            f"Name: {name}\nProperties: {properties}", QssLabels.STATUS_LABEL_INFO
-        )
-        self.vbox_sensor_info_layout.addWidget(self.sensor_info_label)
 
     def enableButtons(self, enable: bool = False):
         if not enable:
@@ -260,14 +244,9 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
             self.remove_row_button.setEnabled(enable)
         if self.measurements_widget.rowCount() > 1:
             self.generate_results_button.setEnabled(enable)
-        if self.ref_sensor:
-            self.auto_measure_button.setEnabled(enable)
         self.test_value_input.setEnabled(enable)
         self.manual_measure_button.setEnabled(enable)
         self.clear_button.setEnabled(enable)
-
-    def checkReferenceSensor(self):
-        self.ref_sensor = self.calib_mngr.checkRefSensorConnection()
 
     def addMeasurementRow(
         self,
@@ -302,4 +281,4 @@ class CalibrationPanelWidget(QtWidgets.QWidget):
         self.measurements_widget.setRowCount(0)
         self.plot_widget.clear()
         self.updateResultsTable(0, 0, 0)
-        self.calib_mngr.clearAllValues()
+        self.calib_mngr.clearValues()

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from src.handlers.sensor import Sensor, Driver
-from src.enums.sensorStatus import SensorStatus as SStatus
-from src.enums.sensorParams import SensorParams as SParams
+from src.enums.sensorStatus import SStatus
+from src.enums.sensorParams import SParams
+from src.enums.sensorTypes import STypes
 import pytest
 
 
@@ -42,9 +43,12 @@ def buildSensorParamsDict(
 ) -> dict:
     return {
         SParams.NAME.value: "Test name",
-        SParams.CHANNEL.value: 0,
-        SParams.SERIAL.value: 0000,
         SParams.READ.value: read,
+        SParams.TYPE.value: "SENSOR_LOADCELL",
+        SParams.CONNECTION_SECTION.value: {
+            SParams.SERIAL.value: 0,
+            SParams.CHANNEL.value: 0000,
+        },
         SParams.CALIBRATION_SECTION.value: {
             SParams.SLOPE.value: slope,
             SParams.INTERCEPT.value: intercept,
@@ -68,63 +72,74 @@ def sensor_av() -> Sensor:
 
 
 @pytest.fixture
-def sensor_av_nr() -> Sensor:
-    sensor = Sensor()
-    setupSensor(sensor, "test_id", False, AvailableDriverMock)
-    return sensor
-
-
-@pytest.fixture
 def sensor_unav() -> Sensor:
     sensor = Sensor()
     setupSensor(sensor, "test_id", True, UnavailableDriverMock)
     return sensor
 
 
-@pytest.fixture
-def sensor_unav_nr() -> Sensor:
-    sensor = Sensor()
-    setupSensor(sensor, "test_id", False, UnavailableDriverMock)
-    return sensor
-
-
 # Tests
 
 
-def test_sensor_setup() -> None:
+def test_check_sensor_id(sensor_av: Sensor) -> None:
+    assert sensor_av.getID() == "test_id"
+
+
+def test_check_sensor_name(sensor_av: Sensor) -> None:
+    assert sensor_av.getName() == "Test name"
+
+
+def test_check_sensor_type(sensor_av: Sensor) -> None:
+    assert sensor_av.getType() == STypes.SENSOR_LOADCELL
+
+
+def test_check_sensor_read(sensor_av: Sensor) -> None:
+    assert sensor_av.getRead() == True
+
+
+def test_check_sensor_status(sensor_av: Sensor) -> None:
+    assert sensor_av.getStatus() == SStatus.IGNORED
+
+
+def test_check_sensor_properties(sensor_av: Sensor) -> None:
+    assert sensor_av.getProperties() == " - Y8888888 - 150 kg - "
+
+
+def test_check_sensor_slope(sensor_av: Sensor) -> None:
+    assert sensor_av.getSlope() == 10
+
+
+def test_check_sensor_intercept(sensor_av: Sensor) -> None:
+    assert sensor_av.getIntercept() == -10
+
+
+sensor_cases = [
+    ("test_id", True, AvailableDriverMock, SStatus.AVAILABLE),
+    ("test_id", False, AvailableDriverMock, SStatus.IGNORED),
+    ("test_id", True, UnavailableDriverMock, SStatus.NOT_FOUND),
+    ("test_id", False, UnavailableDriverMock, SStatus.IGNORED),
+]
+
+
+@pytest.mark.parametrize("sensor_status", sensor_cases)
+@pytest.mark.parametrize("check_connection", [True, False])
+def test_sensor_connection(sensor_status, check_connection: bool) -> None:
     sensor = Sensor()
-    sensor.setup(
-        id="sensor_id", params=buildSensorParamsDict(), driver=AvailableDriverMock
-    )
-    assert sensor.getName() == "Test name"
+    id, read, driver, expected_status = sensor_status
+    setupSensor(sensor, id, read, driver)
+    sensor.connect(check=check_connection)
+    if check_connection:
+        assert sensor.getStatus() == expected_status
+    else:
+        assert sensor.getStatus() == SStatus.IGNORED
 
 
-def test_available_noread_sensor_connect(sensor_av_nr: Sensor) -> None:
-    sensor_av_nr.connect(check=True)
-    assert sensor_av_nr.getStatus() == SStatus.IGNORED
-
-
-def test_available_read_sensor_connect(sensor_av: Sensor) -> None:
-    sensor_av.connect(check=True)
-    assert sensor_av.getStatus() == SStatus.AVAILABLE
-
-
-def test_unavailable_noread_sensor_connect(sensor_unav_nr: Sensor) -> None:
-    sensor_unav_nr.connect(check=True)
-    assert sensor_unav_nr.getStatus() == SStatus.IGNORED
-
-
-def test_unavailable_read_sensor_connect(sensor_unav: Sensor) -> None:
-    sensor_unav.connect(check=True)
-    assert sensor_unav.getStatus() == SStatus.NOT_FOUND
-
-
-def test_available_read_unchecked_sensor_connection(sensor_av: Sensor) -> None:
+def test_unchecked_sensor_connection(sensor_av: Sensor) -> None:
     sensor_av.connect()
     assert sensor_av.getStatus() == SStatus.IGNORED
 
 
-def test_available_read_checked_sensor_connection(sensor_av: Sensor) -> None:
+def test_checked_sensor_connection(sensor_av: Sensor) -> None:
     sensor_av.checkConnection()
     sensor_av.connect()
     assert sensor_av.getStatus() == SStatus.AVAILABLE
@@ -146,15 +161,7 @@ def test_unavailable_sensor_register_values(sensor_unav: Sensor) -> None:
     assert sensor_unav.getValues() == []
 
 
-def test_available_sensor_calibration_values(sensor_av: Sensor) -> None:
-    sensor_av.checkConnection()
-    sensor_av.connect()
-    sensor_av.registerValue()
-    sensor_av.registerValue()
-    assert sensor_av.getCalibValues() == [90, 90]
-
-
-def test_available_sensor_clear_registered_values(sensor_av: Sensor) -> None:
+def test_clear_registered_values(sensor_av: Sensor) -> None:
     sensor_av.checkConnection()
     sensor_av.connect()
     sensor_av.registerValue()
@@ -163,18 +170,16 @@ def test_available_sensor_clear_registered_values(sensor_av: Sensor) -> None:
     assert sensor_av.getValues() == []
 
 
-def test_sensor_modify_calibration_params(sensor_av: Sensor) -> None:
-    sensor_av.setSlope(100)
-    sensor_av.setIntercept(-50)
-    calib_params = sensor_av.getSlopeIntercept()
-    assert calib_params == [100, -50]
-
-
 def test_sensor_modify_read_status(sensor_av: Sensor) -> None:
     sensor_av.setRead(read=False)
-    assert not sensor_av.getIsReadable()
+    assert sensor_av.getRead() == False
 
 
-def test_sensor_properties_getter(sensor_av: Sensor) -> None:
-    properties = sensor_av.getProperties()
-    assert properties == " - Y8888888 - 150 kg - "
+def test_sensor_modify_slope_param(sensor_av: Sensor) -> None:
+    sensor_av.setSlope(slope=20.5)
+    assert sensor_av.getSlope() == 20.5
+
+
+def test_sensor_modify_intercept_param(sensor_av: Sensor) -> None:
+    sensor_av.setIntercept(intercept=-2.5)
+    assert sensor_av.getIntercept() == -2.5
