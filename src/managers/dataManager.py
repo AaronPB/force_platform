@@ -263,7 +263,7 @@ class DataManager:
         return self.formatDataframe(self.df_raw.copy(deep=True), idx1, idx2)
 
     def getCalibrateDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
-        return self.formatDataframe(self.df_raw.copy(deep=True), idx1, idx2)
+        return self.formatDataframe(self.df_calibrated.copy(deep=True), idx1, idx2)
 
     def formatDataframe(
         self, df: pd.DataFrame, idx1: int = 0, idx2: int = 0
