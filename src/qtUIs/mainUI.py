@@ -365,15 +365,19 @@ class MainUI(QtWidgets.QWidget):
     def loadTabularPanel(self) -> QtWidgets.QTabWidget:
         tabular_panel = QtWidgets.QTabWidget()
         tabular_panel.addTab(
-            self.loadTabSettings(), QtGui.QIcon(IconPaths.SETTINGS.value), "Settings"
+            self.loadTabSettings(),
+            QtGui.QIcon(IconPaths.SETTINGS.value),
+            "Settings",
         )
         tabular_panel.addTab(
-            self.loadTabFigures(), QtGui.QIcon(IconPaths.GRAPH.value), "Sensor figures"
+            self.loadTabFigures(),
+            QtGui.QIcon(IconPaths.GRAPH.value),
+            "Sensor graphs",
         )
         tabular_panel.addTab(
             self.loadTabPlatformFigures(),
             QtGui.QIcon(IconPaths.GRAPH.value),
-            "Platform figures",
+            "Platform graphs",
         )
         return tabular_panel
 
@@ -578,11 +582,11 @@ class MainUI(QtWidgets.QWidget):
         vbox_selector_layout.addWidget(QtWidgets.QLabel("Select sensor group"))
         vbox_selector_layout.addWidget(self.group_combo_box)
         vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select figure option"))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select graph option"))
         vbox_selector_layout.addLayout(self.sensor_option_selector)
 
         # Figure layout
-        figure_box = QtWidgets.QGroupBox("Figure")
+        figure_box = QtWidgets.QGroupBox("Graph")
         self.sensor_figure_layout = QtWidgets.QVBoxLayout()
         figure_box.setLayout(self.sensor_figure_layout)
 
@@ -622,11 +626,11 @@ class MainUI(QtWidgets.QWidget):
         vbox_selector_layout.addWidget(QtWidgets.QLabel("Select platform group"))
         vbox_selector_layout.addWidget(self.platform_combo_box)
         vbox_selector_layout.addItem(QtWidgets.QSpacerItem(20, 20))
-        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select figure option"))
+        vbox_selector_layout.addWidget(QtWidgets.QLabel("Select graph option"))
         vbox_selector_layout.addLayout(self.platform_option_selector)
 
         # Figure layout
-        figure_box = QtWidgets.QGroupBox("Figure")
+        figure_box = QtWidgets.QGroupBox("Graph")
         self.platform_figure_layout = QtWidgets.QVBoxLayout()
         figure_box.setLayout(self.platform_figure_layout)
 
