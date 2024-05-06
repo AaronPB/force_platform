@@ -210,10 +210,6 @@ class SensorPlotSelector(QtWidgets.QWidget):
         self.group_combo_box.clear()
         clearWidgetsLayout(self.options_selector_layout)
         for group in self.group_list:
-            if not group.getRead():
-                continue
-            if group.getStatus() == SGStatus.ERROR:
-                continue
             icon_path = IconPaths.DEFAULT_GROUP_ICON
             if group.getType() in _sensor_group_types:
                 icon_path = _sensor_group_types[group.getType()]
@@ -221,7 +217,7 @@ class SensorPlotSelector(QtWidgets.QWidget):
 
     def updateSelectorLayout(self, sensor_group: SensorGroup) -> None:
         clearWidgetsLayout(self.options_selector_layout)
-        for sensor in sensor_group.getAvailableSensors().values():
+        for sensor in sensor_group.getSensors(only_available=True).values():
             if sensor.getType() == STypes.SENSOR_LOADCELL:
                 widget = self.buildOptionPanel(
                     f"{sensor.getName()} Force",
@@ -337,10 +333,6 @@ class PlatformPlotSelector(QtWidgets.QWidget):
         self.group_combo_box.clear()
         clearWidgetsLayout(self.options_selector_layout)
         for group in self.group_list:
-            if not group.getRead():
-                continue
-            if group.getStatus() == SGStatus.ERROR:
-                continue
             self.group_combo_box.addItem(
                 QtGui.QIcon(IconPaths.PLATFORM_ICON.value), group.getName()
             )
@@ -348,20 +340,26 @@ class PlatformPlotSelector(QtWidgets.QWidget):
     def updateSelectorLayout(self, sensor_group: SensorGroup) -> None:
         clearWidgetsLayout(self.options_selector_layout)
         sensor_list = [
-            sensor.getName() for sensor in sensor_group.getAvailableSensors().values()
+            sensor.getName()
+            for sensor in sensor_group.getSensors(
+                only_available=True, sensor_type=STypes.SENSOR_LOADCELL
+            ).values()
         ]
-        self.options_selector_layout.addWidget(
-            self.buildOptionPanel(
+        forces_widget = self.buildOptionPanel(
+            "Total forces", PlotTypes.GROUP_PLATFORM_FORCES, sensor_list, False
+        )
+        if len(sensor_list) > 0 and len(sensor_list) <= 12:
+            forces_widget = self.buildOptionPanel(
                 "Total forces", PlotTypes.GROUP_PLATFORM_FORCES, sensor_list
             )
-        )
         cop_widget = self.buildOptionPanel(
             "Platform COP", PlotTypes.GROUP_PLATFORM_COP, sensor_list, False
         )
-        if sensor_group.getSize() == 12:
+        if len(sensor_list) == 12:
             cop_widget = self.buildOptionPanel(
                 "Platform COP", PlotTypes.GROUP_PLATFORM_COP, sensor_list
             )
+        self.options_selector_layout.addWidget(forces_widget)
         self.options_selector_layout.addWidget(cop_widget)
 
     def updateSensorFigurePlot(
@@ -434,19 +432,15 @@ class CalibrationSelector(QtWidgets.QWidget):
     def setupGroupComboBox(self) -> None:
         self.group_combo_box.clear()
         for group in self.group_list:
-            if not group.getRead():
-                continue
-            if group.getStatus() == SGStatus.ERROR:
-                continue
             self.group_combo_box.addItem(
                 QtGui.QIcon(IconPaths.PLATFORM_ICON.value), group.getName()
             )
 
     def setupSensorComboBox(self, sensor_group: SensorGroup) -> None:
         self.sensor_combo_box.clear()
-        for sensor in sensor_group.getAvailableSensors().values():
-            if sensor.getType() != STypes.SENSOR_LOADCELL:
-                continue
+        for sensor in sensor_group.getSensors(
+            only_available=True, sensor_type=STypes.SENSOR_LOADCELL
+        ).values():
             self.sensor_combo_box.addItem(
                 QtGui.QIcon(IconPaths.LOADCELL_ICON.value), sensor.getName()
             )

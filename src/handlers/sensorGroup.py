@@ -3,7 +3,7 @@
 import concurrent.futures
 
 from src.enums.sensorStatus import SStatus, SGStatus
-from src.enums.sensorTypes import SGTypes
+from src.enums.sensorTypes import SGTypes, STypes
 from src.handlers.sensor import Sensor
 
 
@@ -79,13 +79,16 @@ class SensorGroup:
     def isActive(self) -> bool:
         return self.active
 
-    def getSensors(self) -> dict[str, Sensor]:
-        return self.sensors
-
-    def getAvailableSensors(self) -> dict[str, Sensor]:
+    def getSensors(
+        self, only_available: bool = False, sensor_type: STypes = None
+    ) -> dict[str, Sensor]:
+        if not only_available and sensor_type is None:
+            return self.sensors
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
+            if only_available and sensor.getStatus() != SStatus.AVAILABLE:
+                continue
+            if sensor_type is not None and sensor.getType() != sensor_type:
                 continue
             group_dict[sensor_id] = sensor
         return group_dict

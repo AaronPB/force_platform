@@ -7,6 +7,7 @@ from src.handlers import drivers
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.sensorParams import SParams, SGParams
 from src.enums.sensorTypes import STypes, SGTypes
+from src.enums.sensorStatus import SGStatus
 from typing import Protocol
 
 # Required param keys for sensor handlers
@@ -242,22 +243,19 @@ class SensorManager:
             intercept,
         )
 
-    def getGroups(self) -> list[SensorGroup]:
-        return self.sensor_groups
-
-    def getDefaultGroups(self) -> list[SensorGroup]:
-        sensor_list: list[SensorGroup] = []
+    def getGroups(
+        self, only_available: bool = False, group_type: SGTypes = None
+    ) -> list[SensorGroup]:
+        if not only_available and group_type is None:
+            return self.sensor_groups
+        group_list: list[SensorGroup] = []
         for group in self.sensor_groups:
-            if group.getType() == SGTypes.GROUP_DEFAULT:
-                sensor_list.append(group)
-        return sensor_list
-
-    def getPlatformGroups(self) -> list[SensorGroup]:
-        sensor_list: list[SensorGroup] = []
-        for group in self.sensor_groups:
-            if group.getType() == SGTypes.GROUP_PLATFORM:
-                sensor_list.append(group)
-        return sensor_list
+            if only_available and group.getStatus() == SGStatus.ERROR:
+                continue
+            if group_type is not None and group.getType() != group_type:
+                continue
+            group_list.append(group)
+        return group_list
 
     def getGroup(self, group_id: str) -> SensorGroup:
         for group in self.getGroups():

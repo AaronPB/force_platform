@@ -3,6 +3,7 @@
 from src.enums.qssLabels import QssLabels
 from src.enums.uiResources import ImagePaths, IconPaths
 from src.enums.configPaths import ConfigPaths
+from src.enums.sensorTypes import SGTypes
 from src.managers.configManager import ConfigManager
 from src.managers.sensorManager import SensorManager
 from src.managers.calibrationManager import SensorCalibrationManager
@@ -27,7 +28,11 @@ class CalibrationUI(QtWidgets.QWidget):
         self.initUI()
 
     def updateUI(self) -> None:
-        self.calibration_selector.updateLayouts(self.sensor_mngr.getPlatformGroups())
+        self.calibration_selector.updateLayouts(
+            self.sensor_mngr.getGroups(
+                only_available=True, group_type=SGTypes.GROUP_PLATFORM
+            )
+        )
         if self.platform_selector.count() > 0:
             # TODO
             pass

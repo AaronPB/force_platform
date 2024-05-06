@@ -3,6 +3,7 @@
 from src.enums.qssLabels import QssLabels
 from src.enums.configPaths import ConfigPaths as CfgPaths
 from src.enums.uiResources import IconPaths, ImagePaths
+from src.enums.sensorTypes import SGTypes
 from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.fileManager import FileManager
@@ -99,8 +100,14 @@ class MainUI(QtWidgets.QWidget):
         # Update plot options and data settings
         self.updateDataSettings(range=False)
         self.preview_plotter.updateLayouts()
-        self.sensor_plotter.updateLayouts(self.sensor_mngr.getGroups())
-        self.platform_plotter.updateLayouts(self.sensor_mngr.getPlatformGroups())
+        self.sensor_plotter.updateLayouts(
+            self.sensor_mngr.getGroups(only_available=True)
+        )
+        self.platform_plotter.updateLayouts(
+            self.sensor_mngr.getGroups(
+                only_available=True, group_type=SGTypes.GROUP_PLATFORM
+            )
+        )
         self.setDataSettings(True)
 
         # Save dataframes
@@ -199,8 +206,14 @@ class MainUI(QtWidgets.QWidget):
         # Update plot options and data settings
         self.updateDataSettings(range=False)
         self.preview_plotter.updateLayouts()
-        self.sensor_plotter.updateLayouts(self.sensor_mngr.getGroups())
-        self.platform_plotter.updateLayouts(self.sensor_mngr.getPlatformGroups())
+        self.sensor_plotter.updateLayouts(
+            self.sensor_mngr.getGroups(only_available=True)
+        )
+        self.platform_plotter.updateLayouts(
+            self.sensor_mngr.getGroups(
+                only_available=True, group_type=SGTypes.GROUP_PLATFORM
+            )
+        )
         self.setDataSettings(True)
 
         # Update status text
@@ -685,8 +698,10 @@ class MainUI(QtWidgets.QWidget):
     def getSensorInformation(self):
         sensor_panels = SensorSettings(self.sensor_mngr)
         sensor_panels.updateLayout(
-            self.hbox_platforms, self.sensor_mngr.getPlatformGroups()
+            self.hbox_platforms,
+            self.sensor_mngr.getGroups(group_type=SGTypes.GROUP_PLATFORM),
         )
         sensor_panels.updateLayout(
-            self.hbox_defaults, self.sensor_mngr.getDefaultGroups()
+            self.hbox_defaults,
+            self.sensor_mngr.getGroups(group_type=SGTypes.GROUP_DEFAULT),
         )

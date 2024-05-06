@@ -64,7 +64,7 @@ class DataManager:
                 continue
             if group.getStatus() == SGStatus.ERROR:
                 continue
-            for sensor in group.getAvailableSensors().values():
+            for sensor in group.getSensors(only_available=True).values():
                 if sensor.getType() == STypes.SENSOR_IMU:
                     values_list = self.getListedData(sensor)
                     for i, suffix in enumerate(
@@ -394,8 +394,8 @@ class DataManager:
     # Tare sensors
 
     def tareSensors(self, sensor_manager: SensorManager, last_values: int) -> None:
-        for group in sensor_manager.getGroups():
-            for sensor in group.getAvailableSensors().values():
+        for group in sensor_manager.getGroups(only_available=True):
+            for sensor in group.getSensors(only_available=True).values():
                 # Only tare loadcells and encoders
                 if sensor.getType() not in [
                     STypes.SENSOR_LOADCELL,
