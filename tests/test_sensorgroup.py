@@ -2,7 +2,7 @@
 
 from src.handlers.sensorGroup import SensorGroup
 from src.enums.sensorStatus import SStatus, SGStatus
-from src.enums.sensorTypes import SGTypes
+from src.enums.sensorTypes import SGTypes, STypes
 import pytest
 
 
@@ -41,6 +41,9 @@ class SensorMock:
 
     def getStatus(self) -> SStatus:
         return self.status
+
+    def getType(self) -> STypes:
+        return STypes.SENSOR_LOADCELL
 
     def clearValues(self) -> None:
         self.values.clear()
@@ -195,7 +198,22 @@ def test_group_available_sensors_size(sensor_group_filled: SensorGroup) -> None:
     Check dict size when getting only the available sensor information
     """
     sensor_group_filled.checkConnections()
-    assert len(sensor_group_filled.getAvailableSensors()) == 2
+    assert len(sensor_group_filled.getSensors(only_available=True)) == 2
+
+
+def test_group_available_type_sensors_size(sensor_group_filled: SensorGroup) -> None:
+    """
+    Check dict size when getting only the available sensor type information
+    """
+    sensor_group_filled.checkConnections()
+    assert (
+        len(
+            sensor_group_filled.getSensors(
+                only_available=True, sensor_type=STypes.SENSOR_IMU
+            )
+        )
+        == 0
+    )
 
 
 def test_group_register_values(sensor_group_filled: SensorGroup) -> None:
