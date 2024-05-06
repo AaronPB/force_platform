@@ -19,6 +19,7 @@ class FileManager:
     def checkDuplicatedName(self, name: str) -> None:
         total_path = os.path.join(self.file_path, name + ".csv")
         if not os.path.exists(total_path):
+            self.file_name_suffix = ""
             return name
         suffix_num = 1
         while True:
