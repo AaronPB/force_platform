@@ -1,145 +1,165 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from src.managers.configManager import ConfigManager
-from src.sensorLoader import SensorLoader
-from src.enums.configPaths import ConfigPaths as CfgPaths
-from src.enums.sensorStatus import SensorStatus as SStatus
+from src.managers.sensorManager import SensorManager
+from src.enums.sensorStatus import SStatus
 from src.handlers.sensor import Sensor
 
 from loguru import logger
 
 
-class CalibrationManager:
-    def __init__(self, config_mngr: ConfigManager, sensor_loader: SensorLoader) -> None:
-        # Global values
-        self.config_mngr = config_mngr
-        self.sensor_loader = sensor_loader
-        self.sensors_connected = False
-        self.sensor_values = []
-        self.test_values = []
-        self.calib_results = []
-        self.calib_sensor: Sensor = None
-        self.group_platform1 = sensor_loader.getSensorGroupPlatform1()
-        self.group_platform2 = sensor_loader.getSensorGroupPlatform2()
-        self.reference_sensor = sensor_loader.getRefSensor()
+class SensorCalibrationManager:
+    def __init__(self) -> None:
+        # Sensors
+        self.sensor: Sensor
+        self.ref_sensor: Sensor
+        # Calib params
+        self.record_interval_ms: int
+        self.record_amount: int
+        # Calib measurements
+        self.measurement_ready: bool = False
+        self.use_ref_sensor: bool = False
+        self.ref_value: float
+        df_cols = ["ref_value", "sensor_mean", "sensor_std", "data_amount"]
+        self.measurements_df = pd.DataFrame(columns=df_cols)
+        # Calib results
+        self.sensor_slope: float = 1
+        self.sensor_intercept: float = 0
+        self.calib_score: float = 1
 
-    def checkConnection(self) -> bool:
-        connection_results_list = [
-            handler.checkConnections()
-            for handler in [self.group_platform1, self.group_platform2]
-        ]
-        self.sensors_connected = any(connection_results_list)
-        return self.sensors_connected
+    def setup(
+        self,
+        sensor: Sensor,
+        ref_sensor: Sensor | None = None,
+        record_interval_ms: int = 10,
+        record_amount: int = 300,
+    ) -> None:
+        self.sensor = sensor
+        self.ref_sensor = ref_sensor
+        self.checkConnection(self.sensor)
+        self.checkConnection(self.ref_sensor)
+        self.record_interval_ms = record_interval_ms
+        self.record_amount = record_amount
 
-    def checkRefSensorConnection(self):
-        if self.reference_sensor is None:
+    def checkConnection(self, sensor: Sensor) -> bool:
+        if sensor is None:
             return False
-        return self.reference_sensor.checkConnection()
+        return sensor.checkConnection()
+
+    # Calibration measurements
+
+    def startMeasurement(
+        self, use_ref_sensor: bool = False, ref_value: float = None
+    ) -> None:
+        self.measurement_ready = False
+        self.use_ref_sensor = False
+        self.ref_value = ref_value
+        if use_ref_sensor and not self.ref_sensor:
+            logger.warning("There is no reference sensor connected!")
+            return
+        if not use_ref_sensor and not ref_value:
+            logger.warning("No value provided! Measurement ignored")
+            return
+        if use_ref_sensor and self.ref_sensor.getStatus() == SStatus.AVAILABLE:
+            self.ref_sensor.clearValues()
+            self.ref_sensor.connect()
+            self.use_ref_sensor = True
+        self.sensor.clearValues()
+        self.sensor.connect()
+        self.measurement_ready = True
+
+    def registerValue(self) -> None:
+        if not self.measurement_ready:
+            return
+        if self.use_ref_sensor:
+            self.ref_sensor.registerValue()
+        self.sensor.registerValue()
+
+    def stopMeasurement(self) -> None:
+        if not self.measurement_ready:
+            return
+        if self.use_ref_sensor:
+            self.ref_sensor.disconnect()
+        self.sensor.disconnect()
+        self.saveMeasurement()
+
+    # Data management
+
+    def getCalibratedValues(self, sensor: Sensor) -> list[float]:
+        slope = sensor.getSlope()
+        intercept = sensor.getIntercept()
+        return [value * slope + intercept for value in sensor.getValues()]
+
+    def saveMeasurement(self) -> None:
+        if self.use_ref_sensor:
+            ref_values = self.getCalibratedValues(self.ref_sensor)
+            self.ref_value = np.mean(ref_values)
+        if not self.ref_value:
+            return
+        sensor_values = self.sensor.getValues()
+        sensor_mean = np.mean(sensor_values)
+        sensor_std = np.std(sensor_values)
+        new_measurement = [self.ref_value, sensor_mean, sensor_std, len(sensor_values)]
+        self.measurements_df.loc[len(self.measurements_df)] = new_measurement
+
+    def removeMeasurement(self, index: int) -> None:
+        self.measurements_df.drop(index=index, inplace=True)
+
+    def saveResults(self, sensor_manager: SensorManager) -> None:
+        sensor_manager.setSensorSlope(self.sensor, self.sensor_slope)
+        sensor_manager.setSensorIntercept(self.sensor, self.sensor_intercept)
+        logger.info(
+            f"Saved sensor {self.sensor.getName()} "
+            + f"slope: {self.sensor.getSlope():.4f}; intercept: {self.sensor.getIntercept():.4f}"
+        )
+
+    def clearValues(self) -> None:
+        self.measurements_df.drop(self.measurements_df.index, inplace=True)
+        self.sensor_slope: float = 1
+        self.sensor_intercept: float = 0
+        self.calib_score: float = 1
 
     # Setters and getters
 
-    def calibrateP1Sensor(self, index: int) -> list:
-        sensor_list = list(self.group_platform1.sensors.values())
-        self.calib_sensor = sensor_list[index]
-        return [self.calib_sensor.getName(), self.calib_sensor.getProperties()]
-
-    def calibrateP2Sensor(self, index: int) -> None:
-        sensor_list = list(self.group_platform2.sensors.values())
-        self.calib_sensor = sensor_list[index]
-        return [self.calib_sensor.getName(), self.calib_sensor.getProperties()]
-
-    def getP1SensorStatus(self) -> dict:
-        return self.group_platform1.getGroupInfo()
-
-    def getP2SensorStatus(self) -> dict:
-        return self.group_platform2.getGroupInfo()
-
-    def getCalibDuration(self) -> int:
-        return self.config_mngr.getConfigValue(
-            CfgPaths.GENERAL_CALIBRATION_DURATION_MS.value, 3000
-        )
-
-    def getCalibTestInterval(self) -> int:
-        return self.config_mngr.getConfigValue(
-            CfgPaths.GENERAL_CALIBRATION_INTERVAL_MS.value, 10
-        )
-
     def refSensorConnected(self) -> bool:
-        if self.reference_sensor is None:
+        if not self.ref_sensor:
             return False
-        return self.reference_sensor.getStatus() == SStatus.AVAILABLE
+        return self.ref_sensor.getStatus() == SStatus.AVAILABLE
 
-    # Calibration functions
+    def getRecordInterval(self) -> int:
+        return self.record_interval_ms
 
-    def startRecording(self, auto: bool = False):
-        self.add_ref_sensor = False
-        if auto and not self.refSensorConnected():
-            return
-        if auto:
-            self.reference_sensor.clearValues()
-            self.reference_sensor.connect()
-            self.add_ref_sensor = True
-        self.calib_sensor.clearValues()
-        self.calib_sensor.connect()
+    def getRecordDuration(self) -> int:
+        return int(self.record_interval_ms * self.record_amount)
 
-    def registerValue(self):
-        self.calib_sensor.registerValue()
-        if self.add_ref_sensor:
-            self.reference_sensor.registerValue()
+    def getLastValues(self) -> list:
+        return self.measurements_df.iloc[-1].tolist()
 
-    def stopRecording(self):
-        self.calib_sensor.disconnect()
-        if self.add_ref_sensor:
-            self.reference_sensor.disconnect()
-
-    def getValues(self, test_value: float = None) -> list:
-        if test_value is None and not self.add_ref_sensor:
-            return [-1, -1, -1, -1]
-        if self.add_ref_sensor:
-            ref_values = np.array(self.reference_sensor.getCalibValues())
-            test_value = np.mean(ref_values)
-        values = np.array(self.calib_sensor.getValues())
-        values_mean = np.mean(values)
-        self.sensor_values.append(values_mean)
-        self.test_values.append(test_value)
-        return [test_value, values_mean, np.std(values), len(values)]
-
-    def clearAllValues(self):
-        self.sensor_values.clear()
-        self.test_values.clear()
-        self.calib_results.clear()
-
-    def removeValueSet(self, index: int):
-        self.sensor_values.pop(index)
-        self.test_values.pop(index)
-
-    def getRegressionResults(self) -> list:
-        features = np.array(self.sensor_values).reshape(-1, 1)
-        targets = np.array(self.test_values).reshape(-1, 1)
+    def getResults(self) -> list[float]:
+        features = self.measurements_df["sensor_mean"].to_numpy().reshape(-1, 1)
+        targets = self.measurements_df["ref_value"].to_numpy().reshape(-1, 1)
         model = LinearRegression().fit(features, targets)
-        self.calib_results.clear()
-        self.calib_results.append(np.array(model.coef_[0]).item())
-        self.calib_results.append(model.intercept_.item())
-        self.calib_results.append(model.score(features, targets))
-        return self.calib_results
+        self.sensor_slope = float(model.coef_[0])
+        self.sensor_intercept = float(model.intercept_)
+        self.calib_score = model.score(features, targets)
+        return [self.sensor_slope, self.sensor_intercept, self.calib_score]
+
+    # Plot data arrays
 
     def getValuesArrays(self):
-        return np.array(self.sensor_values), np.array(self.test_values)
+        return (
+            self.measurements_df["sensor_mean"].to_numpy(),
+            self.measurements_df["ref_value"].to_numpy(),
+        )
 
     def getRegressionArrays(self):
-        sensor_values = np.array(self.sensor_values)
-        test_values = sensor_values * self.calib_results[0] + self.calib_results[1]
-        return sensor_values, test_values
-
-    def saveResults(self):
-        if self.calib_results is None:
-            return
-        self.calib_sensor.setSlope(self.calib_results[0])
-        self.calib_sensor.setIntercept(self.calib_results[1])
-        self.config_mngr.saveConfig()
-        logger.info(
-            f"Saved sensor {self.calib_sensor.getName()} slope: {self.calib_results[0]:.4f}; intercept: {self.calib_results[1]:.4f}"
+        return (
+            self.measurements_df["sensor_mean"].to_numpy(),
+            (
+                self.measurements_df["sensor_mean"] * self.sensor_slope
+                + self.sensor_intercept
+            ).to_numpy(),
         )

@@ -1,12 +1,13 @@
-general_settings:
-  calibration_times:
-    data_interval_ms: 10
-    calibration_time_ms: 3000
-  test_times:
-    data_interval_ms: 10
-    tare_time_ms: 3000
-  test_results:
-    folder: /example/folder
+settings:
+  test:
     name: Example Test
-    save_calib_results: true
-    save_raw_results: false
+    folder_path: /example/folder/
+    results:
+      save_raw: true
+      save_calib: true
+  recording:
+    data_interval_ms: 10
+    tare_data_amount: 300
+  calibration:
+    data_interval_ms: 10
+    data_amount: 300

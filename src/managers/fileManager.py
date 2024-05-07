@@ -5,20 +5,21 @@ from src.managers.configManager import ConfigManager
 from src.enums.configPaths import ConfigPaths as CfgPaths
 
 
-class TestFileManager:
-    __test__ = False
+class FileManager:
     def __init__(self, cfg_mngr: ConfigManager) -> None:
-        self.cfg_mngr = cfg_mngr
-        self.file_name = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_NAME.value, "Test"
+        self.cfg_mngr: ConfigManager = cfg_mngr
+        self.file_name: str = self.cfg_mngr.getConfigValue(
+            CfgPaths.TEST_NAME.value, "Test"
         )
-        self.file_path = self.cfg_mngr.getConfigValue(
-            CfgPaths.GENERAL_TEST_FOLDER.value, ""
+        self.file_name_suffix: str = ""
+        self.file_path: str = self.cfg_mngr.getConfigValue(
+            CfgPaths.TEST_FOLDER_PATH.value, ""
         )
 
-    def checkDuplicatedName(self, name: str) -> str:
+    def checkDuplicatedName(self, name: str) -> None:
         total_path = os.path.join(self.file_path, name + ".csv")
         if not os.path.exists(total_path):
+            self.file_name_suffix = ""
             return name
         suffix_num = 1
         while True:
@@ -32,21 +33,21 @@ class TestFileManager:
                 )
                 break
             suffix_num += 1
-        return new_name
+        self.file_name_suffix = f"_{suffix_num}"
 
     # Setters and getters
 
     def setFileName(self, name: str) -> None:
-        name = self.checkDuplicatedName(name)
+        self.checkDuplicatedName(name)
         if name == self.file_name:
             return
         self.file_name = name
-        self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_NAME.value, self.file_name)
+        self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
         logger.info(f"Changed test name to: {self.file_name}")
 
     def setFilePath(self, path: str, check_name: bool = True):
         self.file_path = path
-        self.cfg_mngr.setConfigValue(CfgPaths.GENERAL_TEST_FOLDER.value, self.file_path)
+        self.cfg_mngr.setConfigValue(CfgPaths.TEST_FOLDER_PATH.value, self.file_path)
         logger.info(f"Changed test folder path to: {self.file_path}")
         if check_name:
             self.setFileName(self.file_name)
@@ -55,7 +56,7 @@ class TestFileManager:
         self.setFileName(self.file_name)
 
     def getFileName(self) -> str:
-        return self.file_name
+        return self.file_name + self.file_name_suffix
 
     def getFilePath(self) -> str:
         return self.file_path
@@ -69,23 +70,24 @@ class TestFileManager:
         if not self.getPathExists():
             logger.warning("The file path does not exist!")
             return
-        file_name = self.file_name + name_suffix
+        file_name = self.file_name + self.file_name_suffix + name_suffix
         total_path = os.path.join(self.file_path, file_name + ".csv")
         df.to_csv(total_path, index=False)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
         logger.info(
-            f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)"
+            f"Test file {file_name} saved in {self.file_path} ({str(round(file_size, 2))} MB)"
         )
 
-    def saveDataToBinary(self, df: pd.DataFrame):
+    def saveDataToBinary(self, df: pd.DataFrame, name_suffix: str = ""):
         if not self.getPathExists():
             logger.warning("The file path does not exist!")
             return
-        total_path = os.path.join(self.file_path, self.file_name + ".pk1")
+        file_name = self.file_name + self.file_name_suffix + name_suffix
+        total_path = os.path.join(self.file_path, file_name + ".pk1")
         df.to_pickle(total_path)
 
         file_size = os.path.getsize(total_path) / (1024 * 1024)
         logger.info(
-            f"Test file saved in {self.file_path} ({str(round(file_size, 2))} MB)"
+            f"Test file {file_name} saved in {self.file_path} ({str(round(file_size, 2))} MB)"
         )

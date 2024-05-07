@@ -3,7 +3,7 @@
 import pytest
 import os
 import pandas as pd
-from src.managers.testFileManager import TestFileManager
+from src.managers.fileManager import FileManager
 from pytest import MonkeyPatch
 
 
@@ -24,8 +24,8 @@ class ConfigManagerMock:
 
 
 @pytest.fixture
-def test_manager() -> TestFileManager:
-    test_mngr = TestFileManager(cfg_mngr=ConfigManagerMock())
+def test_manager() -> FileManager:
+    test_mngr = FileManager(cfg_mngr=ConfigManagerMock())
     test_mngr.file_path = os.path.dirname(__file__)
     return test_mngr
 
@@ -42,14 +42,14 @@ def dataframe() -> pd.DataFrame:
 # Tests
 
 
-def test_check_no_duplicated_file(test_manager: TestFileManager) -> None:
+def test_check_no_duplicated_file(test_manager: FileManager) -> None:
     new_name = "New test"
     test_name = test_manager.checkDuplicatedName(new_name)
     assert test_name == new_name
 
 
 def test_check_duplicated_file(
-    monkeypatch: MonkeyPatch, test_manager: TestFileManager
+    monkeypatch: MonkeyPatch, test_manager: FileManager
 ) -> None:
     os_exists_mock = [True]
 
@@ -59,49 +59,50 @@ def test_check_duplicated_file(
         return os_exists_status
 
     monkeypatch.setattr(os.path, "exists", mock_exists)
-    result = test_manager.checkDuplicatedName("Test")
+    test_manager.checkDuplicatedName("Test")
+    result = test_manager.getFileName()
     assert result == "Test_1"
 
 
-def test_file_name_setter(test_manager: TestFileManager) -> None:
+def test_file_name_setter(test_manager: FileManager) -> None:
     new_name = "New test"
     test_manager.setFileName(new_name)
     config_manager: ConfigManagerMock = test_manager.cfg_mngr
     assert config_manager.set_cfg_value_calls == 1
 
 
-def test_file_name_setter_equal(test_manager: TestFileManager) -> None:
+def test_file_name_setter_equal(test_manager: FileManager) -> None:
     new_name = "Test"
     test_manager.setFileName(new_name)
     config_manager: ConfigManagerMock = test_manager.cfg_mngr
     assert config_manager.set_cfg_value_calls == 0
 
 
-def test_filepath_name_setter(test_manager: TestFileManager) -> None:
+def test_filepath_name_setter(test_manager: FileManager) -> None:
     test_manager.setFilePath("/test/path")
     config_manager: ConfigManagerMock = test_manager.cfg_mngr
     assert config_manager.set_cfg_value_calls == 1
 
 
-def test_file_name_getter(test_manager: TestFileManager) -> None:
+def test_file_name_getter(test_manager: FileManager) -> None:
     assert test_manager.getFileName() == "Test"
 
 
-def test_file_path_getter(test_manager: TestFileManager) -> None:
+def test_file_path_getter(test_manager: FileManager) -> None:
     assert os.path.samefile(test_manager.getFilePath(), os.path.dirname(__file__))
 
 
-def test_file_path_exists(test_manager: TestFileManager) -> None:
+def test_file_path_exists(test_manager: FileManager) -> None:
     assert test_manager.getPathExists()
 
 
-def test_file_path_not_exists(test_manager: TestFileManager) -> None:
+def test_file_path_not_exists(test_manager: FileManager) -> None:
     test_manager.setFilePath("/test/non/existing/path", check_name=False)
     assert not test_manager.getPathExists()
 
 
 def test_file_save_csv_dataframe(
-    test_manager: TestFileManager, dataframe: pd.DataFrame
+    test_manager: FileManager, dataframe: pd.DataFrame
 ) -> None:
     test_manager.saveDataToCSV(df=dataframe)
     total_path = os.path.join(
@@ -114,7 +115,7 @@ def test_file_save_csv_dataframe(
 
 
 def test_file_save_failure_csv_dataframe(
-    test_manager: TestFileManager, dataframe: pd.DataFrame
+    test_manager: FileManager, dataframe: pd.DataFrame
 ) -> None:
     test_manager.setFilePath("/test/non/existing/path", check_name=False)
     test_manager.saveDataToCSV(df=dataframe)
@@ -128,7 +129,7 @@ def test_file_save_failure_csv_dataframe(
 
 
 def test_file_save_binary_dataframe(
-    test_manager: TestFileManager, dataframe: pd.DataFrame
+    test_manager: FileManager, dataframe: pd.DataFrame
 ) -> None:
     test_manager.saveDataToBinary(df=dataframe)
     total_path = os.path.join(
@@ -141,7 +142,7 @@ def test_file_save_binary_dataframe(
 
 
 def test_file_save_failure_binary_dataframe(
-    test_manager: TestFileManager, dataframe: pd.DataFrame
+    test_manager: FileManager, dataframe: pd.DataFrame
 ) -> None:
     test_manager.setFilePath("/test/non/existing/path", check_name=False)
     test_manager.saveDataToBinary(df=dataframe)

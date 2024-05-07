@@ -2,108 +2,93 @@
 
 import concurrent.futures
 
-from src.enums.sensorStatus import SensorStatus as SStatus
+from src.enums.sensorStatus import SStatus, SGStatus
+from src.enums.sensorTypes import SGTypes, STypes
 from src.handlers.sensor import Sensor
 
 
 class SensorGroup:
-    def __init__(self, group_name: str) -> None:
-        self.group_name = group_name
-        self.is_group_active = False
+    def __init__(self, id: str, name: str, type: SGTypes) -> None:
+        self.id: str = id
+        self.name: str = name
+        self.type: SGTypes = type
+        self.read: bool = False
+        self.status: SGStatus = SGStatus.IGNORED
+        self.active: bool = False
         self.sensors: dict[str, Sensor] = {}
 
     def addSensor(self, sensor: Sensor):
         self.sensors[sensor.id] = sensor
 
     def checkConnections(self) -> bool:
+        if not self.read:
+            self.status = SGStatus.IGNORED
+            return False
         results = False
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
             results = list(
                 executor.map(lambda sensor: sensor.checkConnection(), sensors_list)
             )
-        return any(results)
+        self.status = SGStatus.ERROR
+        if all(results):
+            self.status = SGStatus.OK
+        elif any(results):
+            self.status = SGStatus.WARNING
+        return self.status != SGStatus.ERROR
 
     def start(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             sensors_list = list(self.sensors.values())
             results = list(executor.map(lambda sensor: sensor.connect(), sensors_list))
-            self.is_group_active = any(results)
+            self.active = any(results)
 
     def register(self) -> None:
         [sensor.registerValue() for sensor in self.sensors.values()]
 
     def stop(self) -> None:
         [sensor.disconnect() for sensor in list(self.sensors.values())]
-        self.is_group_active = False
+        self.active = False
 
     # Setters and getters
 
-    def setSensorRead(self, sensor_id: str, read: bool) -> None:
-        if sensor_id not in self.sensors.keys():
-            return
-        self.sensors[sensor_id].setRead(read)
+    def setRead(self, read: bool) -> None:
+        self.read = read
 
-    def tareSensors(self, mean_dict: dict) -> None:
-        for sensor_id, mean in mean_dict.items():
-            sensor = self.sensors.get(sensor_id)
-            current_params = sensor.getSlopeIntercept()
-            sensor.setIntercept(float(current_params[1] - mean))
-
-    def clearSensorValues(self) -> None:
+    def clearValues(self) -> None:
         [sensor.clearValues() for sensor in self.sensors.values()]
 
-    def getGroupName(self) -> str:
-        return self.group_name
+    def getID(self) -> str:
+        return self.id
 
-    def getGroupInfo(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            group_dict[sensor_id] = [
-                sensor.getName(),
-                sensor.getProperties(),
-                sensor.getStatus(),
-                sensor.getIsReadable(),
-            ]
-        return group_dict
+    def getName(self) -> str:
+        return self.name
 
-    def getGroupAvailableInfo(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
-                continue
-            group_dict[sensor_id] = [
-                sensor.getName(),
-                sensor.getProperties(),
-                sensor.getStatus(),
-                sensor.getIsReadable(),
-            ]
-        return group_dict
+    def getType(self) -> SGTypes:
+        return self.type
 
-    def getGroupSize(self) -> int:
+    def getSize(self) -> int:
         return len(self.sensors)
 
-    def getGroupIsActive(self) -> bool:
-        return self.is_group_active
+    def getRead(self) -> bool:
+        return self.read
 
-    def getGroupValues(self) -> dict:
+    def getStatus(self) -> SGStatus:
+        return self.status
+
+    def isActive(self) -> bool:
+        return self.active
+
+    def getSensors(
+        self, only_available: bool = False, sensor_type: STypes = None
+    ) -> dict[str, Sensor]:
+        if not only_available and sensor_type is None:
+            return self.sensors
         group_dict = {}
         for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
+            if only_available and sensor.getStatus() != SStatus.AVAILABLE:
                 continue
-            group_dict[sensor_id] = sensor.getValues()
-        return group_dict
-
-    def getGroupCalibValues(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            if sensor.getStatus() is not SStatus.AVAILABLE:
+            if sensor_type is not None and sensor.getType() != sensor_type:
                 continue
-            group_dict[sensor_id] = sensor.getCalibValues()
-        return group_dict
-
-    def getGroupCalibrationParams(self) -> dict:
-        group_dict = {}
-        for sensor_id, sensor in self.sensors.items():
-            group_dict[sensor_id] = sensor.getSlopeIntercept()
+            group_dict[sensor_id] = sensor
         return group_dict
