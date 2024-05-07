@@ -1,7 +1,6 @@
 [:house: `Back to Home`](../home.md)
 
 # General test procedure
-**Work in progress**
 
 The main objective of the program is to record data from the connected sensors in a synchronised manner and to generate a file in `.csv` format at the end of each trial.
 
@@ -15,6 +14,7 @@ The interface is organised in three main sections which will be detailed below:
 - At the right:
 	- Settings and sensor information tab.
 	- Plot tabs.
+
 
 ## Control Panel
 
@@ -35,7 +35,6 @@ The layer is divided into three parts:
 - **Calibrate sensors button**: to calibrate the Phidget LoadCells. For more information, see the [Calibrate sensors](calibration_test.md) section.
 
 
-
 ## Settings and sensor information
 
 ![Main UI settings tab](../images/mainUI_tab_settings.png)
@@ -54,8 +53,8 @@ Once selected, if it is in the correct format, the window will be updated with t
 
 The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
 
-> [!NOTE]\
-> This can be cancelled by loading again the default `config.yaml` file or deleting the custom configuration path manually.
+> [!NOTE]
+> This can be cancelled by loading again the default `config.yaml` file or deleting the custom configuration path manually in the [`settings` config section](../setup/config_file.md#settings-section).
 
 ### Folder and file name of the test
 
@@ -65,59 +64,81 @@ They will be saved in `.csv` format, either with the calibration data applied as
 
 ### Sensor connection
 
-To connect the sensors you must mark the ones you want to connect in the **Sensor information** table by clicking on the text boxes. In case you do not want to connect a certain sensor that is selected, simply click it again.
+This section shows all sensor groups configured in the [`sensor_groups` config section](../setup/config_file.md#sensor-groups-section).
 
-You can check the selection status by identifying its color border:
+You can select or deselect sensor groups connections by clicking on their names. It is also possible to enable/disable individual sensors from a sensor group via the `settings` button next to it.
+
+> [!NOTE]
+> When you click the `settings` button, an additional window will show up with the sensor information. If you want to continue in the main window, close the pop-up window.
+> 
+> Any modifications will be saved.
+
+You can check the selection status looking at the name background color:
 
 ![Main UI settings tab sensors](../images/mainUI_tab_settings_sensors.png)
 
-| Border color | Description |
+| Background color | Description |
 | :---: | :--- |
-|<img valign='middle' src='https://readme-swatches.vercel.app/008000'/>| Selected. |
-|<img valign='middle' src='https://readme-swatches.vercel.app/808080'/>| Not selected. |
+| <div style="background-color: #326295; padding: 10px; display: inline-block;"></div> | Selected. |
+| <div style="background-color: gray; padding: 10px; display: inline-block;"></div> | Not selected. |
 
 Once the sensors are selected, press the <kbd>Connect sensors</kbd> button. Depending on the type and number of sensors it will take some time to establish connection with all of them.
 
-Once a connection is established (or not) with the indicated sensors, the background colors will be updated with the status of each sensor as follows:
+Once a connection is established (or not) with the indicated sensors, the connection background colors will be updated with the status of each sensor as follows:
 
 ![Main UI settings tab sensors connection](../images/mainUI_tab_settings_sensors_connect.png)
 
-| Background color | Description |
-| :---: | :--- |
-| No color | No connection attempted. |
-|<img valign='middle' src='https://readme-swatches.vercel.app/ff0000'/>| Connection could not be established. |
-|<img valign='middle' src='https://readme-swatches.vercel.app/008000'/>| Connection successfully established. |
+| Background color | Description for sensor groups | Description for individual sensors |
+| :---: | :--- | :--- |
+| <div style="background-color: gray; padding: 10px; display: inline-block;"></div> | No connection attempted. | No connection attempted. |
+| <div style="background-color: red; padding: 10px; display: inline-block;"></div> | All sensors failed to connect. | Connection could not be established. |
+| <div style="background-color: orange; padding: 10px; display: inline-block;"></div> | Some sensors failed to connect. | - |
+| <div style="background-color: green; padding: 10px; display: inline-block;"></div> | All sensors are connected. | Connection successfully established. |
 
 If at least one sensor is connected and the requirements indicated on the control panel are met, the buttons will be enabled to start the tests.
 
-## Plot tabs
+### Results settings
 
-If enabled in [`general settings` config section](../setup/config_file.md#general-settings), the current recorded data will be displayed in different tabs depending of the available sensors.
+When a test has finished, this section will update with the available data recorded. Here you can modify data limits and the butterworth filter parameters.
 
-All the plot data processing is done by the [`TestDataManager`](../../src/managers/testDataManager.py)  class.
+![Main UI settings tab results](../images/mainUI_tab_settings_results.png)
 
-### Platform forces
+You can change the preview graph by clicking other sensor name in the preview selector.
 
-> [!IMPORTANT]\
-> Requires `_X_n`, `_Y_n` or `_Z_n` markers in sensor names of [`platform loadcell list` config section](../setup/config_file.md#platform-1-loadcell-list) in order to be plotted.
+To apply any modifications, click the <kbd>Apply changes</kbd> button. If you want to save the data again with those modifications, click the <kbd>Save</kbd> button. To undo range modifications, click on <kbd>Reset</kbd>.
 
-*TODO plot image*
+> [!NOTE]
+> The <kbd>Save</kbd> button only apply data range modifications. It does not save filtered data.
 
-### Platform COP
+All applied modifications will update available sensor graphs. Checkout the following section!
 
-> [!IMPORTANT]\
-> Requires `_X_n`, `_Y_n` or `_Z_n` markers in sensor names of [`platform loadcell list` config section](../setup/config_file.md#platform-1-loadcell-list).\
-> Requires the 12 platform sensors to be available in order to be plotted.
 
-*TODO plot image*
+# Graph tabs
 
-### Encoders
+There are two tabs available:
+- **Sensor graphs** - To see individual sensor data.
+- **Platform graphs** - To see specific platform data: total forces and COP data.
 
-*TODO plot image*
+All the graph processing is done by the [`DataManager`](../../src/managers/dataManager.py)  class.
 
-### IMU angles
+## Sensor graphs
 
-*TODO plot image*
+Simply click a sensor group at the top selector and an available sensor. The graph will update with the current recorded data from the selected sensor.
+
+You can use the options above to save the generated graph, edit, zoom, etc.
+
+![Main UI graphs sensor](../images/mainUI_tab_graphs_sensor.png)
+
+## Platform graphs
+
+As in the previous section, click a sensor group at the top selector and an available option below. The graph will update with the current recorded data.
+
+Use the options above to save the generated graph, edit, zoom, etc.
+
+> [!IMPORTANT]
+> This graphs needs special sensor group requirements in order to be available. Check [platform groups configuration](../setup/config_file.md#platform-groups).
+
+![Main UI graphs platform](../images/mainUI_tab_graphs_platform.png)
 
 ---
 
