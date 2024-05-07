@@ -53,7 +53,7 @@ To calibrate with known values you must follow these steps:
 
 ### Calibrate with calibration sensor input
 
-To calibrate using the reference sensor, you must first declare it in the [`calibration_sensor` section](../setup/config_file.md#calibration-sensor) of the `config.yaml` file. 
+To calibrate using the reference sensor, you must first declare it in the [`calibration_sensors` section](../setup/config_file.md#calibration-sensors-section) of the `config.yaml` file. 
 
 Once defined, run the program, connect the sensors to be calibrated and access the calibration window again.
 
