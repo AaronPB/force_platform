@@ -334,7 +334,7 @@ class MainUI(QtWidgets.QWidget):
             "AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
         version_label = customQT.createLabelBox(
-            "PRE-v.1.2", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "v1.2.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
         credits_layout.addWidget(github_icon)
         credits_layout.addWidget(author_label)
