@@ -31,12 +31,6 @@ class UnavailableDriverMock:
     def connect(self, check: bool = False):
         return False
 
-    def disconnect(self):
-        pass
-
-    def getValue(self):
-        return None
-
 
 def buildSensorParamsDict(
     read: bool = True, slope: float = 10, intercept: float = -10
