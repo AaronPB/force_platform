@@ -79,8 +79,8 @@ You can check the selection status looking at the name background color:
 
 | Background color | Description |
 | :---: | :--- |
-| <div style="background-color: #326295; padding: 10px; display: inline-block;"></div> | Selected. |
-| <div style="background-color: gray; padding: 10px; display: inline-block;"></div> | Not selected. |
+| <img valign='middle' src='https://readme-swatches.vercel.app/326295'> | Selected. |
+| <img valign='middle' src='https://readme-swatches.vercel.app/808080'> | Not selected. |
 
 Once the sensors are selected, press the <kbd>Connect sensors</kbd> button. Depending on the type and number of sensors it will take some time to establish connection with all of them.
 
@@ -90,10 +90,10 @@ Once a connection is established (or not) with the indicated sensors, the connec
 
 | Background color | Description for sensor groups | Description for individual sensors |
 | :---: | :--- | :--- |
-| <div style="background-color: gray; padding: 10px; display: inline-block;"></div> | No connection attempted. | No connection attempted. |
-| <div style="background-color: red; padding: 10px; display: inline-block;"></div> | All sensors failed to connect. | Connection could not be established. |
-| <div style="background-color: orange; padding: 10px; display: inline-block;"></div> | Some sensors failed to connect. | - |
-| <div style="background-color: green; padding: 10px; display: inline-block;"></div> | All sensors are connected. | Connection successfully established. |
+| <img valign='middle' src='https://readme-swatches.vercel.app/808080'> | No connection attempted. | No connection attempted. |
+| <img valign='middle' src='https://readme-swatches.vercel.app/ff0000'> | All sensors failed to connect. | Connection could not be established. |
+| <img valign='middle' src='https://readme-swatches.vercel.app/ffa500'> | Some sensors failed to connect. | - |
+| <img valign='middle' src='https://readme-swatches.vercel.app/008000'> | All sensors are connected. | Connection successfully established. |
 
 If at least one sensor is connected and the requirements indicated on the control panel are met, the buttons will be enabled to start the tests.
 
