@@ -465,7 +465,9 @@ class CalibrationSelector(QtWidgets.QWidget):
         sensor_name = self.sensor_combo_box.currentText()
         group = self.group_list[group_index]
         selected_sensor = None
-        for sensor in group.getAvailableSensors().values():
+        for sensor in group.getSensors(
+            only_available=True, sensor_type=STypes.SENSOR_LOADCELL
+        ).values():
             if sensor.getName() == sensor_name:
                 selected_sensor = sensor
                 break
