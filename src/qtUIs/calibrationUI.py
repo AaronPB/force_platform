@@ -153,10 +153,13 @@ class CalibrationUI(QtWidgets.QWidget):
         github_icon = customQT.createIconLabelBox(IconPaths.GITHUB, None)
         tag_icon = customQT.createIconLabelBox(IconPaths.TAG, None)
         author_label = customQT.createLabelBox(
-            "AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "<a style='color: white' href='https://github.com/AaronPB'>AaronPB</a>",
+            QssLabels.AUTHOR_COPYRIGHT_LABEL,
         )
+        author_label.setOpenExternalLinks(True)
+        author_label.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         version_label = customQT.createLabelBox(
-            "v1.2.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "PRE-v1.3.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
         credits_layout.addWidget(github_icon)
         credits_layout.addWidget(author_label)
