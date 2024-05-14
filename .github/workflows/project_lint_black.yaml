@@ -1,0 +1,30 @@
+name: Lint python code with Black
+
+on:
+  pull_request:
+    branches:
+    - master
+    - develop
+  push:
+    - '**'
+
+jobs:
+  lint:
+    if: contains(github.event.head_commit.message, '--lint-black')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check project src folder
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src"
+          version: "24.4.2"
+      
+      - name: Check project test folder
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src"
+          version: "24.4.2"
