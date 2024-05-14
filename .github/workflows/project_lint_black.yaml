@@ -25,5 +25,5 @@ jobs:
         uses: psf/black@stable
         with:
           options: "--check --verbose"
-          src: "./src"
+          src: "./tests"
           version: "24.4.2"
