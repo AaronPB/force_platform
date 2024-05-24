@@ -1,4 +1,5 @@
 import os
+import glob
 import pandas as pd
 from loguru import logger
 from src.managers.configManager import ConfigManager
@@ -21,26 +22,25 @@ class FileManager:
 
     def setup(self, config_manager: ConfigYAMLHandler):
         self.cfg_mngr = config_manager
-        self.file_name: str = self.cfg_mngr.getConfigValue(
+        self.file_name = self.cfg_mngr.getConfigValue(
             CfgPaths.TEST_NAME.value, self.file_name
         )
-        self.file_path: str = self.cfg_mngr.getConfigValue(
+        self.file_path = self.cfg_mngr.getConfigValue(
             CfgPaths.TEST_FOLDER_PATH.value, self.file_path
         )
         if self.getPathExists():
             self.checkFileName()
 
-    def checkFileNameSuffix(self, file_name: str, file_format: str) -> int:
-        file = file_name + file_format
-        total_path = os.path.join(self.file_path, file)
-        if not os.path.exists(total_path):
+    def checkFileNameSuffix(self, file_name: str) -> int:
+        total_path = os.path.join(self.file_path, file_name + ".*")
+        if not glob.glob(total_path):
             return 0
         suffix_num = 1
         suffix_num_max = 100
         while suffix_num < suffix_num_max:
-            new_name = f"{os.path.splitext(file_name)[0]}_{suffix_num}{os.path.splitext(file_name)[1]}"
-            total_path = os.path.join(self.file_path, new_name + file_format)
-            if not os.path.exists(total_path):
+            new_name = f"{file_name}_{suffix_num}"
+            total_path = os.path.join(self.file_path, new_name + ".*")
+            if not glob.glob(total_path):
                 break
             suffix_num += 1
         return suffix_num
@@ -48,7 +48,7 @@ class FileManager:
     # Setters and getters
 
     def setFileName(self, name: str) -> None:
-        self.checkFileName(name)
+        self.checkFileName()
         if name == self.file_name:
             return
         self.file_name = name
@@ -60,23 +60,15 @@ class FileManager:
         self.cfg_mngr.setConfigValue(CfgPaths.TEST_FOLDER_PATH.value, self.file_path)
         logger.info(f"Changed test folder path to: {self.file_path}")
 
-    def checkFileName(
-        self, file_name: str = None, suffix_list: list[str] = ["", "_RAW"]
-    ) -> None:
+    def checkFileName(self, file_name: str = None) -> None:
         if not file_name:
             file_name = self.file_name
-        format_list = [".csv", ".pk1"]
         file_suffix_num = 0
-        for file_format in format_list:
-            if not suffix_list:
-                num = self.checkFileNameSuffix(file_name, file_format)
-                if num > file_suffix_num:
-                    file_suffix_num = num
-                continue
-            for suffix in suffix_list:
-                num = self.checkFileNameSuffix(file_name + suffix, file_format)
-                if num > file_suffix_num:
-                    file_suffix_num = num
+        suffix_list = ["", "_RAW"]
+        for suffix in suffix_list:
+            num = self.checkFileNameSuffix(file_name + suffix)
+            if num > file_suffix_num:
+                file_suffix_num = num
         if file_suffix_num > 0:
             self.file_name_suffix = f"_{file_suffix_num}"
             logger.warning(
@@ -101,7 +93,6 @@ class FileManager:
         if not self.getPathExists():
             logger.warning("The file path does not exist!")
             return
-        self.checkFileName(self.file_name, [name_suffix])
         file_name = self.file_name + self.file_name_suffix + name_suffix
         total_path = os.path.join(self.file_path, file_name + ".csv")
         df.to_csv(total_path, index=False)
@@ -115,7 +106,6 @@ class FileManager:
         if not self.getPathExists():
             logger.warning("The file path does not exist!")
             return
-        self.checkFileName(self.file_name, [name_suffix])
         file_name = self.file_name + self.file_name_suffix + name_suffix
         total_path = os.path.join(self.file_path, file_name + ".pk1")
         df.to_pickle(total_path)
