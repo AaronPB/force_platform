@@ -43,7 +43,8 @@ class MainUI(QtWidgets.QWidget):
         self.getSensorInformation()
 
     def initManagers(self) -> None:
-        self.file_mngr = FileManager(self.cfg_mngr)
+        self.file_mngr = FileManager()
+        self.file_mngr.setup(self.cfg_mngr)
         self.sensor_mngr.setup(self.cfg_mngr)
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
 
