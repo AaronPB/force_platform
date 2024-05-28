@@ -154,9 +154,9 @@ class PlotPlatformForcesWidget(QtWidgets.QWidget):
         self.ax_fz = self.figure.add_subplot(311)
         self.ax_fx = self.figure.add_subplot(312, sharex=self.ax_fz)
         self.ax_fy = self.figure.add_subplot(313, sharex=self.ax_fz)
-        self.ax_fz.set_ylabel("Forces Z (kg)")
-        self.ax_fx.set_ylabel("Forces X (kg)")
-        self.ax_fy.set_ylabel("Forces Y (kg)")
+        self.ax_fz.set_ylabel("Forces Z (N)")
+        self.ax_fx.set_ylabel("Forces X (N)")
+        self.ax_fy.set_ylabel("Forces Y (N)")
         self.ax_fy.set_xlabel("Time (s)")
 
     def setupPlot(
