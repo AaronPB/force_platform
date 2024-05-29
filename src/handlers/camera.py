@@ -55,14 +55,13 @@ class Camera:
             f"Recording camera {self.params[CParams.NAME.value]} to file path {file_path}"
         )
         self.video_output = cv2.VideoWriter(
-            file_path, fourcc, fps, frame_width, frame_height
+            file_path, fourcc, fps, (frame_width, frame_height)
         )
         while self.recording:
             ret, frame = self.camera.read()
             if not ret:
                 break
             self.video_output.write(frame)
-            cv2.imshow("Recording", frame)
         return True
 
     def disconnect(self) -> None:
@@ -71,5 +70,4 @@ class Camera:
             self.camera.release()
         if self.video_output is not None:
             self.video_output.release()
-        cv2.destroyAllWindows()
         logger.info(f"Stopped recording of camera {self.params[CParams.NAME.value]}")
