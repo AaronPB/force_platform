@@ -20,4 +20,4 @@ class ConfigPaths(Enum):
     SENSOR_GROUPS_SECTION = "sensor_groups"
     SENSORS_SECTION = "sensors"
     CALIBRATION_LOADCELL_SENSOR = "sensors_calibration.phidget_loadcell_reference"
-    CALIBRATION_PLATFORM_SENSOR = "sensors_calibration.platform_reference"
+    CALIBRATION_PLATFORM_TRIAXIAL = "sensors_calibration.platform_reference_triaxial"

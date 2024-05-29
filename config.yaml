@@ -64,7 +64,10 @@ sensor_groups:
     - encoder_2
 sensors_calibration:
   phidget_loadcell_reference: s_type
-  platform_reference: triaxial
+  platform_reference_triaxial:
+  - triax_x
+  - triax_y
+  - triax_z
 sensors:
   p1_z1:
     name: P1_LoadCell_Z_1
@@ -444,3 +447,42 @@ sensors:
     calibration:
       slope: 31851.0
       intercept: -0.3355
+  triax_x:
+    name: Triaxial_X
+    type: SENSOR_LOADCELL
+    read: true
+    connection:
+      channel: 0
+      serial: 583229
+    properties:
+      serial_number: SN231206001
+      max_weight: 2000N
+    calibration:
+      slope: 1721022.287
+      intercept: 0
+  triax_y:
+    name: Triaxial_Y
+    type: SENSOR_LOADCELL
+    read: true
+    connection:
+      channel: 1
+      serial: 583229
+    properties:
+      serial_number: SN231206001
+      max_weight: 2000N
+    calibration:
+      slope: 19773710.180
+      intercept: 0
+  triax_z:
+    name: Triaxial_Z
+    type: SENSOR_LOADCELL
+    read: true
+    connection:
+      channel: 2
+      serial: 583229
+    properties:
+      serial_number: SN231206001
+      max_weight: 2000N
+    calibration:
+      slope: 1771149.742
+      intercept: 0
