@@ -23,8 +23,8 @@ class Camera:
         if not self.params[CParams.READ.value]:
             self.status = SStatus.IGNORED
             return False
-        if not check and self.status is not SStatus.AVAILABLE:
-            return False
+        # if not check and self.status is not SStatus.AVAILABLE:
+        #     return False
         self.status = SStatus.NOT_FOUND
         if self.record(check, file_path):
             self.status = SStatus.AVAILABLE
@@ -71,3 +71,28 @@ class Camera:
         if self.video_output is not None:
             self.video_output.release()
         logger.info(f"Stopped recording of camera {self.params[CParams.NAME.value]}")
+
+    # Setters and getters methods
+
+    def setRead(self, read: bool) -> None:
+        self.params[CParams.READ.value] = read
+
+    def getID(self) -> str:
+        return self.id
+
+    def getName(self) -> str:
+        return self.params[CParams.NAME.value]
+
+    def getRead(self) -> bool:
+        return self.params[CParams.READ.value]
+
+    def getStatus(self) -> SStatus:
+        return self.status
+
+    def getProperties(self) -> str:
+        text = " - "
+        for property in self.params[CParams.PROPERTIES_SECTION.value]:
+            text = (
+                text + self.params[CParams.PROPERTIES_SECTION.value][property] + " - "
+            )
+        return text

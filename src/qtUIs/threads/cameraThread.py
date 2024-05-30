@@ -17,4 +17,7 @@ class CameraRecordThread(QtCore.QThread):
         self.camera.disconnect()
 
     def setFilePath(self, file_path: str) -> None:
-        self.file_path = file_path
+        self.file_path = file_path + "_" + self.camera.getName() + ".avi"
+
+    def getCamera(self) -> Camera:
+        return self.camera
