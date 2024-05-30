@@ -122,7 +122,12 @@ class MainUI(QtWidgets.QWidget):
         self.setDataSettings(True)
 
         # Save dataframes
-        self.saveResults()
+        dataframe = self.data_mngr.getCalibrateDataframe()
+        dataframe_raw = self.data_mngr.getRawDataframe()
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
+            self.file_mngr.saveDataToCSV(dataframe)
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
+            self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
 
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
