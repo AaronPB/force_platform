@@ -29,6 +29,7 @@ class IconPaths(Enum):
     LOADCELL_ICON = os.path.join(_icon_folder, "purse-bag.svg")
     ENCODER_ICON = os.path.join(_icon_folder, "map-pin.svg")
     IMU_ICON = os.path.join(_icon_folder, "bot.svg")
+    CAMERA_ICON = os.path.join(_icon_folder, "camera.svg")
 
     PLATFORM_ICON = os.path.join(_icon_folder, "layer-two.svg")
     DEFAULT_GROUP_ICON = os.path.join(_icon_folder, "layout-grid-stack-down.svg")

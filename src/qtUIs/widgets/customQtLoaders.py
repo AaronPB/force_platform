@@ -109,3 +109,25 @@ def createSensorQCheckBox(
             )
         )
     return checkbox
+
+
+def createCameraQCheckBox(
+    text: str,
+    qss_object: QssLabels = None,
+    enabled: bool = False,
+    change_fn=None,
+    sensor_id: str = None,
+) -> QtWidgets.QCheckBox:
+    checkbox = QtWidgets.QCheckBox(text)
+    checkbox.setSizePolicy(
+        QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred
+    )
+    checkbox.setCursor(QtCore.Qt.PointingHandCursor)
+    if qss_object is not None:
+        checkbox.setObjectName(qss_object.value)
+    checkbox.setChecked(enabled)
+    if change_fn is not None and sensor_id is not None:
+        checkbox.stateChanged.connect(
+            lambda state, sensor_id=sensor_id: change_fn(state == 2, sensor_id)
+        )
+    return checkbox

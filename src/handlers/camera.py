@@ -2,7 +2,7 @@
 
 from loguru import logger
 import cv2
-from src.enums.sensorStatus import SStatus
+from src.enums.cameraStatus import CStatus
 from src.enums.cameraParams import CParams
 
 
@@ -10,7 +10,7 @@ class Camera:
     def __init__(self) -> None:
         self.id: str
         self.params: dict
-        self.status: SStatus
+        self.status: CStatus = CStatus.IGNORED
         self.recording: bool = False
         self.camera: cv2.VideoCapture
         self.video_output: cv2.VideoWriter
@@ -21,13 +21,13 @@ class Camera:
 
     def connect(self, check: bool = False, file_path: str = None) -> bool:
         if not self.params[CParams.READ.value]:
-            self.status = SStatus.IGNORED
+            self.status = CStatus.IGNORED
             return False
-        # if not check and self.status is not SStatus.AVAILABLE:
-        #     return False
-        self.status = SStatus.NOT_FOUND
+        if not check and self.status is not CStatus.AVAILABLE:
+            return False
+        self.status = CStatus.NOT_FOUND
         if self.record(check, file_path):
-            self.status = SStatus.AVAILABLE
+            self.status = CStatus.AVAILABLE
             return True
         return False
 
@@ -49,8 +49,8 @@ class Camera:
         fourcc = cv2.VideoWriter_fourcc(*"XVID")
         frame_width = int(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # fps = self.camera.get(cv2.CAP_PROP_FPS) If you want to take native fps
-        fps = self.params[CParams.SETTINGS_SECTION.value][CParams.FPS.value]
+        fps = self.camera.get(cv2.CAP_PROP_FPS)
+        # fps = self.params[CParams.SETTINGS_SECTION.value][CParams.FPS.value]
         logger.info(
             f"Recording camera {self.params[CParams.NAME.value]} to file path {file_path}"
         )
@@ -86,7 +86,7 @@ class Camera:
     def getRead(self) -> bool:
         return self.params[CParams.READ.value]
 
-    def getStatus(self) -> SStatus:
+    def getStatus(self) -> CStatus:
         return self.status
 
     def getProperties(self) -> str:

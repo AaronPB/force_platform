@@ -13,6 +13,7 @@ from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.mainWidgets import (
     SensorSettings,
+    CameraSettings,
     PreviewPlotSelector,
     SensorPlotSelector,
     PlatformPlotSelector,
@@ -551,15 +552,22 @@ class MainUI(QtWidgets.QWidget):
         # - Sensors grid
         sensors_layout = QtWidgets.QVBoxLayout()
         group_box_platforms = QtWidgets.QGroupBox("Platforms")
+        group_box_cameras = QtWidgets.QGroupBox("Cameras")
         group_box_defaults = QtWidgets.QGroupBox("Other sensor groups")
         self.hbox_platforms = QtWidgets.QHBoxLayout()
+        self.hbox_cameras = QtWidgets.QHBoxLayout()
         self.hbox_defaults = QtWidgets.QHBoxLayout()
         self.hbox_platforms.setAlignment(QtCore.Qt.AlignTop)
+        self.hbox_cameras.setAlignment(QtCore.Qt.AlignTop)
         self.hbox_defaults.setAlignment(QtCore.Qt.AlignTop)
         group_box_platforms.setLayout(self.hbox_platforms)
+        group_box_cameras.setLayout(self.hbox_cameras)
         group_box_defaults.setLayout(self.hbox_defaults)
+        hbox_bottom_groups = QtWidgets.QHBoxLayout()
+        hbox_bottom_groups.addWidget(group_box_defaults)
+        hbox_bottom_groups.addWidget(group_box_cameras)
         sensors_layout.addWidget(group_box_platforms)
-        sensors_layout.addWidget(group_box_defaults)
+        sensors_layout.addLayout(hbox_bottom_groups)
         # Build sensor information layout
         sensors_vbox_layout.addLayout(connect_grid_layout)
         sensors_vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
@@ -714,6 +722,7 @@ class MainUI(QtWidgets.QWidget):
 
     def getSensorInformation(self):
         sensor_panels = SensorSettings(self.sensor_mngr)
+        camera_panels = CameraSettings(self.camera_mngr)
         sensor_panels.updateLayout(
             self.hbox_platforms,
             self.sensor_mngr.getGroups(group_type=SGTypes.GROUP_PLATFORM),
@@ -721,4 +730,8 @@ class MainUI(QtWidgets.QWidget):
         sensor_panels.updateLayout(
             self.hbox_defaults,
             self.sensor_mngr.getGroups(group_type=SGTypes.GROUP_DEFAULT),
+        )
+        camera_panels.updateLayout(
+            self.hbox_cameras,
+            self.camera_mngr.getCameras(),
         )
