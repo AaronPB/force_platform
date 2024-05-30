@@ -62,6 +62,16 @@ sensor_groups:
     sensor_list:
     - encoder_1
     - encoder_2
+cameras:
+  camera_1:
+    name: Test Camera
+    read: true
+    connection:
+      serial: /dev/video2
+    settings:
+      fps: 30.0
+    properties:
+      camera_model: Logitech Series
 sensors_calibration:
   phidget_loadcell_reference: s_type
   platform_reference_triaxial:
@@ -185,7 +195,7 @@ sensors:
       serial_number: TT805088
       max_weight: 110kg
     calibration:
-      slope: 1070190.30
+      slope: 1070190.3
       intercept: 0
   p1_y2:
     name: P1_LoadCell_Y_2
@@ -198,7 +208,7 @@ sensors:
       serial_number: TT805064
       max_weight: 110kg
     calibration:
-      slope: 1071275.80
+      slope: 1071275.8
       intercept: 0
   p1_y3:
     name: P1_LoadCell_Y_3
@@ -224,7 +234,7 @@ sensors:
       serial_number: TT805053
       max_weight: 110kg
     calibration:
-      slope: 1069900.50
+      slope: 1069900.5
       intercept: 0
   p2_z1:
     name: P2_LoadCell_Z_1
@@ -237,7 +247,7 @@ sensors:
       serial_number: W019737
       max_weight: 150kg
     calibration:
-      slope: 1459204.40
+      slope: 1459204.4
       intercept: 0
   p2_z2:
     name: P2_LoadCell_Z_2
@@ -471,7 +481,7 @@ sensors:
       serial_number: SN231206001
       max_weight: 2000N
     calibration:
-      slope: 19773710.180
+      slope: 19773710.18
       intercept: 0
   triax_z:
     name: Triaxial_Z

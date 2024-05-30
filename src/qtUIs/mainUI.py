@@ -8,6 +8,7 @@ from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.fileManager import FileManager
 from src.managers.dataManager import DataManager
+from src.managers.cameraManager import CameraManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.mainWidgets import (
@@ -36,6 +37,7 @@ class MainUI(QtWidgets.QWidget):
 
         self.test_mngr = TestManager()
         self.data_mngr = DataManager()
+        self.camera_mngr = CameraManager()
 
         self.initManagers()
         self.initUI()
@@ -46,6 +48,7 @@ class MainUI(QtWidgets.QWidget):
         self.file_mngr = FileManager()
         self.file_mngr.setup(self.cfg_mngr)
         self.sensor_mngr.setup(self.cfg_mngr)
+        self.camera_mngr.setup(self.cfg_mngr)
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
 
         self.test_timer = QtCore.QTimer(self)
@@ -76,6 +79,11 @@ class MainUI(QtWidgets.QWidget):
         self.sensors_connect_button.setEnabled(False)
         self.setDataSettings(False)
         self.calibration_button.setEnabled(False)
+        # Start cameras first
+        self.camera_mngr.startThreads(
+            self.file_mngr.getFilePath() + "/" + self.file_mngr.getFileName()
+        )
+        # Start sensors
         self.test_mngr.testStart(self.file_mngr.getFileName())
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
@@ -92,6 +100,7 @@ class MainUI(QtWidgets.QWidget):
         # Stop test
         self.test_timer.stop()
         self.test_mngr.testStop(self.file_mngr.getFileName())
+        self.camera_mngr.stopThreads()
 
         # Get results from recorded data
         self.data_mngr.loadData(
