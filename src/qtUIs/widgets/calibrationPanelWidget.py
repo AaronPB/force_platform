@@ -282,3 +282,186 @@ class SensorCalibrationPanelWidget(QtWidgets.QWidget):
         self.plot_widget.clear()
         self.updateResultsTable(0, 0, 0)
         self.calib_mngr.clearValues()
+
+
+class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
+    def __init__(
+        self,
+        sensor_manager: SensorManager,
+        # platform_calibration_manager: SensorCalibrationManager,
+        platform_name: str,
+    ):
+        super(PlatformCalibrationPanelWidget, self).__init__()
+        self.sensor_mngr = sensor_manager
+        # self.calib_mngr = platform_calibration_manager
+        # self.recording_timer = QtCore.QTimer(self)
+        # self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
+
+        self.platform_name = platform_name
+
+        self.setLayout(self.loadLayout())
+
+        # self.enableButtons(True)
+
+    # UI section loaders
+
+    def loadLayout(self) -> QtWidgets.QVBoxLayout:
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.setAlignment(QtCore.Qt.AlignTop)
+
+        # Sensor info and main buttons
+        hbox_info_layout = QtWidgets.QHBoxLayout()
+
+        group_box_sensor_info = QtWidgets.QGroupBox("Platform information")
+        self.vbox_sensor_info_layout = QtWidgets.QVBoxLayout()
+        self.vbox_sensor_info_layout.setAlignment(QtCore.Qt.AlignTop)
+        group_box_sensor_info.setLayout(self.vbox_sensor_info_layout)
+        sensor_info_label = customQT.createLabelBox(
+            f"Name: {self.platform_name}",
+            QssLabels.STATUS_LABEL_INFO,
+        )
+        self.vbox_sensor_info_layout.addWidget(sensor_info_label)
+
+        group_box_general_buttons = QtWidgets.QGroupBox("Manage results")
+        self.grid_buttons_layout = QtWidgets.QGridLayout()
+        group_box_general_buttons.setLayout(self.grid_buttons_layout)
+        self.save_button = customQT.createQPushButton(
+            "Save results",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=False,
+            # connect_fn=self.saveResults,
+        )
+        self.clear_button = customQT.createQPushButton(
+            "Clear calibration test",
+            QssLabels.CRITICAL_CONTROL_PANEL_BTN,
+            enabled=False,
+            # connect_fn=self.clearValues,
+        )
+        self.grid_buttons_layout.addWidget(self.save_button, 0, 0)
+        self.grid_buttons_layout.addWidget(self.clear_button, 0, 1)
+
+        hbox_info_layout.addWidget(group_box_sensor_info)
+        hbox_info_layout.addWidget(group_box_general_buttons)
+
+        # Calibration info
+        group_box_calibration = QtWidgets.QGroupBox("Measurements for calibration")
+        vbox_calibration_layout = QtWidgets.QVBoxLayout()
+        vbox_calibration_layout.setAlignment(QtCore.Qt.AlignTop)
+        group_box_calibration.setLayout(vbox_calibration_layout)
+
+        # - Measurements TableWidget
+        self.measurements_widget = QtWidgets.QTableWidget(0, 8)
+        self.measurements_widget.setHorizontalHeaderLabels(
+            [
+                "\u0394l x",
+                "\u0394l y",
+                "\u0394l z",
+                "Test X mean",
+                "Test Y mean",
+                "Test Z mean",
+                "Max sensor STD",
+                "Measurements",
+            ]
+        )
+        self.measurements_widget.verticalHeader().setVisible(False)
+        self.measurements_widget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.Stretch
+        )
+
+        # - Measure control buttons
+        hbox_measure_btns_layout = QtWidgets.QHBoxLayout()
+        # vbox_distance_grid = QtWidgets.QVBoxLayout()
+        distance_info_label = customQT.createLabelBox(
+            "Distances from the center of the platform."
+            + "\nCheck platform layout on the left."
+            + "\nNOTE: \u0394l z = 0mm on top platform surface.",
+            QssLabels.STATUS_LABEL_INFO,
+        )
+        grid_distance_spinboxes_layout = QtWidgets.QGridLayout()
+        self.distance_delta_x = QtWidgets.QSpinBox()
+        self.distance_delta_x.setMaximum(300)
+        self.distance_delta_x.setMinimum(-300)
+        self.distance_delta_y = QtWidgets.QSpinBox()
+        self.distance_delta_y.setMaximum(200)
+        self.distance_delta_y.setMinimum(-200)
+        self.distance_delta_z = QtWidgets.QSpinBox()
+        self.distance_delta_z.setMaximum(500)
+        grid_distance_spinboxes_layout.addWidget(
+            QtWidgets.QLabel("\u0394l x"), 0, 0, QtCore.Qt.AlignRight
+        )
+        grid_distance_spinboxes_layout.addWidget(
+            QtWidgets.QLabel("\u0394l y"), 1, 0, QtCore.Qt.AlignRight
+        )
+        grid_distance_spinboxes_layout.addWidget(
+            QtWidgets.QLabel("\u0394l z"), 2, 0, QtCore.Qt.AlignRight
+        )
+        grid_distance_spinboxes_layout.addWidget(self.distance_delta_x, 0, 1)
+        grid_distance_spinboxes_layout.addWidget(self.distance_delta_y, 1, 1)
+        grid_distance_spinboxes_layout.addWidget(self.distance_delta_z, 2, 1)
+        grid_distance_spinboxes_layout.addWidget(QtWidgets.QLabel("mm"), 0, 2)
+        grid_distance_spinboxes_layout.addWidget(QtWidgets.QLabel("mm"), 1, 2)
+        grid_distance_spinboxes_layout.addWidget(QtWidgets.QLabel("mm"), 2, 2)
+        grid_distance_spinboxes_layout.setSizeConstraint(
+            QtWidgets.QGridLayout.SetFixedSize
+        )
+        # vbox_distance_grid.addWidget(distance_info_label)
+        # vbox_distance_grid.addLayout(grid_distance_spinboxes_layout)
+        vbox_measure_btns_layout = QtWidgets.QVBoxLayout()
+        vbox_measure_btns_layout.setAlignment(QtCore.Qt.AlignTop)
+        self.auto_measure_button = customQT.createQPushButton(
+            "Measure with sensor", enabled=False, connect_fn=None
+        )
+        self.remove_row_button = customQT.createQPushButton(
+            "Remove selected row",
+            QssLabels.CRITICAL_BTN,
+            enabled=False,
+            # connect_fn=self.removeRow,
+        )
+        vbox_measure_btns_layout.addWidget(self.auto_measure_button)
+        vbox_measure_btns_layout.addWidget(self.remove_row_button)
+        hbox_measure_btns_layout.addWidget(distance_info_label)
+        hbox_measure_btns_layout.addLayout(grid_distance_spinboxes_layout)
+        hbox_measure_btns_layout.addLayout(vbox_measure_btns_layout)
+
+        # -  Results TableWidget
+        self.calib_matrix_widget = QtWidgets.QTableWidget(6, 12)
+        self.calib_matrix_widget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.Stretch
+        )
+        self.calib_matrix_widget.setVerticalHeaderLabels(
+            ["Fx", "Fy", "Fz", "Mx", "My", "Mz"]
+        )
+        self.std_matrix_widget = QtWidgets.QTableWidget(6, 12)
+        self.std_matrix_widget.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.Stretch
+        )
+        self.std_matrix_widget.setVerticalHeaderLabels(
+            ["Fx", "Fy", "Fz", "Mx", "My", "Mz"]
+        )
+        self.generate_results_button = customQT.createQPushButton(
+            "Apply calibration and generate results",
+            QssLabels.CONTROL_PANEL_BTN,
+            enabled=False,
+            # connect_fn=self.generateResults,
+        )
+
+        # - Build calibration layout
+        vbox_calibration_layout.addWidget(self.measurements_widget)
+        vbox_calibration_layout.addLayout(hbox_measure_btns_layout)
+        vbox_calibration_layout.addWidget(QtWidgets.QLabel("Calibration matrix"))
+        vbox_calibration_layout.addWidget(self.calib_matrix_widget)
+        vbox_calibration_layout.addWidget(QtWidgets.QLabel("Calibration STD matrix"))
+        vbox_calibration_layout.addWidget(self.std_matrix_widget)
+        vbox_calibration_layout.addWidget(self.generate_results_button)
+
+        # Build main layout
+        main_layout.addLayout(hbox_info_layout)
+        main_layout.addItem(QtWidgets.QSpacerItem(10, 10))
+        main_layout.addWidget(group_box_calibration)
+        main_layout.addItem(
+            QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+            )
+        )
+
+        return main_layout
