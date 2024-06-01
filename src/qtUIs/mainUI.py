@@ -51,6 +51,7 @@ class MainUI(QtWidgets.QWidget):
         self.sensor_mngr.setup(self.cfg_mngr)
         self.camera_mngr.setup(self.cfg_mngr)
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
+        self.test_mngr.setCameraThreads(self.camera_mngr.getCameraThreads())
 
         self.test_timer = QtCore.QTimer(self)
         self.test_timer.timeout.connect(self.test_mngr.testRegisterValues)
@@ -80,12 +81,10 @@ class MainUI(QtWidgets.QWidget):
         self.sensors_connect_button.setEnabled(False)
         self.setDataSettings(False)
         self.calibration_button.setEnabled(False)
-        # Start cameras first
-        self.camera_mngr.startThreads(
-            self.file_mngr.getFilePath() + "/" + self.file_mngr.getFileName()
+        # Start test
+        self.test_mngr.testStart(
+            self.file_mngr.getFilePath(), self.file_mngr.getFileName()
         )
-        # Start sensors
-        self.test_mngr.testStart(self.file_mngr.getFileName())
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
@@ -101,7 +100,6 @@ class MainUI(QtWidgets.QWidget):
         # Stop test
         self.test_timer.stop()
         self.test_mngr.testStop(self.file_mngr.getFileName())
-        self.camera_mngr.stopThreads()
 
         # Get results from recorded data
         self.data_mngr.loadData(

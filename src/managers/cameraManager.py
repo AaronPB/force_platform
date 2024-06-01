@@ -79,22 +79,6 @@ class CameraManager:
                 thread.stop()
         self.camera_threads.clear()
 
-    # Start and stop recordings
-
-    def checkConnections(self):
-        for thread in self.camera_threads:
-            thread.getCamera().connect(check=True)
-
-    def startThreads(self, file_path: str) -> None:
-        for thread in self.camera_threads:
-            thread.setFilePath(file_path)
-            thread.start()
-
-    def stopThreads(self) -> None:
-        for thread in self.camera_threads:
-            if thread.isRunning():
-                thread.stop()
-
     # Setters and getters
 
     def setCameraRead(self, read: bool, camera_id: str) -> None:
@@ -116,3 +100,6 @@ class CameraManager:
 
     def getCameras(self) -> list[Camera]:
         return [thread.getCamera() for thread in self.camera_threads]
+
+    def getCameraThreads(self) -> list[CameraRecordThread]:
+        return self.camera_threads
