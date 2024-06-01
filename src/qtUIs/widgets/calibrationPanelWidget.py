@@ -350,7 +350,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         group_box_calibration.setLayout(vbox_calibration_layout)
 
         # - Measurements TableWidget
-        self.measurements_widget = QtWidgets.QTableWidget(0, 8)
+        self.measurements_widget = QtWidgets.QTableWidget(0, 9)
         self.measurements_widget.setHorizontalHeaderLabels(
             [
                 "\u0394l x",
@@ -359,6 +359,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
                 "Test X mean",
                 "Test Y mean",
                 "Test Z mean",
+                "Max sensor mean",
                 "Max sensor STD",
                 "Measurements",
             ]
