@@ -407,6 +407,37 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         )
         # vbox_distance_grid.addWidget(distance_info_label)
         # vbox_distance_grid.addLayout(grid_distance_spinboxes_layout)
+        grid_distance_fixedpoint_layout = QtWidgets.QVBoxLayout()
+        grid_distance_fixedpoint_spinboxes_layout = QtWidgets.QGridLayout()
+        self.fixedpoint_row = QtWidgets.QSpinBox()
+        self.fixedpoint_row.setMaximum(11)
+        self.fixedpoint_row.setMinimum(1)
+        self.fixedpoint_row.setValue(6)
+        self.fixedpoint_col = QtWidgets.QSpinBox()
+        self.fixedpoint_col.setMaximum(5)
+        self.fixedpoint_col.setMinimum(1)
+        self.fixedpoint_col.setValue(3)
+        self.fixedpoint_row.valueChanged.connect(self.changeFixedPoint)
+        self.fixedpoint_col.valueChanged.connect(self.changeFixedPoint)
+        grid_distance_fixedpoint_spinboxes_layout.addWidget(
+            QtWidgets.QLabel("P row"), 0, 0, QtCore.Qt.AlignRight
+        )
+        grid_distance_fixedpoint_spinboxes_layout.addWidget(
+            QtWidgets.QLabel("P col"), 1, 0, QtCore.Qt.AlignRight
+        )
+        grid_distance_fixedpoint_spinboxes_layout.addWidget(self.fixedpoint_row, 0, 1)
+        grid_distance_fixedpoint_spinboxes_layout.addWidget(self.fixedpoint_col, 1, 1)
+        grid_distance_fixedpoint_spinboxes_layout.addWidget(QtWidgets.QLabel(""), 0, 2)
+        grid_distance_fixedpoint_spinboxes_layout.addWidget(QtWidgets.QLabel(""), 1, 2)
+        grid_distance_fixedpoint_spinboxes_layout.setSizeConstraint(
+            QtWidgets.QGridLayout.SetFixedSize
+        )
+        grid_distance_fixedpoint_layout.addWidget(
+            QtWidgets.QLabel("Get a predefined XY distance from Pij")
+        )
+        grid_distance_fixedpoint_layout.addLayout(
+            grid_distance_fixedpoint_spinboxes_layout
+        )
         vbox_measure_btns_layout = QtWidgets.QVBoxLayout()
         vbox_measure_btns_layout.setAlignment(QtCore.Qt.AlignTop)
         self.auto_measure_button = customQT.createQPushButton(
@@ -422,6 +453,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         vbox_measure_btns_layout.addWidget(self.remove_row_button)
         hbox_measure_btns_layout.addWidget(distance_info_label)
         hbox_measure_btns_layout.addLayout(grid_distance_spinboxes_layout)
+        hbox_measure_btns_layout.addLayout(grid_distance_fixedpoint_layout)
         hbox_measure_btns_layout.addLayout(vbox_measure_btns_layout)
 
         # -  Results TableWidget
@@ -466,3 +498,28 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         )
 
         return main_layout
+
+    # UI buttons click connectors
+
+    @QtCore.Slot()
+    def changeFixedPoint(self):
+        lm, ln = 108, 30  # TODO set this distances in config
+        print("Ey you!")
+        if self.sender() is self.fixedpoint_col:
+            self.distance_delta_x.setValue(
+                lm
+                * (
+                    self.fixedpoint_col.value()
+                    - ((self.fixedpoint_col.maximum() + 1) / 2)
+                )
+            )
+            return
+        if self.sender() is self.fixedpoint_row:
+            self.distance_delta_y.setValue(
+                ln
+                * (
+                    ((self.fixedpoint_row.maximum() + 1) / 2)
+                    - self.fixedpoint_row.value()
+                )
+            )
+            return
