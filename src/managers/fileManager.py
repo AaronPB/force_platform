@@ -48,16 +48,21 @@ class FileManager:
     # Setters and getters
 
     def setFileName(self, name: str) -> None:
-        self.checkFileName()
         if name == self.file_name:
+            self.checkFileName()
             return
         self.file_name = name
-        self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
+        self.checkFileName()
+        if self.cfg_mngr:
+            self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
         logger.info(f"Changed test name to: {self.file_name}")
 
     def setFilePath(self, path: str):
         self.file_path = path
-        self.cfg_mngr.setConfigValue(CfgPaths.TEST_FOLDER_PATH.value, self.file_path)
+        if self.cfg_mngr:
+            self.cfg_mngr.setConfigValue(
+                CfgPaths.TEST_FOLDER_PATH.value, self.file_path
+            )
         logger.info(f"Changed test folder path to: {self.file_path}")
 
     def checkFileName(self, file_name: str = None) -> None:
