@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from sklearn.linear_model import LinearRegression
+from scipy.linalg import lstsq
 
 from src.managers.sensorManager import SensorManager
 from src.managers.fileManager import FileManager
@@ -180,9 +181,9 @@ class PlatformCalibrationManager:
         self.measurement_ready: bool = False
         self.use_ref_sensor: bool = False
         self.ref_value: float
-        df_distance_cols = ["l_x", "l_y", "l_z"]
-        df_triaxial_cols = ["V_fx", "V_fy", "V_fy"]
-        df_platform_cols = [
+        self.df_distance_cols = ["l_x", "l_y", "l_z"]
+        self.df_triaxial_cols = ["V_fx", "V_fy", "V_fy"]
+        self.df_platform_cols = [
             "V_f1",
             "V_f2",
             "V_f3",
@@ -197,20 +198,20 @@ class PlatformCalibrationManager:
             "V_f12",
         ]
         # - Measurement dataframes with mean values of sensors
-        self.measurement_distances_df = pd.DataFrame(columns=df_distance_cols)
-        df_triaxial_cols_mean = [col + "_mean" for col in df_triaxial_cols]
-        df_platform_cols_mean = [col + "_mean" for col in df_platform_cols]
+        self.measurement_distances_df = pd.DataFrame(columns=self.df_distance_cols)
+        df_triaxial_cols_mean = [col + "_mean" for col in self.df_triaxial_cols]
+        df_platform_cols_mean = [col + "_mean" for col in self.df_platform_cols]
         self.measurement_mean_df = pd.DataFrame(
             columns=df_triaxial_cols_mean + df_platform_cols_mean
         )
-        df_triaxial_cols_std = [col + "_std" for col in df_triaxial_cols]
-        df_platform_cols_std = [col + "_std" for col in df_platform_cols]
+        df_triaxial_cols_std = [col + "_std" for col in self.df_triaxial_cols]
+        df_platform_cols_std = [col + "_std" for col in self.df_platform_cols]
         self.measurement_std_df = pd.DataFrame(
             columns=df_triaxial_cols_std + df_platform_cols_std
         )
         # Calib results
         self.calibration_matrix = None
-        self.covariance_matrix = None
+        self.std_dev_matrix = None
         # File manager
         self.file_mngr: FileManager
 
@@ -255,6 +256,9 @@ class PlatformCalibrationManager:
         self.platform_group.start()
         [sensor.connect() for sensor in self.ref_sensor]
         self.measurement_ready = True
+        self.measurement_distances_df.loc[len(self.measurement_distances_df)] = (
+            distances
+        )
 
     def registerValue(self) -> None:
         if not self.measurement_ready:
@@ -342,13 +346,50 @@ class PlatformCalibrationManager:
         # return self.measurements_df.iloc[-1].tolist()
         pass
 
-    def getResults(self) -> list[float]:
-        # TODO
-        # features = self.measurements_df["sensor_mean"].to_numpy().reshape(-1, 1)
-        # targets = self.measurements_df["ref_value"].to_numpy().reshape(-1, 1)
-        # model = LinearRegression().fit(features, targets)
-        # self.sensor_slope = float(model.coef_[0])
-        # self.sensor_intercept = float(model.intercept_)
-        # self.calib_score = model.score(features, targets)
-        # return [self.sensor_slope, self.sensor_intercept, self.calib_score]
-        pass
+    def getResults(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+        force_ratio_x = self.ref_sensor[0].getSlope()
+        force_ratio_y = self.ref_sensor[1].getSlope()
+        force_ratio_z = self.ref_sensor[2].getSlope()
+        mean_values = self.measurement_mean_df
+        distance_values = self.measurement_distances_df
+
+        M = len(mean_values)
+        Zf = []
+        f = []
+        for i in range(M):
+            # Process data for M measurement
+            # Applied force in triaxial sensor
+            fpM = np.array(
+                [
+                    mean_values.at[i, self.df_triaxial_cols[1]] * force_ratio_y,
+                    mean_values.at[i, self.df_triaxial_cols[0]] * force_ratio_x,
+                    mean_values.at[i, self.df_triaxial_cols[2]] * force_ratio_z,
+                ]
+            )
+            # Transform force to platform center (fM)
+            delta_x = distance_values.at[i, self.df_distance_cols[0]]
+            delta_y = distance_values.at[i, self.df_distance_cols[1]]
+            delta_z = distance_values.at[i, self.df_distance_cols[2]]
+            delta = np.array(
+                [[0, -delta_z, delta_y], [delta_z, 0, -delta_x], [-delta_y, delta_x, 0]]
+            )
+            fM = np.dot(np.vstack([np.eye(3), delta]), fpM)
+            # Define platform sensor values matrix
+            vfM = np.array([mean_values.at[i, col] for col in self.df_platform_cols])
+            # Build A matrix
+            ZfM = np.kron(np.eye(6), vfM.T)
+            # Concatenate M matrixes into general matrixes.
+            Zf.append(ZfM)
+            f.append(fM)
+        # Apply least squares
+        Zf = np.vstack(Zf)
+        f = np.hstack(f).reshape(-1, 1)
+        x, residuals, rank, s = lstsq(Zf, f)
+        # Reshape calibration and deviation matrixes
+        C = x.reshape(12, 6).T
+        covariance_matrix = 25 * np.linalg.inv(np.dot(Zf.T, Zf))
+        std_devs = np.sqrt(np.diag(covariance_matrix))
+        # Save matrixes in dataframes
+        self.calibration_matrix = pd.DataFrame(C)
+        self.std_dev_matrix = pd.DataFrame(std_devs)
+        return (self.calibration_matrix, self.std_dev_matrix)
