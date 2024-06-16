@@ -353,21 +353,18 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         group_box_calibration.setLayout(vbox_calibration_layout)
 
         # - Measurements TableWidget
-        self.measurements_widget = QtWidgets.QTableWidget(0, 9)
+        self.measurements_widget = QtWidgets.QTableWidget(0, 6)
         self.measurements_widget.setHorizontalHeaderLabels(
             [
-                "\u0394l x",
-                "\u0394l y",
-                "\u0394l z",
-                "Test X mean",
-                "Test Y mean",
-                "Test Z mean",
-                "Max sensor mean",
-                "Max sensor STD",
-                "Measurements",
+                "\u0394l x (mm)",
+                "\u0394l y (mm)",
+                "\u0394l z (mm)",
+                "Test X mean (N/V/V)",
+                "Test Y mean (N/V/V)",
+                "Test Z mean (N/V/V)",
             ]
         )
-        self.measurements_widget.verticalHeader().setVisible(False)
+        # self.measurements_widget.verticalHeader().setVisible(False)
         self.measurements_widget.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.Stretch
         )
@@ -562,9 +559,8 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         while self.recording_timer.isActive():
             QtCore.QCoreApplication.processEvents()
         self.calib_mngr.stopMeasurement()
-        # TODO
-        # values = self.calib_mngr.getLastValues()
-        # self.addMeasurementRow(values[0], values[1], values[2], values[3])
+        values = self.calib_mngr.getLastValues()
+        self.addMeasurementRow(values)
         self.enableButtons(True)
 
     @QtCore.Slot()
@@ -615,29 +611,12 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         self.clear_button.setEnabled(enable)
         pass
 
-    def addMeasurementRow(
-        self,
-        test_value: float,
-        sensor_mean: float,
-        sensor_std: float,
-        measurements: int,
-    ):
-        # TODO
-        # row_position = self.measurements_widget.rowCount()
-        # self.measurements_widget.insertRow(row_position)
-        # self.measurements_widget.setItem(
-        #     row_position, 0, QtWidgets.QTableWidgetItem("{:.6e}".format(test_value))
-        # )
-        # self.measurements_widget.setItem(
-        #     row_position, 1, QtWidgets.QTableWidgetItem("{:.6e}".format(sensor_mean))
-        # )
-        # self.measurements_widget.setItem(
-        #     row_position, 2, QtWidgets.QTableWidgetItem("{:.6e}".format(sensor_std))
-        # )
-        # self.measurements_widget.setItem(
-        #     row_position, 3, QtWidgets.QTableWidgetItem(str(measurements))
-        # )
-        pass
+    def addMeasurementRow(self, test_values: list[float]):
+        row_position = self.measurements_widget.rowCount()
+        self.measurements_widget.insertRow(row_position)
+        for col, value in enumerate(test_values):
+            item = QtWidgets.QTableWidgetItem("{:.0e}".format(value))
+            self.measurements_widget.setItem(row_position, col, item)
 
     def updateResultsTable(
         self,

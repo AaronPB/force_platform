@@ -347,10 +347,12 @@ class PlatformCalibrationManager:
     def getRecordDuration(self) -> int:
         return int(self.record_interval_ms * self.record_amount)
 
-    def getLastValues(self) -> list:
-        # TODO
-        # return self.measurements_df.iloc[-1].tolist()
-        pass
+    def getLastValues(self) -> list[float]:
+        distances_last_values = self.measurement_distances_df.iloc[-1].tolist()
+        mean_last_values = (
+            self.measurement_mean_df[self.df_triaxial_cols].iloc[-1].tolist()
+        )
+        return distances_last_values + mean_last_values
 
     def getResults(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         force_ratio_x = self.ref_sensor[0].getSlope()
