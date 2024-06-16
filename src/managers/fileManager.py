@@ -15,7 +15,7 @@ class ConfigYAMLHandler(Protocol):
 
 class FileManager:
     def __init__(self) -> None:
-        self.cfg_mngr: ConfigYAMLHandler
+        self.cfg_mngr: ConfigYAMLHandler = None
         self.file_name: str = "Test"
         self.file_name_suffix: str = ""
         self.file_path: str = os.path.join(os.path.dirname(__file__), "..", "..")
@@ -53,13 +53,13 @@ class FileManager:
             return
         self.file_name = name
         self.checkFileName()
-        if self.cfg_mngr:
+        if self.cfg_mngr is not None:
             self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
         logger.info(f"Changed test name to: {self.file_name}")
 
     def setFilePath(self, path: str):
         self.file_path = path
-        if self.cfg_mngr:
+        if self.cfg_mngr is not None:
             self.cfg_mngr.setConfigValue(
                 CfgPaths.TEST_FOLDER_PATH.value, self.file_path
             )

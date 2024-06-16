@@ -291,5 +291,5 @@ class SensorManager:
     def getSensorCalibRef(self) -> Sensor:
         return self.loadcell_calib_ref
 
-    def getPlatformCalibRef(self) -> Sensor:
+    def getPlatformCalibRef(self) -> list[Sensor]:
         return self.platform_calib_ref

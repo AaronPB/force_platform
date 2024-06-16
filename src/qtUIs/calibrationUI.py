@@ -6,7 +6,10 @@ from src.enums.configPaths import ConfigPaths
 from src.enums.sensorTypes import SGTypes
 from src.managers.configManager import ConfigManager
 from src.managers.sensorManager import SensorManager
-from src.managers.calibrationManager import SensorCalibrationManager
+from src.managers.calibrationManager import (
+    SensorCalibrationManager,
+    PlatformCalibrationManager,
+)
 from src.qtUIs.widgets.calibrationPanelWidget import (
     SensorCalibrationPanelWidget,
     PlatformCalibrationPanelWidget,
@@ -70,14 +73,14 @@ class CalibrationUI(QtWidgets.QWidget):
         record_amount: int = self.cfg_mngr.getConfigValue(
             ConfigPaths.CALIBRATION_DATA_AMOUNT.value, 300
         )
-        # TODO calibration manager for platform calibration
-        # calib_mngr = SensorCalibrationManager()
-        # calib_mngr.setup(
-        #     sensor,
-        #     self.sensor_mngr.getSensorCalibRef(),
-        #     record_interval,
-        #     record_amount,
-        # )
+        # Calibration manager for platform calibration
+        calib_mngr = PlatformCalibrationManager()
+        calib_mngr.setup(
+            platform_group,
+            self.sensor_mngr.getPlatformCalibRef(),
+            record_interval,
+            record_amount,
+        )
         # Clear panel layout
         for i in reversed(range(self.panel_layout.count())):
             widget = self.panel_layout.itemAt(i).widget()

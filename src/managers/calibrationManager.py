@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
 import numpy as np
 import pandas as pd
+from datetime import datetime
 from sklearn.linear_model import LinearRegression
 
 from src.managers.sensorManager import SensorManager
+from src.managers.fileManager import FileManager
 from src.enums.sensorStatus import SStatus
 from src.handlers import SensorGroup, Sensor
 
@@ -206,8 +209,10 @@ class PlatformCalibrationManager:
             columns=df_triaxial_cols_std + df_platform_cols_std
         )
         # Calib results
-        self.calibration_matrix
-        self.covariance_matrix
+        self.calibration_matrix = None
+        self.covariance_matrix = None
+        # File manager
+        self.file_mngr: FileManager
 
     def setup(
         self,
@@ -224,10 +229,27 @@ class PlatformCalibrationManager:
             sensor.checkConnection()
         self.record_interval_ms = record_interval_ms
         self.record_amount = record_amount
+        self.setupFileManager()
+
+    # Prepare FileManager
+    def setupFileManager(self):
+        self.file_mngr = FileManager()
+        formatted_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        folder_name = f"platform_calibs/calibration_{self.platform_group.getName()}_{formatted_date}"
+        folder_path = os.path.join(self.file_mngr.getFilePath(), folder_name)
+        # Crear la carpeta
+        try:
+            os.makedirs(folder_path, exist_ok=True)
+            logger.info(f"New calibration folder created in {folder_path}")
+        except Exception as e:
+            logger.error(
+                f"Could not create folder with name {folder_name} in {self.file_mngr.getFilePath()}"
+            )
+        self.file_mngr.setFilePath(folder_path)
 
     # Calibration measurements
 
-    def startMeasurement(self) -> None:
+    def startMeasurement(self, distances: list[int]) -> None:
         self.platform_group.clearValues()
         [sensor.clearValues() for sensor in self.ref_sensor]
         self.platform_group.start()
