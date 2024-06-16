@@ -272,19 +272,34 @@ class PlatformCalibrationManager:
     # Data management
 
     def saveMeasurement(self) -> None:
-        # TODO distances in dataframe
+        df_raw: pd.DataFrame = pd.DataFrame()
         new_measurement_means = []
         new_measurement_stds = []
         for sensor in self.ref_sensor:
             new_measurement_means.append(np.mean(sensor.getValues()))
             new_measurement_stds.append(np.std(sensor.getValues()))
+            df_raw[sensor.getName()] = sensor.getValues()
         for sensor in self.platform_group.getSensors().values():
             new_measurement_means.append(np.mean(sensor.getValues()))
             new_measurement_stds.append(np.std(sensor.getValues()))
+            df_raw[sensor.getName()] = sensor.getValues()
+        # Save means and stds data into dataframes, moving z axis data to end of list.
         self.measurement_mean_df.loc[len(self.measurement_mean_df)] = (
-            new_measurement_means
+            new_measurement_means[:3]
+            + new_measurement_means[7:]
+            + new_measurement_means[3:7]
         )
-        self.measurement_std_df.loc[len(self.measurement_std_df)] = new_measurement_stds
+        self.measurement_std_df.loc[len(self.measurement_std_df)] = (
+            new_measurement_stds[:3]
+            + new_measurement_stds[7:]
+            + new_measurement_stds[3:7]
+        )
+        # Save raw data in calibration folder
+        file_name = "-".join(
+            self.measurement_distances_df.iloc[-1].astype(str).tolist()
+        )
+        self.file_mngr.setFileName(file_name)
+        self.file_mngr.saveDataToCSV(df_raw)
 
     def removeMeasurement(self, index: int) -> None:
         self.measurement_distances_df.drop(index=index, inplace=True)
