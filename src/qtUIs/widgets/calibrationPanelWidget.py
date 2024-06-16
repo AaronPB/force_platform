@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 from src.enums.qssLabels import QssLabels
 from src.managers.sensorManager import SensorManager
 from src.managers.calibrationManager import SensorCalibrationManager
@@ -478,6 +478,25 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             # connect_fn=self.generateResults,
         )
 
+        self.color_matrix = [
+            [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+        ]
+        self.updateTable(
+            table_widget=self.calib_matrix_widget,
+            color_matrix=self.color_matrix,
+            color=(0, 10, 40),
+        )
+        self.updateTable(
+            table_widget=self.std_matrix_widget,
+            color_matrix=self.color_matrix,
+            color=(0, 10, 40),
+        )
+
         # - Build calibration layout
         vbox_calibration_layout.addWidget(self.measurements_widget)
         vbox_calibration_layout.addLayout(hbox_measure_btns_layout)
@@ -504,7 +523,6 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def changeFixedPoint(self):
         lm, ln = 108, 30  # TODO set this distances in config
-        print("Ey you!")
         if self.sender() is self.fixedpoint_col:
             self.distance_delta_x.setValue(
                 lm
@@ -523,3 +541,28 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
                 )
             )
             return
+
+    # Widget functions
+
+    def updateTable(
+        self,
+        table_widget: QtWidgets.QTableWidget,
+        dataframe=None,
+        color_matrix=None,
+        color=(255, 255, 255),
+    ):
+        if dataframe is not None:
+            for row in range(dataframe.shape[0]):
+                for col in range(dataframe.shape[1]):
+                    item = QtWidgets.QTableWidgetItem(str(dataframe.iloc[row, col]))
+                    table_widget.setItem(row, col, item)
+
+        if color_matrix is not None:
+            for row in range(len(color_matrix)):
+                for col in range(len(color_matrix[row])):
+                    if color_matrix[row][col] == 1:
+                        item = table_widget.item(row, col)
+                        if item is None:
+                            item = QtWidgets.QTableWidgetItem()
+                            table_widget.setItem(row, col, item)
+                        item.setBackground(QtGui.QColor(*color))
