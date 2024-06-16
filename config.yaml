@@ -70,6 +70,8 @@ cameras:
       serial: /dev/video2
     settings:
       fps: 30.0
+      frame_width: 620
+      frame_height: 480
     properties:
       camera_model: Logitech Series
 sensors_calibration:

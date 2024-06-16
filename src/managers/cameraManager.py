@@ -14,10 +14,8 @@ camera_global_keys = [
     CParams.NAME,
     CParams.READ,
     CParams.CONNECTION_SECTION,
-    CParams.SETTINGS_SECTION,
 ]
 camera_conn_keys = [CParams.SERIAL]
-camera_sets_keys = [CParams.FPS]
 
 
 class ConfigYAMLHandler(Protocol):
@@ -59,14 +57,6 @@ class CameraManager:
         ):
             logger.warning(
                 f"Camera {id} does not have the required connection keys! Not loaded."
-            )
-            return None
-        if not all(
-            key.value in params[CParams.SETTINGS_SECTION.value].keys()
-            for key in camera_sets_keys
-        ):
-            logger.warning(
-                f"Camera {id} does not have the required settings keys! Not loaded."
             )
             return None
         camera = Camera()

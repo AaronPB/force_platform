@@ -34,6 +34,29 @@ class Camera:
     def record(self, check: bool = False, file_path: str = None) -> bool:
         usb_path = self.params[CParams.CONNECTION_SECTION.value][CParams.SERIAL.value]
         self.camera = cv2.VideoCapture(usb_path)
+        # Get camera props
+        frame_width = int(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = self.camera.get(cv2.CAP_PROP_FPS)
+        # Update camera props in case user has defined them in config via settings
+        # FIXME OpenCV could override camera values, and the FPS drops significantly.
+        if CParams.SETTINGS_SECTION.value in self.params:
+            camera_settings: dict = self.params[CParams.SETTINGS_SECTION.value]
+            self.camera.set(
+                cv2.CAP_PROP_FRAME_WIDTH,
+                camera_settings.get(CParams.FRAME_WIDTH.value, frame_width),
+            )
+            self.camera.set(
+                cv2.CAP_PROP_FRAME_HEIGHT,
+                camera_settings.get(CParams.FRAME_HEIGHT.value, frame_height),
+            )
+            self.camera.set(
+                cv2.CAP_PROP_FPS, camera_settings.get(CParams.FPS.value, fps)
+            )
+            # Update camera props
+            frame_width = int(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = self.camera.get(cv2.CAP_PROP_FPS)
         if not self.camera.isOpened():
             self.camera.release()
             logger.warning(f"Could not connect or open camera port {usb_path}")
@@ -43,14 +66,13 @@ class Camera:
             return True
 
         # Start camera recording
+        logger.debug(
+            "Camera props" + f"\nFRAME: {frame_width}x{frame_height}" + f"\nFPS: {fps}"
+        )
         self.recording = True
         if file_path is None:
             file_path = "output.avi"
         fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        frame_width = int(self.camera.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = self.camera.get(cv2.CAP_PROP_FPS)
-        # fps = self.params[CParams.SETTINGS_SECTION.value][CParams.FPS.value]
         logger.info(
             f"Recording camera {self.params[CParams.NAME.value]} to file path {file_path}"
         )
