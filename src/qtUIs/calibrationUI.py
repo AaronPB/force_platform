@@ -89,6 +89,7 @@ class CalibrationUI(QtWidgets.QWidget):
         # Build layout with new calibration panel
         platform_calib_panel = PlatformCalibrationPanelWidget(
             self.sensor_mngr,
+            calib_mngr,
             platform_group.getName(),
         )
         self.panel_layout.addWidget(platform_calib_panel)

@@ -3,7 +3,10 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from src.enums.qssLabels import QssLabels
 from src.managers.sensorManager import SensorManager
-from src.managers.calibrationManager import SensorCalibrationManager
+from src.managers.calibrationManager import (
+    SensorCalibrationManager,
+    PlatformCalibrationManager,
+)
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.matplotlibWidgets import PlotRegressionWidget
 
@@ -288,20 +291,20 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
     def __init__(
         self,
         sensor_manager: SensorManager,
-        # platform_calibration_manager: SensorCalibrationManager,
+        platform_calibration_manager: PlatformCalibrationManager,
         platform_name: str,
     ):
         super(PlatformCalibrationPanelWidget, self).__init__()
         self.sensor_mngr = sensor_manager
-        # self.calib_mngr = platform_calibration_manager
-        # self.recording_timer = QtCore.QTimer(self)
-        # self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
+        self.calib_mngr = platform_calibration_manager
+        self.recording_timer = QtCore.QTimer(self)
+        self.recording_timer.timeout.connect(self.calib_mngr.registerValue)
 
         self.platform_name = platform_name
 
         self.setLayout(self.loadLayout())
 
-        # self.enableButtons(True)
+        self.enableButtons(True)
 
     # UI section loaders
 
@@ -329,13 +332,13 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             "Save results",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=False,
-            # connect_fn=self.saveResults,
+            connect_fn=self.saveResults,
         )
         self.clear_button = customQT.createQPushButton(
             "Clear calibration test",
             QssLabels.CRITICAL_CONTROL_PANEL_BTN,
             enabled=False,
-            # connect_fn=self.clearValues,
+            connect_fn=self.clearValues,
         )
         self.grid_buttons_layout.addWidget(self.save_button, 0, 0)
         self.grid_buttons_layout.addWidget(self.clear_button, 0, 1)
@@ -447,7 +450,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             "Remove selected row",
             QssLabels.CRITICAL_BTN,
             enabled=False,
-            # connect_fn=self.removeRow,
+            connect_fn=self.removeRow,
         )
         vbox_measure_btns_layout.addWidget(self.auto_measure_button)
         vbox_measure_btns_layout.addWidget(self.remove_row_button)
@@ -475,7 +478,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             "Apply calibration and generate results",
             QssLabels.CONTROL_PANEL_BTN,
             enabled=False,
-            # connect_fn=self.generateResults,
+            connect_fn=self.generateResults,
         )
 
         self.color_matrix = [
@@ -486,12 +489,12 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
         ]
-        self.updateTable(
+        self.updateResultsTable(
             table_widget=self.calib_matrix_widget,
             color_matrix=self.color_matrix,
             color=(0, 10, 40),
         )
-        self.updateTable(
+        self.updateResultsTable(
             table_widget=self.std_matrix_widget,
             color_matrix=self.color_matrix,
             color=(0, 10, 40),
@@ -542,9 +545,101 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             )
             return
 
+    @QtCore.Slot()
+    def recordDataWithSensor(self):
+        self.enableButtons(False)
+        self.calib_mngr.startMeasurement(
+            distances=[
+                self.distance_delta_x.value(),
+                self.distance_delta_y.value(),
+                self.distance_delta_z.value(),
+            ]
+        )
+        self.recording_timer.start(self.calib_mngr.getRecordInterval())
+        QtCore.QTimer.singleShot(
+            self.calib_mngr.getRecordDuration(), self.recording_timer.stop
+        )
+        while self.recording_timer.isActive():
+            QtCore.QCoreApplication.processEvents()
+        self.calib_mngr.stopMeasurement()
+        # TODO
+        # values = self.calib_mngr.getLastValues()
+        # self.addMeasurementRow(values[0], values[1], values[2], values[3])
+        self.enableButtons(True)
+
+    @QtCore.Slot()
+    def removeRow(self):
+        self.enableButtons(False)
+        selected_row = self.measurements_widget.currentRow()
+        if selected_row >= 0:
+            self.measurements_widget.removeRow(selected_row)
+            self.calib_mngr.removeMeasurement(selected_row)
+        self.enableButtons(True)
+
+    @QtCore.Slot()
+    def generateResults(self):
+        results = self.calib_mngr.getResults()
+        self.updateResultsTable(
+            table_widget=self.calib_matrix_widget, dataframe=results(0)
+        )
+        self.updateResultsTable(
+            table_widget=self.std_matrix_widget, dataframe=results(1)
+        )
+        self.save_button.setEnabled(True)
+
+    @QtCore.Slot()
+    def saveResults(self):
+        self.calib_mngr.saveResults(self.sensor_mngr)
+        self.save_button.setEnabled(False)
+
+    @QtCore.Slot()
+    def clearValues(self):
+        self.enableButtons(False)
+        self.clearCalibrationTest()
+        self.enableButtons(True)
+
     # Widget functions
 
-    def updateTable(
+    def enableButtons(self, enable: bool = False):
+        if not enable:
+            self.save_button.setEnabled(enable)
+            self.auto_measure_button.setEnabled(enable)
+            self.remove_row_button.setEnabled(enable)
+            self.generate_results_button.setEnabled(enable)
+        if self.calib_mngr.refSensorConnected():
+            self.auto_measure_button.setEnabled(enable)
+        if self.measurements_widget.rowCount() > 0:
+            self.remove_row_button.setEnabled(enable)
+        if self.measurements_widget.rowCount() > 12:
+            self.generate_results_button.setEnabled(enable)
+        self.clear_button.setEnabled(enable)
+        pass
+
+    def addMeasurementRow(
+        self,
+        test_value: float,
+        sensor_mean: float,
+        sensor_std: float,
+        measurements: int,
+    ):
+        # TODO
+        # row_position = self.measurements_widget.rowCount()
+        # self.measurements_widget.insertRow(row_position)
+        # self.measurements_widget.setItem(
+        #     row_position, 0, QtWidgets.QTableWidgetItem("{:.6e}".format(test_value))
+        # )
+        # self.measurements_widget.setItem(
+        #     row_position, 1, QtWidgets.QTableWidgetItem("{:.6e}".format(sensor_mean))
+        # )
+        # self.measurements_widget.setItem(
+        #     row_position, 2, QtWidgets.QTableWidgetItem("{:.6e}".format(sensor_std))
+        # )
+        # self.measurements_widget.setItem(
+        #     row_position, 3, QtWidgets.QTableWidgetItem(str(measurements))
+        # )
+        pass
+
+    def updateResultsTable(
         self,
         table_widget: QtWidgets.QTableWidget,
         dataframe=None,
@@ -566,3 +661,10 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
                             item = QtWidgets.QTableWidgetItem()
                             table_widget.setItem(row, col, item)
                         item.setBackground(QtGui.QColor(*color))
+
+    def clearCalibrationTest(self):
+        self.measurements_widget.clearContents()
+        self.measurements_widget.setRowCount(0)
+        self.calib_matrix_widget.clearContents()
+        self.std_matrix_widget.clearContents()
+        self.calib_mngr.clearValues()

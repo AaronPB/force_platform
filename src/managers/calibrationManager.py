@@ -311,6 +311,12 @@ class PlatformCalibrationManager:
         self.measurement_std_df.drop(index=index, inplace=True)
 
     def saveResults(self, sensor_manager: SensorManager) -> None:
+        # First save results in csv files
+        self.file_mngr.setFileName("RESULTS_CALIBRATION_MATRIX")
+        self.file_mngr.saveDataToCSV(self.calibration_matrix)
+        self.file_mngr.setFileName("RESULTS_STDDEV_MATRIX")
+        self.file_mngr.saveDataToCSV(self.std_dev_matrix)
+        # TODO Replace platform sensor slope values
         # sensor_manager.setSensorSlope(self.sensor, self.sensor_slope)
         # sensor_manager.setSensorIntercept(self.sensor, self.sensor_intercept)
         # logger.info(
