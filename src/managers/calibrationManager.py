@@ -182,8 +182,8 @@ class PlatformCalibrationManager:
         self.use_ref_sensor: bool = False
         self.ref_value: float
         self.df_distance_cols = ["l_x", "l_y", "l_z"]
-        self.df_triaxial_cols = ["V_fx", "V_fy", "V_fy"]
-        self.df_platform_cols = [
+        df_triaxial_cols = ["V_fx", "V_fy", "V_fz"]
+        df_platform_cols = [
             "V_f1",
             "V_f2",
             "V_f3",
@@ -197,17 +197,17 @@ class PlatformCalibrationManager:
             "V_f11",
             "V_f12",
         ]
+        self.df_triaxial_cols_mean = [col + "_mean" for col in df_triaxial_cols]
+        self.df_platform_cols_mean = [col + "_mean" for col in df_platform_cols]
+        self.df_triaxial_cols_std = [col + "_std" for col in df_triaxial_cols]
+        self.df_platform_cols_std = [col + "_std" for col in df_platform_cols]
         # - Measurement dataframes with mean values of sensors
         self.measurement_distances_df = pd.DataFrame(columns=self.df_distance_cols)
-        df_triaxial_cols_mean = [col + "_mean" for col in self.df_triaxial_cols]
-        df_platform_cols_mean = [col + "_mean" for col in self.df_platform_cols]
         self.measurement_mean_df = pd.DataFrame(
-            columns=df_triaxial_cols_mean + df_platform_cols_mean
+            columns=self.df_triaxial_cols_mean + self.df_platform_cols_mean
         )
-        df_triaxial_cols_std = [col + "_std" for col in self.df_triaxial_cols]
-        df_platform_cols_std = [col + "_std" for col in self.df_platform_cols]
         self.measurement_std_df = pd.DataFrame(
-            columns=df_triaxial_cols_std + df_platform_cols_std
+            columns=self.df_triaxial_cols_std + self.df_platform_cols_std
         )
         # Calib results
         self.calibration_matrix = None
@@ -251,11 +251,13 @@ class PlatformCalibrationManager:
     # Calibration measurements
 
     def startMeasurement(self, distances: list[int]) -> None:
+        self.measurement_ready = False
         self.platform_group.clearValues()
         [sensor.clearValues() for sensor in self.ref_sensor]
         self.platform_group.start()
         [sensor.connect() for sensor in self.ref_sensor]
         self.measurement_ready = True
+        logger.debug(f"Starting measurement...")
         self.measurement_distances_df.loc[len(self.measurement_distances_df)] = (
             distances
         )
@@ -298,8 +300,10 @@ class PlatformCalibrationManager:
             + new_measurement_stds[7:]
             + new_measurement_stds[3:7]
         )
+        logger.debug(self.measurement_mean_df)
+        logger.debug(self.measurement_std_df)
         # Save raw data in calibration folder
-        file_name = "-".join(
+        file_name = "_".join(
             self.measurement_distances_df.iloc[-1].astype(str).tolist()
         )
         self.file_mngr.setFileName(file_name)
@@ -350,7 +354,7 @@ class PlatformCalibrationManager:
     def getLastValues(self) -> list[float]:
         distances_last_values = self.measurement_distances_df.iloc[-1].tolist()
         mean_last_values = (
-            self.measurement_mean_df[self.df_triaxial_cols].iloc[-1].tolist()
+            self.measurement_mean_df[self.df_triaxial_cols_mean].iloc[-1].tolist()
         )
         return distances_last_values + mean_last_values
 
@@ -369,9 +373,9 @@ class PlatformCalibrationManager:
             # Applied force in triaxial sensor
             fpM = np.array(
                 [
-                    mean_values.at[i, self.df_triaxial_cols[1]] * force_ratio_y,
-                    mean_values.at[i, self.df_triaxial_cols[0]] * force_ratio_x,
-                    mean_values.at[i, self.df_triaxial_cols[2]] * force_ratio_z,
+                    mean_values.at[i, self.df_triaxial_cols_mean[1]] * force_ratio_y,
+                    mean_values.at[i, self.df_triaxial_cols_mean[0]] * force_ratio_x,
+                    mean_values.at[i, self.df_triaxial_cols_mean[2]] * force_ratio_z,
                 ]
             )
             # Transform force to platform center (fM)
@@ -383,7 +387,9 @@ class PlatformCalibrationManager:
             )
             fM = np.dot(np.vstack([np.eye(3), delta]), fpM)
             # Define platform sensor values matrix
-            vfM = np.array([mean_values.at[i, col] for col in self.df_platform_cols])
+            vfM = np.array(
+                [mean_values.at[i, col] for col in self.df_platform_cols_mean]
+            )
             # Build A matrix
             ZfM = np.kron(np.eye(6), vfM.T)
             # Concatenate M matrixes into general matrixes.
@@ -394,9 +400,26 @@ class PlatformCalibrationManager:
         f = np.hstack(f).reshape(-1, 1)
         x, residuals, rank, s = lstsq(Zf, f)
         # Reshape calibration and deviation matrixes
+        logger.debug(x)
         C = x.reshape(12, 6).T
+        logger.debug(pd.DataFrame(C))
+        logger.debug(Zf)
         covariance_matrix = 25 * np.linalg.inv(np.dot(Zf.T, Zf))
-        std_devs = np.sqrt(np.diag(covariance_matrix))
+        diagonal_covariance = np.diag(covariance_matrix)
+        diag_cov_ok = True
+        if np.isnan(diagonal_covariance).any():
+            logger.error("Covariance matrix diagonal has NaN values!")
+            logger.debug(diagonal_covariance)
+            diag_cov_ok = False
+        if np.any(diagonal_covariance < 0):
+            logger.error("Covariance matrix diagonal has negative values!")
+            logger.debug(diagonal_covariance)
+            diag_cov_ok = False
+        std_devs = C
+        logger.debug("STD_DEVS")
+        logger.debug(pd.DataFrame(np.sqrt(diagonal_covariance).reshape(12, 6).T))
+        if diag_cov_ok:
+            std_devs = np.sqrt(diagonal_covariance).reshape(12, 6).T
         # Save matrixes in dataframes
         self.calibration_matrix = pd.DataFrame(C)
         self.std_dev_matrix = pd.DataFrame(std_devs)

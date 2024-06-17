@@ -441,7 +441,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         vbox_measure_btns_layout = QtWidgets.QVBoxLayout()
         vbox_measure_btns_layout.setAlignment(QtCore.Qt.AlignTop)
         self.auto_measure_button = customQT.createQPushButton(
-            "Measure with sensor", enabled=False, connect_fn=None
+            "Measure with sensor", enabled=False, connect_fn=self.recordDataWithSensor
         )
         self.remove_row_button = customQT.createQPushButton(
             "Remove selected row",
@@ -576,10 +576,16 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
     def generateResults(self):
         results = self.calib_mngr.getResults()
         self.updateResultsTable(
-            table_widget=self.calib_matrix_widget, dataframe=results(0)
+            table_widget=self.calib_matrix_widget,
+            dataframe=results[0],
+            color_matrix=self.color_matrix,
+            color=(0, 10, 40),
         )
         self.updateResultsTable(
-            table_widget=self.std_matrix_widget, dataframe=results(1)
+            table_widget=self.std_matrix_widget,
+            dataframe=results[1],
+            color_matrix=self.color_matrix,
+            color=(0, 10, 40),
         )
         self.save_button.setEnabled(True)
 
@@ -606,7 +612,7 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             self.auto_measure_button.setEnabled(enable)
         if self.measurements_widget.rowCount() > 0:
             self.remove_row_button.setEnabled(enable)
-        if self.measurements_widget.rowCount() > 12:
+        if self.measurements_widget.rowCount() > 11:
             self.generate_results_button.setEnabled(enable)
         self.clear_button.setEnabled(enable)
         pass
@@ -615,7 +621,9 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         row_position = self.measurements_widget.rowCount()
         self.measurements_widget.insertRow(row_position)
         for col, value in enumerate(test_values):
-            item = QtWidgets.QTableWidgetItem("{:.0e}".format(value))
+            item = QtWidgets.QTableWidgetItem("{:.6e}".format(value))
+            if col < 3:
+                item = QtWidgets.QTableWidgetItem("{:.0f}".format(value))
             self.measurements_widget.setItem(row_position, col, item)
 
     def updateResultsTable(
@@ -628,7 +636,9 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         if dataframe is not None:
             for row in range(dataframe.shape[0]):
                 for col in range(dataframe.shape[1]):
-                    item = QtWidgets.QTableWidgetItem(str(dataframe.iloc[row, col]))
+                    item = QtWidgets.QTableWidgetItem(
+                        "{:.2e}".format(dataframe.iloc[row, col])
+                    )
                     table_widget.setItem(row, col, item)
 
         if color_matrix is not None:
