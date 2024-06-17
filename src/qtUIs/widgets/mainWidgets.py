@@ -473,6 +473,8 @@ class CalibrationSelector(QtWidgets.QWidget):
     def setupGroupComboBox(self) -> None:
         self.group_combo_box.clear()
         for group in self.group_list:
+            if group.getStatus() is not SGStatus.OK:
+                continue
             self.group_combo_box.addItem(
                 QtGui.QIcon(IconPaths.PLATFORM_ICON.value), group.getName()
             )

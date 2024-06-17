@@ -483,18 +483,18 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
             [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
-            [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
             [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
         ]
         self.updateResultsTable(
             table_widget=self.calib_matrix_widget,
             color_matrix=self.color_matrix,
-            color=(0, 10, 40),
+            color=(0, 128, 0),
         )
         self.updateResultsTable(
             table_widget=self.std_matrix_widget,
             color_matrix=self.color_matrix,
-            color=(0, 10, 40),
+            color=(0, 128, 0),
         )
 
         # - Build calibration layout
@@ -579,13 +579,13 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
             table_widget=self.calib_matrix_widget,
             dataframe=results[0],
             color_matrix=self.color_matrix,
-            color=(0, 10, 40),
+            color=(0, 128, 0),
         )
         self.updateResultsTable(
             table_widget=self.std_matrix_widget,
             dataframe=results[1],
             color_matrix=self.color_matrix,
-            color=(0, 10, 40),
+            color=(0, 128, 0),
         )
         self.save_button.setEnabled(True)
 

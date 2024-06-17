@@ -317,17 +317,42 @@ class PlatformCalibrationManager:
     def saveResults(self, sensor_manager: SensorManager) -> None:
         # First save results in csv files
         self.file_mngr.setFileName("RESULTS_CALIBRATION_MATRIX")
-        self.file_mngr.saveDataToCSV(self.calibration_matrix)
+        self.file_mngr.saveDataToCSV(self.calibration_matrix.map("{:.6e}".format))
         self.file_mngr.setFileName("RESULTS_STDDEV_MATRIX")
-        self.file_mngr.saveDataToCSV(self.std_dev_matrix)
-        # TODO Replace platform sensor slope values
-        # sensor_manager.setSensorSlope(self.sensor, self.sensor_slope)
-        # sensor_manager.setSensorIntercept(self.sensor, self.sensor_intercept)
-        # logger.info(
-        #     f"Saved sensor {self.sensor.getName()} "
-        #     + f"slope: {self.sensor.getSlope():.4f}; intercept: {self.sensor.getIntercept():.4f}"
-        # )
-        pass
+        self.file_mngr.saveDataToCSV(self.std_dev_matrix.map("{:.6e}".format))
+        # Replace platform sensor slope values
+        for sensor in self.platform_group.getSensors().values():
+            name = sensor.getName()
+            index = None
+            map_indexes = {
+                "X_1": [0, 0],
+                "X_2": [0, 1],
+                "X_3": [0, 2],
+                "X_4": [0, 3],
+                "Y_1": [1, 4],
+                "Y_2": [1, 5],
+                "Y_3": [1, 6],
+                "Y_4": [1, 7],
+                "Z_1": [2, 8],
+                "Z_2": [2, 9],
+                "Z_3": [2, 10],
+                "Z_4": [2, 11],
+            }
+            for key in map_indexes:
+                if key in name:
+                    index = map_indexes[key]
+                    break
+            if index is None:
+                logger.error(
+                    f"Sensor {name} has not a valid format! Expected <XYZ>_<1234> in name"
+                )
+                continue
+            sensor_manager.setSensorSlope(
+                sensor, self.calibration_matrix.iat[index[0], index[1]]
+            )
+            logger.info(
+                f"Saved sensor {sensor.getName()} slope: {sensor.getSlope():.4f}"
+            )
 
     def clearValues(self) -> None:
         self.measurement_distances_df.drop(

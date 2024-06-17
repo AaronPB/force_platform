@@ -40,7 +40,6 @@ class CalibrationUI(QtWidgets.QWidget):
             )
         )
         if self.platform_selector.count() > 0:
-            # TODO Filters to avoid invalid platform groups
             self.platform_calibrate_button.setEnabled(True)
         if self.sensor_selector.count() > 0:
             self.sensor_calibrate_button.setEnabled(True)
