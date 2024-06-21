@@ -224,8 +224,8 @@ class PlatformCalibrationManager:
     ) -> None:
         self.platform_group = platform_group
         self.ref_sensor = ref_sensor
-        # TODO Meaning of this checks?
-        self.platform_group.checkConnections()
+        # TODO Meaning of this check?
+        # self.platform_group.checkConnections()
         for sensor in self.ref_sensor:
             sensor.checkConnection()
         self.record_interval_ms = record_interval_ms
@@ -238,7 +238,7 @@ class PlatformCalibrationManager:
         formatted_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         folder_name = f"platform_calibs/calibration_{self.platform_group.getName()}_{formatted_date}"
         folder_path = os.path.join(self.file_mngr.getFilePath(), folder_name)
-        # Crear la carpeta
+        # Create calibration folder
         try:
             os.makedirs(folder_path, exist_ok=True)
             logger.info(f"New calibration folder created in {folder_path}")
@@ -315,11 +315,14 @@ class PlatformCalibrationManager:
         self.measurement_std_df.drop(index=index, inplace=True)
 
     def saveResults(self, sensor_manager: SensorManager) -> None:
+        # Make copies to format and save
+        calib_matrix_df = self.calibration_matrix.copy(deep=True)
+        std_matrix_df = self.std_dev_matrix.copy(deep=True)
         # First save results in csv files
         self.file_mngr.setFileName("RESULTS_CALIBRATION_MATRIX")
-        self.file_mngr.saveDataToCSV(self.calibration_matrix.map("{:.6e}".format))
+        self.file_mngr.saveDataToCSV(calib_matrix_df.map("{:.6e}".format))
         self.file_mngr.setFileName("RESULTS_STDDEV_MATRIX")
-        self.file_mngr.saveDataToCSV(self.std_dev_matrix.map("{:.6e}".format))
+        self.file_mngr.saveDataToCSV(std_matrix_df.map("{:.6e}".format))
         # Replace platform sensor slope values
         for sensor in self.platform_group.getSensors().values():
             name = sensor.getName()
@@ -425,26 +428,19 @@ class PlatformCalibrationManager:
         f = np.hstack(f).reshape(-1, 1)
         x, residuals, rank, s = lstsq(Zf, f)
         # Reshape calibration and deviation matrixes
-        logger.debug(x)
+        logger.debug(f"X:\n {x}")
         C = x.reshape(12, 6).T
-        logger.debug(pd.DataFrame(C))
-        logger.debug(Zf)
+        logger.debug(f"Calibration matrix:\n {C}")
         covariance_matrix = 25 * np.linalg.inv(np.dot(Zf.T, Zf))
         diagonal_covariance = np.diag(covariance_matrix)
-        diag_cov_ok = True
         if np.isnan(diagonal_covariance).any():
             logger.error("Covariance matrix diagonal has NaN values!")
             logger.debug(diagonal_covariance)
-            diag_cov_ok = False
         if np.any(diagonal_covariance < 0):
             logger.error("Covariance matrix diagonal has negative values!")
             logger.debug(diagonal_covariance)
-            diag_cov_ok = False
-        std_devs = C
-        logger.debug("STD_DEVS")
-        logger.debug(pd.DataFrame(np.sqrt(diagonal_covariance).reshape(12, 6).T))
-        if diag_cov_ok:
-            std_devs = np.sqrt(diagonal_covariance).reshape(12, 6).T
+        std_devs = np.sqrt(diagonal_covariance).reshape(12, 6).T
+        logger.debug(f"STD_DEVS:\n {std_devs}")
         # Save matrixes in dataframes
         self.calibration_matrix = pd.DataFrame(C)
         self.std_dev_matrix = pd.DataFrame(std_devs)

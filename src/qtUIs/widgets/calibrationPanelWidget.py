@@ -657,3 +657,4 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         self.calib_matrix_widget.clearContents()
         self.std_matrix_widget.clearContents()
         self.calib_mngr.clearValues()
+        self.calib_mngr.setupFileManager()
