@@ -656,5 +656,15 @@ class PlatformCalibrationPanelWidget(QtWidgets.QWidget):
         self.measurements_widget.setRowCount(0)
         self.calib_matrix_widget.clearContents()
         self.std_matrix_widget.clearContents()
+        self.updateResultsTable(
+            table_widget=self.calib_matrix_widget,
+            color_matrix=self.color_matrix,
+            color=(0, 128, 0),
+        )
+        self.updateResultsTable(
+            table_widget=self.std_matrix_widget,
+            color_matrix=self.color_matrix,
+            color=(0, 128, 0),
+        )
         self.calib_mngr.clearValues()
         self.calib_mngr.setupFileManager()

@@ -350,9 +350,8 @@ class PlatformCalibrationManager:
                     f"Sensor {name} has not a valid format! Expected <XYZ>_<1234> in name"
                 )
                 continue
-            sensor_manager.setSensorSlope(
-                sensor, self.calibration_matrix.iat[index[0], index[1]]
-            )
+            new_slope = float(self.calibration_matrix.iat[index[0], index[1]])
+            sensor_manager.setSensorSlope(sensor, new_slope)
             logger.info(
                 f"Saved sensor {sensor.getName()} slope: {sensor.getSlope():.4f}"
             )
