@@ -351,7 +351,7 @@ class PlatformCalibrationManager:
                 )
                 continue
             new_slope = float(self.calibration_matrix.iat[index[0], index[1]])
-            sensor_manager.setSensorSlope(sensor, new_slope)
+            sensor_manager.setSensorSlope(sensor, abs(new_slope))
             logger.info(
                 f"Saved sensor {sensor.getName()} slope: {sensor.getSlope():.4f}"
             )
@@ -400,8 +400,8 @@ class PlatformCalibrationManager:
             # Applied force in triaxial sensor
             fpM = np.array(
                 [
-                    mean_values.at[i, self.df_triaxial_cols_mean[1]] * force_ratio_y,
-                    mean_values.at[i, self.df_triaxial_cols_mean[0]] * force_ratio_x,
+                    -mean_values.at[i, self.df_triaxial_cols_mean[1]] * force_ratio_y,
+                    -mean_values.at[i, self.df_triaxial_cols_mean[0]] * force_ratio_x,
                     mean_values.at[i, self.df_triaxial_cols_mean[2]] * force_ratio_z,
                 ]
             )
@@ -428,6 +428,7 @@ class PlatformCalibrationManager:
         x, residuals, rank, s = lstsq(Zf, f)
         # Reshape calibration and deviation matrixes
         logger.debug(f"X:\n {x}")
+        logger.debug(f"Residuals:\n {residuals}")
         C = x.reshape(12, 6).T
         logger.debug(f"Calibration matrix:\n {C}")
         covariance_matrix = 25 * np.linalg.inv(np.dot(Zf.T, Zf))
