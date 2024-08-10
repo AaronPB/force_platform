@@ -190,7 +190,7 @@ class CalibrationUI(QtWidgets.QWidget):
         author_label.setOpenExternalLinks(True)
         author_label.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         version_label = customQT.createLabelBox(
-            "PRE-v1.3.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "v1.3.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
         credits_layout.addWidget(github_icon)
         credits_layout.addWidget(author_label)
