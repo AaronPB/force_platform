@@ -168,7 +168,7 @@ def test_group_connections_status_any_available(
     assert sensor_group_filled.getStatus() == SGStatus.WARNING
 
 
-def test_group_connections_status_any_available(
+def test_group_connections_status_none_available(
     sensor_group_filled_unav: SensorGroup,
 ) -> None:
     sensor_group_filled_unav.checkConnections()

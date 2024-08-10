@@ -16,6 +16,9 @@ class ConfigManager:
         self.loadConfigFile(self.selected_config_path)
 
     def loadConfigFile(self, file_path) -> None:
+        if not os.path.exists(file_path):
+            logger.warning(f"Could not find custom config file: {file_path}.")
+            return
         if os.path.samefile(file_path, self.default_config_path):
             logger.info(f"Loading default config settings: {file_path}.")
             self.loadConfig(file_path)
@@ -33,9 +36,6 @@ class ConfigManager:
                 # If the target file is the default config, remove custom file path
                 self.selected_config_path = self.default_config_path
                 self.setConfigValue(ConfigPaths.CUSTOM_CONFIG_PATH.value, None)
-            return
-        if not os.path.exists(file_path):
-            logger.warning(f"Could not find custom config file: {file_path}.")
             return
         logger.info(f"Loading custom file: {file_path}.")
         # First save new custom config path in default config

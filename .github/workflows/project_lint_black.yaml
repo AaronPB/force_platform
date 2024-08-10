@@ -1,0 +1,27 @@
+name: Lint python code with Black
+
+on:
+  pull_request:
+    branches:
+    - master
+    - develop
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check project src folder
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src"
+          version: "24.4.2"
+      
+      - name: Check project test folder
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./tests"
+          version: "24.4.2"

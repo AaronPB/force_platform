@@ -1,59 +1,87 @@
 import os
+import glob
 import pandas as pd
 from loguru import logger
 from src.managers.configManager import ConfigManager
 from src.enums.configPaths import ConfigPaths as CfgPaths
+from typing import Protocol
+
+
+class ConfigYAMLHandler(Protocol):
+    def setConfigValue(self, key_path: str, value) -> None: ...
+
+    def getConfigValue(self, key_path: str, default_value=None): ...
 
 
 class FileManager:
-    def __init__(self, cfg_mngr: ConfigManager) -> None:
-        self.cfg_mngr: ConfigManager = cfg_mngr
-        self.file_name: str = self.cfg_mngr.getConfigValue(
-            CfgPaths.TEST_NAME.value, "Test"
-        )
+    def __init__(self) -> None:
+        self.cfg_mngr: ConfigYAMLHandler = None
+        self.file_name: str = "Test"
         self.file_name_suffix: str = ""
-        self.file_path: str = self.cfg_mngr.getConfigValue(
-            CfgPaths.TEST_FOLDER_PATH.value, ""
-        )
+        self.file_path: str = os.path.join(os.path.dirname(__file__), "..", "..")
 
-    def checkDuplicatedName(self, name: str) -> None:
-        total_path = os.path.join(self.file_path, name + ".csv")
-        if not os.path.exists(total_path):
-            self.file_name_suffix = ""
-            return name
+    def setup(self, config_manager: ConfigYAMLHandler):
+        self.cfg_mngr = config_manager
+        self.file_name = self.cfg_mngr.getConfigValue(
+            CfgPaths.TEST_NAME.value, self.file_name
+        )
+        self.file_path = self.cfg_mngr.getConfigValue(
+            CfgPaths.TEST_FOLDER_PATH.value, self.file_path
+        )
+        if self.getPathExists():
+            self.checkFileName()
+
+    def checkFileNameSuffix(self, file_name: str) -> int:
+        total_path = os.path.join(self.file_path, file_name + ".*")
+        if not glob.glob(total_path):
+            return 0
         suffix_num = 1
-        while True:
-            new_name = (
-                f"{os.path.splitext(name)[0]}_{suffix_num}{os.path.splitext(name)[1]}"
-            )
-            total_path = os.path.join(self.file_path, new_name + ".csv")
-            if not os.path.exists(total_path):
-                logger.warning(
-                    f"There is already a file named {name}. The new file will be {new_name}"
-                )
+        suffix_num_max = 100
+        while suffix_num < suffix_num_max:
+            new_name = f"{file_name}_{suffix_num}"
+            total_path = os.path.join(self.file_path, new_name + ".*")
+            if not glob.glob(total_path):
                 break
             suffix_num += 1
-        self.file_name_suffix = f"_{suffix_num}"
+        return suffix_num
 
     # Setters and getters
 
     def setFileName(self, name: str) -> None:
-        self.checkDuplicatedName(name)
         if name == self.file_name:
+            self.checkFileName()
             return
         self.file_name = name
-        self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
+        self.checkFileName()
+        if self.cfg_mngr is not None:
+            self.cfg_mngr.setConfigValue(CfgPaths.TEST_NAME.value, self.file_name)
         logger.info(f"Changed test name to: {self.file_name}")
 
-    def setFilePath(self, path: str, check_name: bool = True):
+    def setFilePath(self, path: str):
         self.file_path = path
-        self.cfg_mngr.setConfigValue(CfgPaths.TEST_FOLDER_PATH.value, self.file_path)
+        if self.cfg_mngr is not None:
+            self.cfg_mngr.setConfigValue(
+                CfgPaths.TEST_FOLDER_PATH.value, self.file_path
+            )
         logger.info(f"Changed test folder path to: {self.file_path}")
-        if check_name:
-            self.setFileName(self.file_name)
 
-    def checkFileName(self) -> None:
-        self.setFileName(self.file_name)
+    def checkFileName(self, file_name: str = None) -> None:
+        if not file_name:
+            file_name = self.file_name
+        file_suffix_num = 0
+        suffix_list = ["", "_RAW"]
+        for suffix in suffix_list:
+            num = self.checkFileNameSuffix(file_name + suffix)
+            if num > file_suffix_num:
+                file_suffix_num = num
+        if file_suffix_num > 0:
+            self.file_name_suffix = f"_{file_suffix_num}"
+            logger.warning(
+                f"There is already a file named {file_name}. "
+                + f"The new file will be {file_name + self.file_name_suffix}"
+            )
+        if file_suffix_num == 0:
+            self.file_name_suffix = ""
 
     def getFileName(self) -> str:
         return self.file_name + self.file_name_suffix

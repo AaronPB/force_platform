@@ -6,8 +6,14 @@ from src.enums.configPaths import ConfigPaths
 from src.enums.sensorTypes import SGTypes
 from src.managers.configManager import ConfigManager
 from src.managers.sensorManager import SensorManager
-from src.managers.calibrationManager import SensorCalibrationManager
-from src.qtUIs.widgets.calibrationPanelWidget import SensorCalibrationPanelWidget
+from src.managers.calibrationManager import (
+    SensorCalibrationManager,
+    PlatformCalibrationManager,
+)
+from src.qtUIs.widgets.calibrationPanelWidget import (
+    SensorCalibrationPanelWidget,
+    PlatformCalibrationPanelWidget,
+)
 from src.qtUIs.widgets.mainWidgets import CalibrationSelector
 from src.qtUIs.widgets import customQtLoaders as customQT
 from PySide6 import QtWidgets, QtGui, QtCore
@@ -34,8 +40,7 @@ class CalibrationUI(QtWidgets.QWidget):
             )
         )
         if self.platform_selector.count() > 0:
-            # TODO
-            pass
+            self.platform_calibrate_button.setEnabled(True)
         if self.sensor_selector.count() > 0:
             self.sensor_calibrate_button.setEnabled(True)
         pass
@@ -60,7 +65,33 @@ class CalibrationUI(QtWidgets.QWidget):
         platform_group = self.calibration_selector.getSelectedGroup()
         if not platform_group:
             return
-        # TODO
+        # TODO Could add other calibration timing options for platforms
+        record_interval: int = self.cfg_mngr.getConfigValue(
+            ConfigPaths.CALIBRATION_INTERVAL_MS.value, 10
+        )
+        record_amount: int = self.cfg_mngr.getConfigValue(
+            ConfigPaths.CALIBRATION_DATA_AMOUNT.value, 300
+        )
+        # Calibration manager for platform calibration
+        calib_mngr = PlatformCalibrationManager()
+        calib_mngr.setup(
+            platform_group,
+            self.sensor_mngr.getPlatformCalibRef(),
+            record_interval,
+            record_amount,
+        )
+        # Clear panel layout
+        for i in reversed(range(self.panel_layout.count())):
+            widget = self.panel_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+        # Build layout with new calibration panel
+        platform_calib_panel = PlatformCalibrationPanelWidget(
+            self.sensor_mngr,
+            calib_mngr,
+            platform_group.getName(),
+        )
+        self.panel_layout.addWidget(platform_calib_panel)
         pass
 
     @QtCore.Slot()
@@ -153,10 +184,13 @@ class CalibrationUI(QtWidgets.QWidget):
         github_icon = customQT.createIconLabelBox(IconPaths.GITHUB, None)
         tag_icon = customQT.createIconLabelBox(IconPaths.TAG, None)
         author_label = customQT.createLabelBox(
-            "AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "<a style='color: white' href='https://github.com/AaronPB'>AaronPB</a>",
+            QssLabels.AUTHOR_COPYRIGHT_LABEL,
         )
+        author_label.setOpenExternalLinks(True)
+        author_label.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         version_label = customQT.createLabelBox(
-            "v1.2.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "v1.3.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
         credits_layout.addWidget(github_icon)
         credits_layout.addWidget(author_label)

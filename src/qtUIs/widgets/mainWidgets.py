@@ -2,9 +2,11 @@
 
 from PySide6 import QtWidgets, QtGui, QtCore
 from src.managers.sensorManager import SensorManager
+from src.managers.cameraManager import CameraManager
 from src.managers.dataManager import DataManager
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.handlers import Sensor, SensorGroup
+from src.handlers.camera import Camera
 
 from src.enums.qssLabels import QssLabels
 from src.enums.uiResources import IconPaths
@@ -125,6 +127,45 @@ class SensorSettings:
             general_layout.addWidget(widget)
         dialog_window.setModal(True)
         dialog_window.exec_()
+
+
+class CameraSettings:
+    def __init__(self, camera_manager: CameraManager):
+        self.camera_mngr = camera_manager
+
+    def updateLayout(
+        self, hbox_layout: QtWidgets.QHBoxLayout, camera_list: list[Camera]
+    ) -> None:
+        clearWidgetsLayout(hbox_layout)
+        for camera in camera_list:
+            hbox_layout.addWidget(self.buildCameraPanel(camera))
+
+    # Panel builders
+
+    def buildCameraPanel(self, camera: Camera) -> QtWidgets.QWidget:
+        widget = QtWidgets.QWidget()
+        hbox_layout = QtWidgets.QHBoxLayout()
+        widget.setLayout(hbox_layout)
+        # Build elements
+        status_label = customQT.createIconLabelBox(
+            camera.getStatus().value[0], camera.getStatus().value[1]
+        )
+        type_label = customQT.createIconLabelBox(
+            IconPaths.CAMERA_ICON, QssLabels.SENSOR_GROUP
+        )
+        text = f"{camera.getName()} \n {camera.getProperties()}"
+        sensor_checkbox = customQT.createCameraQCheckBox(
+            text,
+            QssLabels.SENSOR_GROUP,
+            enabled=camera.getRead(),
+            change_fn=self.camera_mngr.setCameraRead,
+            sensor_id=camera.getID(),
+        )
+        # Build layout
+        hbox_layout.addWidget(status_label)
+        hbox_layout.addWidget(type_label)
+        hbox_layout.addWidget(sensor_checkbox)
+        return widget
 
 
 class PreviewPlotSelector(QtWidgets.QWidget):
@@ -432,6 +473,8 @@ class CalibrationSelector(QtWidgets.QWidget):
     def setupGroupComboBox(self) -> None:
         self.group_combo_box.clear()
         for group in self.group_list:
+            if group.getStatus() is not SGStatus.OK:
+                continue
             self.group_combo_box.addItem(
                 QtGui.QIcon(IconPaths.PLATFORM_ICON.value), group.getName()
             )

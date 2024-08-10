@@ -233,7 +233,7 @@ class DataManager:
                     sign = self.forces_sign[key]
                     break
             df = self.getForce(sensor_name, sign)
-            y_label = "Weight (kg)"
+            y_label = "Force (N)"
         elif plot_type == PlotTypes.SENSOR_ENCODER_DISTANCE:
             df = self.getDistance(sensor_name)
             y_label = "Distance (mm)"

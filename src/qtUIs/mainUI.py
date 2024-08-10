@@ -8,10 +8,12 @@ from src.managers.configManager import ConfigManager
 from src.managers.testManager import TestManager
 from src.managers.fileManager import FileManager
 from src.managers.dataManager import DataManager
+from src.managers.cameraManager import CameraManager
 from src.managers.sensorManager import SensorManager
 from src.qtUIs.widgets import customQtLoaders as customQT
 from src.qtUIs.widgets.mainWidgets import (
     SensorSettings,
+    CameraSettings,
     PreviewPlotSelector,
     SensorPlotSelector,
     PlatformPlotSelector,
@@ -36,6 +38,7 @@ class MainUI(QtWidgets.QWidget):
 
         self.test_mngr = TestManager()
         self.data_mngr = DataManager()
+        self.camera_mngr = CameraManager()
 
         self.initManagers()
         self.initUI()
@@ -43,9 +46,12 @@ class MainUI(QtWidgets.QWidget):
         self.getSensorInformation()
 
     def initManagers(self) -> None:
-        self.file_mngr = FileManager(self.cfg_mngr)
+        self.file_mngr = FileManager()
+        self.file_mngr.setup(self.cfg_mngr)
         self.sensor_mngr.setup(self.cfg_mngr)
+        self.camera_mngr.setup(self.cfg_mngr)
         self.test_mngr.setSensorGroups(self.sensor_mngr.getGroups())
+        self.test_mngr.setCameraThreads(self.camera_mngr.getCameraThreads())
 
         self.test_timer = QtCore.QTimer(self)
         self.test_timer.timeout.connect(self.test_mngr.testRegisterValues)
@@ -75,7 +81,10 @@ class MainUI(QtWidgets.QWidget):
         self.sensors_connect_button.setEnabled(False)
         self.setDataSettings(False)
         self.calibration_button.setEnabled(False)
-        self.test_mngr.testStart(self.file_mngr.getFileName())
+        # Start test
+        self.test_mngr.testStart(
+            self.file_mngr.getFilePath(), self.file_mngr.getFileName()
+        )
         self.tare_button.setEnabled(True)
         self.stop_button.setEnabled(True)
 
@@ -111,7 +120,12 @@ class MainUI(QtWidgets.QWidget):
         self.setDataSettings(True)
 
         # Save dataframes
-        self.saveResults()
+        dataframe = self.data_mngr.getCalibrateDataframe()
+        dataframe_raw = self.data_mngr.getRawDataframe()
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_CALIB.value, True):
+            self.file_mngr.saveDataToCSV(dataframe)
+        if self.cfg_mngr.getConfigValue(CfgPaths.TEST_SAVE_RAW.value, True):
+            self.file_mngr.saveDataToCSV(dataframe_raw, "_RAW")
 
         self.start_button.setEnabled(True)
         self.calibration_button.setEnabled(True)
@@ -331,10 +345,13 @@ class MainUI(QtWidgets.QWidget):
         github_icon = customQT.createIconLabelBox(IconPaths.GITHUB, None)
         tag_icon = customQT.createIconLabelBox(IconPaths.TAG, None)
         author_label = customQT.createLabelBox(
-            "AaronPB", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "<a style='color: white' href='https://github.com/AaronPB'>AaronPB</a>",
+            QssLabels.AUTHOR_COPYRIGHT_LABEL,
         )
+        author_label.setOpenExternalLinks(True)
+        author_label.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         version_label = customQT.createLabelBox(
-            "v1.2.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
+            "v1.3.0", QssLabels.AUTHOR_COPYRIGHT_LABEL
         )
         credits_layout.addWidget(github_icon)
         credits_layout.addWidget(author_label)
@@ -538,15 +555,22 @@ class MainUI(QtWidgets.QWidget):
         # - Sensors grid
         sensors_layout = QtWidgets.QVBoxLayout()
         group_box_platforms = QtWidgets.QGroupBox("Platforms")
+        group_box_cameras = QtWidgets.QGroupBox("Cameras")
         group_box_defaults = QtWidgets.QGroupBox("Other sensor groups")
         self.hbox_platforms = QtWidgets.QHBoxLayout()
+        self.hbox_cameras = QtWidgets.QHBoxLayout()
         self.hbox_defaults = QtWidgets.QHBoxLayout()
         self.hbox_platforms.setAlignment(QtCore.Qt.AlignTop)
+        self.hbox_cameras.setAlignment(QtCore.Qt.AlignTop)
         self.hbox_defaults.setAlignment(QtCore.Qt.AlignTop)
         group_box_platforms.setLayout(self.hbox_platforms)
+        group_box_cameras.setLayout(self.hbox_cameras)
         group_box_defaults.setLayout(self.hbox_defaults)
+        hbox_bottom_groups = QtWidgets.QHBoxLayout()
+        hbox_bottom_groups.addWidget(group_box_defaults)
+        hbox_bottom_groups.addWidget(group_box_cameras)
         sensors_layout.addWidget(group_box_platforms)
-        sensors_layout.addWidget(group_box_defaults)
+        sensors_layout.addLayout(hbox_bottom_groups)
         # Build sensor information layout
         sensors_vbox_layout.addLayout(connect_grid_layout)
         sensors_vbox_layout.addItem(QtWidgets.QSpacerItem(20, 20))
@@ -701,6 +725,7 @@ class MainUI(QtWidgets.QWidget):
 
     def getSensorInformation(self):
         sensor_panels = SensorSettings(self.sensor_mngr)
+        camera_panels = CameraSettings(self.camera_mngr)
         sensor_panels.updateLayout(
             self.hbox_platforms,
             self.sensor_mngr.getGroups(group_type=SGTypes.GROUP_PLATFORM),
@@ -708,4 +733,8 @@ class MainUI(QtWidgets.QWidget):
         sensor_panels.updateLayout(
             self.hbox_defaults,
             self.sensor_mngr.getGroups(group_type=SGTypes.GROUP_DEFAULT),
+        )
+        camera_panels.updateLayout(
+            self.hbox_cameras,
+            self.camera_mngr.getCameras(),
         )

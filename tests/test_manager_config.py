@@ -18,6 +18,9 @@ CUSTOM_CONFIG_PATH = os.path.join(
 OTHER_CUSTOM_CONFIG_PATH = os.path.join(
     os.path.dirname(__file__), "files", "other_custom_config.yaml"
 )
+NON_EXISTING_CONFIG_PATH = os.path.join(
+    os.path.dirname(__file__), "files", "non_existing_config.yaml"
+)
 
 
 @pytest.fixture
@@ -46,6 +49,13 @@ def test_load_custom_config(config_manager: ConfigManager) -> None:
     config_manager.loadConfig(DEFAULT_CONFIG_PATH)
     saved_path = config_manager.getConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
     assert os.path.samefile(saved_path, CUSTOM_CONFIG_PATH)
+    # Remove custom config path in default yaml at end of test
+    config_manager.setConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
+
+
+def test_load_non_existing_config(config_manager: ConfigManager) -> None:
+    config_manager.loadConfigFile(NON_EXISTING_CONFIG_PATH)
+    assert os.path.samefile(config_manager.getCurrentFilePath(), DEFAULT_CONFIG_PATH)
 
 
 def test_load_other_custom_config_from_custom(config_manager: ConfigManager) -> None:
@@ -53,8 +63,7 @@ def test_load_other_custom_config_from_custom(config_manager: ConfigManager) -> 
     If a custom config has been loaded and the user wants to load
     another custom config, update custom config path in default config.
     """
-    if not os.path.samefile(config_manager.getCurrentFilePath(), CUSTOM_CONFIG_PATH):
-        config_manager.loadConfigFile(CUSTOM_CONFIG_PATH)
+    config_manager.loadConfigFile(CUSTOM_CONFIG_PATH)
     config_manager.loadConfigFile(OTHER_CUSTOM_CONFIG_PATH)
     assert os.path.samefile(
         config_manager.getCurrentFilePath(), OTHER_CUSTOM_CONFIG_PATH
@@ -64,6 +73,8 @@ def test_load_other_custom_config_from_custom(config_manager: ConfigManager) -> 
     config_manager.loadConfig(DEFAULT_CONFIG_PATH)
     saved_path = config_manager.getConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
     assert os.path.samefile(saved_path, OTHER_CUSTOM_CONFIG_PATH)
+    # Remove custom config path in default yaml at end of test
+    config_manager.setConfigValue(CfgPaths.CUSTOM_CONFIG_PATH.value, None)
 
 
 def test_load_default_config_from_custom(config_manager: ConfigManager) -> None:

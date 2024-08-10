@@ -28,4 +28,4 @@ jobs:
           pip install pytest pytest-cov
       
       - name: Run project tests
-        run: python -m pytest tests/ --cov
+        run: python -m pytest tests/ --cov --cov-report term-missing

@@ -3,23 +3,28 @@
 </p>
 <p align="center">
   <a href="#readme"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue.svg"></a>
+  <a href="https://github.com/psf/black"><img alt="Python formatter" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
   <a href="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml"><img alt="Project test status" src="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml/badge.svg"></a>
   <a href="docs/home.md"><img alt="Documentation link" src="https://img.shields.io/badge/docs-available-limegreen.svg"></a>
 </p>
 
 ## Information
 
-A python script for sensor data management of force platforms and extra ones.
+A python software for synchronized data management of specific force platforms sensors compatible with Phidget API and other sensor types such as IMUs.
+
+This project is part of the author's master's thesis in industrial engineering at the University of Almería. force_platform is licensed under de GNU General Public License v3.0.
 
 ![Main UI](docs/images/mainUI.png)
 
 It supports currently the following sensor types:
 - Phidget-Bridge compatible load sensors. (Requires Phidget dependency).
+- Phidget encoders. (Requires Phidget dependency).
 - Taobotics IMU sensors. (Requires MRPT dependency).
+- USB webcams for video recording with opencv.
 
 ## Documentation
 
-Program documentation is available to learn how the program works and how to use it.
+Program documentation is available to learn how the program works and its usage.
 
 Check it out [here](docs/home.md).
 

@@ -1,11 +1,10 @@
 settings:
-  custom_config_path: null
   test:
-    name: Name
-    folder_path: /tests/
+    name: Manual Calibration Test
+    folder_path: /path/to/folder
     results:
       save_raw: true
-      save_calib: true
+      save_calib: false
   recording:
     data_interval_ms: 10
     tare_data_amount: 300
@@ -33,7 +32,7 @@ sensor_groups:
   platform_2:
     name: Platform 2
     type: GROUP_PLATFORM
-    read: true
+    read: false
     sensor_list:
     - p2_z1
     - p2_z2
@@ -47,39 +46,17 @@ sensor_groups:
     - p2_y2
     - p2_y3
     - p2_y4
-  imus:
-    name: Body IMUs
+  triax_group:
+    name: Triaxial sensor
     type: GROUP_DEFAULT
     read: true
     sensor_list:
-    - imu_1
-    - imu_2
-    - imu_3
-  barbell_encoders:
-    name: Barbell encoders
-    type: GROUP_DEFAULT
-    read: true
-    sensor_list:
-    - encoder_1
-    - encoder_2
-cameras:
-  camera_1:
-    name: Test Camera
-    read: true
-    connection:
-      serial: /dev/video2
-    settings:
-      fps: 30.0
-      frame_width: 620
-      frame_height: 480
-    properties:
-      camera_model: Logitech Series
+    - triax_x
+    - triax_y
+    - triax_z
 sensors_calibration:
   phidget_loadcell_reference: s_type
-  platform_reference_triaxial:
-  - triax_x
-  - triax_y
-  - triax_z
+  platform_reference_triaxial: null
 sensors:
   p1_z1:
     name: P1_LoadCell_Z_1
@@ -93,7 +70,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1460645.82
-      intercept: 0
+      intercept: -29.233022296826327
   p1_z2:
     name: P1_LoadCell_Z_2
     type: SENSOR_LOADCELL
@@ -106,7 +83,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1458448.41
-      intercept: 0
+      intercept: -29.0028410183748
   p1_z3:
     name: P1_LoadCell_Z_3
     type: SENSOR_LOADCELL
@@ -119,7 +96,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1467890.08
-      intercept: 0
+      intercept: -27.243367874935444
   p1_z4:
     name: P1_LoadCell_Z_4
     type: SENSOR_LOADCELL
@@ -133,7 +110,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1461505.74
-      intercept: 0
+      intercept: -38.74350208345997
   p1_x1:
     name: P1_LoadCell_X_1
     type: SENSOR_LOADCELL
@@ -146,7 +123,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1060343.01
-      intercept: 0
+      intercept: -10.051483139998794
   p1_x2:
     name: P1_LoadCell_X_2
     type: SENSOR_LOADCELL
@@ -159,7 +136,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1068987.36
-      intercept: 0
+      intercept: -6.01165236848876
   p1_x3:
     name: P1_LoadCell_X_3
     type: SENSOR_LOADCELL
@@ -172,7 +149,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1074759.37
-      intercept: 0
+      intercept: -31.2073560528607
   p1_x4:
     name: P1_LoadCell_X_4
     type: SENSOR_LOADCELL
@@ -185,7 +162,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1069820.71
-      intercept: 0
+      intercept: -32.01276329082123
   p1_y1:
     name: P1_LoadCell_Y_1
     type: SENSOR_LOADCELL
@@ -198,7 +175,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1070190.3
-      intercept: 0
+      intercept: -82.6229947376572
   p1_y2:
     name: P1_LoadCell_Y_2
     type: SENSOR_LOADCELL
@@ -211,7 +188,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1071275.8
-      intercept: 0
+      intercept: -48.45358226925368
   p1_y3:
     name: P1_LoadCell_Y_3
     type: SENSOR_LOADCELL
@@ -224,7 +201,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1070441.22
-      intercept: 0
+      intercept: -54.68206641153183
   p1_y4:
     name: P1_LoadCell_Y_4
     type: SENSOR_LOADCELL
@@ -237,7 +214,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1069900.5
-      intercept: 0
+      intercept: -89.12526523145203
   p2_z1:
     name: P2_LoadCell_Z_1
     type: SENSOR_LOADCELL
@@ -250,7 +227,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1459204.4
-      intercept: 0
+      intercept: -45.93060489212014
   p2_z2:
     name: P2_LoadCell_Z_2
     type: SENSOR_LOADCELL
@@ -263,7 +240,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1459832.02
-      intercept: 0
+      intercept: -35.26667409409197
   p2_z3:
     name: P2_LoadCell_Z_3
     type: SENSOR_LOADCELL
@@ -276,7 +253,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1459933.41
-      intercept: 0
+      intercept: -38.56096355307981
   p2_z4:
     name: P2_LoadCell_Z_4
     type: SENSOR_LOADCELL
@@ -289,7 +266,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1460398.63
-      intercept: 0
+      intercept: -40.44425779705251
   p2_x1:
     name: P2_LoadCell_X_1
     type: SENSOR_LOADCELL
@@ -302,7 +279,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1072009.71
-      intercept: 0
+      intercept: -5.284887526489954
   p2_x2:
     name: P2_LoadCell_X_2
     type: SENSOR_LOADCELL
@@ -315,7 +292,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1061125.79
-      intercept: 0
+      intercept: -12.602795053267448
   p2_x3:
     name: P2_LoadCell_X_3
     type: SENSOR_LOADCELL
@@ -328,7 +305,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1075625.42
-      intercept: 0
+      intercept: -47.413942859929506
   p2_x4:
     name: P2_LoadCell_X_4
     type: SENSOR_LOADCELL
@@ -341,7 +318,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1074300.01
-      intercept: 0
+      intercept: -48.95756074221691
   p2_y1:
     name: P2_LoadCell_Y_1
     type: SENSOR_LOADCELL
@@ -354,7 +331,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1064968.49
-      intercept: 0
+      intercept: -12.97576749959639
   p2_y2:
     name: P2_LoadCell_Y_2
     type: SENSOR_LOADCELL
@@ -367,7 +344,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1070497.24
-      intercept: 0
+      intercept: -8.078278820542721
   p2_y3:
     name: P2_LoadCell_Y_3
     type: SENSOR_LOADCELL
@@ -380,7 +357,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1068378.99
-      intercept: 0
+      intercept: -6.5327581673994946
   p2_y4:
     name: P2_LoadCell_Y_4
     type: SENSOR_LOADCELL
@@ -393,72 +370,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1063008.94
-      intercept: 0
-  encoder_1:
-    name: Encoder_Z_1
-    type: SENSOR_ENCODER
-    read: true
-    connection:
-      channel: 0
-      serial: 641800
-    initial_position: 0
-    properties:
-      serial_number: AAAA
-      max_length: 2500mm
-    calibration:
-      slope: 0.01875
-      intercept: 0.0
-  encoder_2:
-    name: Encoder_Z_2
-    type: SENSOR_ENCODER
-    read: true
-    connection:
-      channel: 1
-      serial: 641800
-    initial_position: 0
-    properties:
-      serial_number: AAAA
-      max_length: 2500mm
-    calibration:
-      slope: 0.01875
-      intercept: 0.0
-  imu_1:
-    name: IMU_Leg_Right
-    type: SENSOR_IMU
-    read: true
-    connection:
-      serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.3:1.0-port0
-    properties:
-      tag: IMU_1
-  imu_2:
-    name: IMU_Thigh_Right
-    type: SENSOR_IMU
-    read: true
-    connection:
-      serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.4:1.0-port0
-    properties:
-      tag: IMU_2
-  imu_3:
-    name: IMU_UpperTrunk_Right
-    type: SENSOR_IMU
-    read: true
-    connection:
-      serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.2:1.0-port0
-    properties:
-      tag: IMU_3
-  s_type:
-    name: S-Type Phidget Load Cell
-    type: SENSOR_LOADCELL
-    read: true
-    connection:
-      channel: 0
-      serial: 583229
-    properties:
-      serial_number: 1906240722
-      max_weight: 100kg
-    calibration:
-      slope: 31851.0
-      intercept: -0.3355
+      intercept: -11.163323948940118
   triax_x:
     name: Triaxial_X
     type: SENSOR_LOADCELL
@@ -470,7 +382,7 @@ sensors:
       serial_number: SN231206001
       max_weight: 2000N
     calibration:
-      slope: 1721022.287
+      slope: 1
       intercept: 0
   triax_y:
     name: Triaxial_Y
@@ -483,7 +395,7 @@ sensors:
       serial_number: SN231206001
       max_weight: 2000N
     calibration:
-      slope: 19773710.18
+      slope: 1
       intercept: 0
   triax_z:
     name: Triaxial_Z
@@ -496,5 +408,5 @@ sensors:
       serial_number: SN231206001
       max_weight: 2000N
     calibration:
-      slope: 1771149.742
+      slope: 1
       intercept: 0
