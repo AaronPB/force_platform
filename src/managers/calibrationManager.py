@@ -393,8 +393,8 @@ class PlatformCalibrationManager:
         distance_values = self.measurement_distances_df
 
         M = len(mean_values)
-        Zf = []
-        f = []
+        Zf = np.zeros((6 * M, 72))
+        f = np.zeros((6 * M, 1))
         for i in range(M):
             # Process data for M measurement
             # Applied force in triaxial sensor
@@ -420,11 +420,11 @@ class PlatformCalibrationManager:
             # Build A matrix
             ZfM = np.kron(np.eye(6), vfM.T)
             # Concatenate M matrixes into general matrixes.
-            Zf.append(ZfM)
-            f.append(fM)
+            row_start = i * 6
+            row_end = row_start + 6
+            Zf[row_start:row_end, :] = ZfM
+            f[row_start:row_end, :] = fM
         # Apply least squares
-        Zf = np.vstack(Zf)
-        f = np.hstack(f).reshape(-1, 1)
         x, residuals, rank, s = lstsq(Zf, f)
         # Reshape calibration and deviation matrixes
         logger.debug(f"X:\n {x}")
