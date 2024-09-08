@@ -1,0 +1,33 @@
+FROM ubuntu:22.04
+LABEL maintainer="AaronPB"
+
+# Install base dependencies and Python 3.11
+RUN apt-get update && apt-get install -y \
+    curl \
+    software-properties-common \
+    python3.11 \
+    python3.11-venv \
+    python3-pip
+
+# MRPT requires tzdata package to be configured
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
+
+# Install dependencies
+## Phidget
+RUN curl -fsSL https://www.phidgets.com/downloads/setup_linux | bash &&\
+    apt-get install -y libphidget22
+
+## MRPT
+RUN add-apt-repository ppa:joseluisblancoc/mrpt
+RUN apt-get update && apt-get install -y \
+    libmrpt-dev \
+    mrpt-apps \
+    python3-pymrpt
+
+# Install python and python dependencies
+COPY requirements-dev.txt requirements-dev.txt
+COPY requirements.txt requirements.txt
+
+# Use python3.11 -m pip to install dependencies
+RUN python3.11 -m pip install --upgrade pip
+RUN python3.11 -m pip install -r requirements-dev.txt
