@@ -45,7 +45,7 @@ docker build -tag force_platform .
 Run a new container called `force_platform_app`:
 
 ```bash
-docker run --name force_platform_app -p 8501:8501 --privileged -v /dev:/dev
+docker run --name force_platform_app -p 8501:8501 --privileged -v /dev:/dev force_platform
 ```
 
 ### 4. Start and stop the container
