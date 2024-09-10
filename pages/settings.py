@@ -18,7 +18,7 @@ def newConfigFile(file_path: str):
         st.session_state.file_mngr.setup(st.session_state.config_mngr)
 
 
-def settings_page():
+def settingsPage():
     # Initialize global instances
     if "config_mngr" not in st.session_state:
         logger.info("Defining config manager")

@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 import numpy as np
 
 
-def example_figure() -> go.Figure:
+def exampleFigure() -> go.Figure:
     x = np.linspace(0, 10, 100)
     y = np.sin(x)
 
@@ -18,8 +18,8 @@ def example_figure() -> go.Figure:
     return fig
 
 
-def dashboard_page():
-    st.plotly_chart(example_figure())
+def dashboardPage():
+    st.plotly_chart(exampleFigure())
 
     figures_col_1, figures_col_2 = st.columns(2)
     figures_col_1.multiselect(

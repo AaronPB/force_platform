@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def home_page():
+def homePage():
     st.title("Welcome to Force Platform Reader")
     st.write(
         "Check the following documentation if you are not familiar with the application."
@@ -87,7 +87,9 @@ def home_page():
         )
 
         st.subheader("Force platform sensor groups")
-        st.warning("Only available for project custom platforms.", icon=":material/warning:")
+        st.warning(
+            "Only available for project custom platforms.", icon=":material/warning:"
+        )
         st.latex(
             r"""
             \begin{bmatrix}
