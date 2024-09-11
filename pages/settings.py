@@ -6,6 +6,7 @@ from src.managers.sensorManager import SensorManager
 from src.managers.fileManager import FileManager
 from src.managers.testManager import TestManager
 
+from src.enums.configPaths import ConfigPaths
 from src.enums.sensorStatus import SStatus
 
 from loguru import logger
@@ -68,7 +69,9 @@ def settingsPage():
         key="number_input_tare_amount",
         min_value=10,
         max_value=500,
-        value=300,
+        value=st.session_state.config_mngr.getConfigValue(
+            ConfigPaths.RECORD_TARE_AMOUNT.value, 300
+        ),
         help="TODO",
     )
     test_col_2.number_input(
@@ -76,7 +79,9 @@ def settingsPage():
         key="number_input_record_freq",
         min_value=10,
         max_value=1000,
-        value=10,
+        value=st.session_state.config_mngr.getConfigValue(
+            ConfigPaths.RECORD_INTERVAL_MS.value, 10
+        ),
         help="TODO",
     )
     test_col_2.number_input(
@@ -84,7 +89,9 @@ def settingsPage():
         key="number_input_calibration_amount",
         min_value=10,
         max_value=500,
-        value=300,
+        value=st.session_state.config_mngr.getConfigValue(
+            ConfigPaths.CALIBRATION_DATA_AMOUNT.value, 300
+        ),
         help="TODO",
     )
 
