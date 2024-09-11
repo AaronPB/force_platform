@@ -1,0 +1,8 @@
+# Workspace folders
+.*
+venv*
+custom*
+# Repository specific folders
+!.streamlit
+docs
+tests
