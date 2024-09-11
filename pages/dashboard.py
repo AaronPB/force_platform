@@ -19,50 +19,60 @@ def exampleFigure() -> go.Figure:
 
 
 def dashboardPage():
-    st.plotly_chart(exampleFigure())
+    st.subheader("Control panel")
 
-    figures_col_1, figures_col_2 = st.columns(2)
-    figures_col_1.multiselect(
-        label="Select individual sensors",
-        options=["A","B","C"],
-        placeholder="Choose one or more sensors",
-        help="Plot one or more individual sensor data on the same plot."
+    panel_col_1, panel_col_2, panel_col_3 = st.columns(3)
+    panel_col_1.button(
+        label="Start test",
+        key="button_test_start",
+        type="primary",
+        use_container_width=True,
     )
-    figures_col_2.selectbox(
-        label="Select platform",
-        options=["Platform A","Platform B"],
-        index=None,
-        placeholder="Choose a platform",
-        help="Plot platform results."
+    panel_col_2.button(
+        label="Stop test",
+        key="button_test_stop",
+        type="primary",
+        use_container_width=True,
     )
+    panel_col_3.button(
+        label="Tare sensors",
+        key="button_tare_sensors",
+        type="secondary",
+        use_container_width=True,
+    )
+
+    st.subheader("Graph results")
 
     with st.expander("**Data settings**", icon=":material/dataset:"):
         settings_col_1, settings_col_2 = st.columns(2)
         settings_col_1.subheader("Recorded data")
-        settings_col_1.radio(
+        data_type = settings_col_1.radio(
             label="Data type",
-            options=[
-                "Raw",
-                "Calibrated"
-            ],
-            captions=[
-                "Just as recorded",
-                "Calibrated param"
-            ],
-            horizontal=True
+            options=["Raw", "Calibrated"],
+            captions=["Just as recorded", "Calibrated param"],
+            horizontal=True,
         )
-        settings_col_1.radio(
+        figure_type = settings_col_1.radio(
             label="Figure type",
-            options=[
-                "Sensor",
-                "Platform"
-            ],
-            captions=[
-                "Individual sensors",
-                "A force platform"
-            ],
-            horizontal=True
+            options=["Sensor", "Platform"],
+            captions=["Individual sensors", "A force platform"],
+            horizontal=True,
         )
+        if figure_type == "Sensor":
+            settings_col_1.multiselect(
+                label="Select individual sensors",
+                options=["A", "B", "C"],
+                placeholder="Choose one or more sensors",
+                help="Plot one or more individual sensor data on the same plot.",
+            )
+        else:
+            settings_col_1.selectbox(
+                label="Select platform",
+                options=["Platform A", "Platform B"],
+                index=None,
+                placeholder="Choose a platform",
+                help="Plot platform results.",
+            )
         settings_col_2.subheader("Butterworth filter")
         # TODO this setting needs to be related to reading frequency: f = 1/t
         settings_col_2.number_input(
@@ -78,7 +88,7 @@ def dashboardPage():
             label="Cutoff frequency (Hz)",
             key="number_input_butter_fc",
             min_value=1,
-            max_value=100, # TODO the fs max value
+            max_value=100,  # TODO the fs max value
             value=10,
             help="TODO",
         )
@@ -90,4 +100,6 @@ def dashboardPage():
             value=6,
             help="TODO",
         )
-        
+
+    # TODO Generate different figures depending on settings
+    st.plotly_chart(exampleFigure())
