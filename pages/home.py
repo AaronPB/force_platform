@@ -2,6 +2,11 @@ import streamlit as st
 
 
 def homePage():
+    _, img_col, _ = st.columns([0.2, 0.6, 0.2])
+    img_col.image(
+        image="images/home_project_logo.png",
+        use_column_width=True,
+    )
     st.title("Welcome to Force Platform Reader")
     st.write(
         "Check the following documentation if you are not familiar with the application."
@@ -69,6 +74,29 @@ def homePage():
         sensor_col_3.code(code_sensor_encoder, language="yaml")
 
         st.subheader("Sensor group types")
+        sensor_group_col_1, sensor_group_col_2 = st.columns(2)
+        code_sensor_group_default = """
+            name: Body IMUs
+            type: GROUP_DEFAULT
+            read: true
+            sensor_list:
+            - imu_1
+            - imu_2
+            - imu_3
+            """
+        code_sensor_group_platform = """
+            name: Platform 1
+            type: GROUP_PLATFORM
+            read: true
+            sensor_list:
+            - p1_z1
+            - p1_z2
+            - p1_z3
+            """
+        sensor_group_col_1.markdown("Type `GROUP_DEFAULT`")
+        sensor_group_col_2.markdown("Type `GROUP_PLATFORM`")
+        sensor_group_col_1.code(code_sensor_group_default, language="yaml")
+        sensor_group_col_2.code(code_sensor_group_platform, language="yaml")
 
     with st.expander("Configure your sensors", icon=":material/toggle_on:"):
         st.write(
