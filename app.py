@@ -7,7 +7,7 @@ def main():
     # Page configuration
     st.set_page_config(
         page_title="Force Platform Reader",
-        page_icon=":material/capture:",
+        page_icon="images/project_icon.png",
         # layout="wide",
         initial_sidebar_state="expanded",
     )
