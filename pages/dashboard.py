@@ -21,24 +21,38 @@ def exampleFigure() -> go.Figure:
 def dashboardPage():
     st.subheader("Control panel")
 
+    test_unavailable = True
+    if (
+        "test_mngr" in st.session_state
+        and st.session_state.test_mngr.getSensorConnected()
+    ):
+        test_unavailable = False
+    if test_unavailable:
+        st.warning(
+            "Need to connect sensors! Go to the settings page.",
+            icon=":material/offline_bolt:",
+        )
     panel_col_1, panel_col_2, panel_col_3 = st.columns(3)
     panel_col_1.button(
         label="Start test",
         key="button_test_start",
         type="primary",
         use_container_width=True,
+        disabled=test_unavailable,
     )
     panel_col_2.button(
         label="Stop test",
         key="button_test_stop",
         type="primary",
         use_container_width=True,
+        disabled=test_unavailable,
     )
     panel_col_3.button(
         label="Tare sensors",
         key="button_tare_sensors",
         type="secondary",
         use_container_width=True,
+        disabled=test_unavailable,
     )
 
     st.subheader("Graph results")
