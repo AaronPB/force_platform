@@ -1,6 +1,53 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
+import pandas as pd
+import threading
+import time
+
+from streamlit.runtime.scriptrunner import get_script_run_ctx, add_script_run_ctx
+
+from loguru import logger
+
+
+stop_event = threading.Event()
+
+
+def readTest(detain_event: threading.Event, session_id: str):
+    ctx = get_script_run_ctx()
+    if ctx.session_id != session_id:
+        return
+    assert "test_mngr" in st.session_state
+    st.session_state.test_mngr.testStart("", "This is a test")
+    st.session_state.test_reading = True
+    test_itr = 0
+    while not detain_event.is_set():
+        ctx = get_script_run_ctx()
+        if ctx.session_id != session_id:
+            break
+        st.session_state.test_mngr.testRegisterValues()
+        test_itr += test_itr
+        if test_itr > 1000:
+            st.session_state.test_reading = False
+        time.sleep(0.01)
+    st.session_state.test_mngr.testStop("This is a test")
+
+
+def getSensorDataFrame() -> pd.DataFrame:
+    df = pd.DataFrame({"timestamp": [0], "sensor_data": [0]})
+    if not "sensor_mngr" in st.session_state or not "test_mngr" in st.session_state:
+        return df
+    sensor_group = st.session_state.sensor_mngr.getGroup("imus")
+    sensor_dict = sensor_group.getSensors(only_available=True)
+    sensor = sensor_dict["imu_1"]
+    if sensor is None:
+        return df
+    sensor_data = sensor.getValues()
+    times = st.session_state.test_mngr.getTestTimes()
+    if not sensor_data or len(sensor_data) != len(times):
+        return pd.DataFrame({"timestamp": [0], "sensor_data": [0]})
+    df = pd.DataFrame({"timestamp": times, "sensor_data": sensor_data})
+    return df
 
 
 def exampleFigure() -> go.Figure:
@@ -19,6 +66,11 @@ def exampleFigure() -> go.Figure:
 
 
 def dashboardPage():
+    # Init variables
+    if "test_reading" not in st.session_state:
+        st.session_state.test_reading = False
+
+    # Load page
     st.subheader("Control panel")
 
     test_unavailable = True
@@ -33,27 +85,39 @@ def dashboardPage():
             icon=":material/offline_bolt:",
         )
     panel_col_1, panel_col_2, panel_col_3 = st.columns(3)
-    panel_col_1.button(
+    btn_test_start = panel_col_1.button(
         label="Start test",
         key="button_test_start",
         type="primary",
         use_container_width=True,
         disabled=test_unavailable,
     )
-    panel_col_2.button(
+    btn_test_stop = panel_col_2.button(
         label="Stop test",
         key="button_test_stop",
         type="primary",
         use_container_width=True,
         disabled=test_unavailable,
     )
-    panel_col_3.button(
+    btn_test_tare = panel_col_3.button(
         label="Tare sensors",
         key="button_tare_sensors",
         type="secondary",
         use_container_width=True,
         disabled=test_unavailable,
     )
+
+    if btn_test_start and not st.session_state.test_reading:
+        stop_event.clear()
+        ctx = get_script_run_ctx()
+        thread = threading.Thread(target=readTest, args=(stop_event, ctx.session_id))
+        add_script_run_ctx(thread)
+        thread.start()
+    if btn_test_stop and st.session_state.test_reading:
+        st.session_state.test_reading = False
+        stop_event.set()
+
+    st.dataframe(data=getSensorDataFrame(), use_container_width=True)
 
     st.subheader("Graph results")
 
