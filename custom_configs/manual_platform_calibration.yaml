@@ -55,8 +55,8 @@ sensor_groups:
     - triax_y
     - triax_z
 sensors_calibration:
-  phidget_loadcell_reference: s_type
-  platform_reference_triaxial: null
+  phidget_loadcell_reference: null
+  platform_reference_triaxial: []
 sensors:
   p1_z1:
     name: P1_LoadCell_Z_1
