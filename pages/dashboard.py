@@ -132,11 +132,20 @@ def dashboardPage():
     if btn_test_stop:
         stop_event.set()
 
-    st.dataframe(data=getSensorDataFrame(), use_container_width=True)
+    # TODO Show/download dataframes only when a test finishes.
+    with st.expander("Recorded data", icon=":material/table:"):
+        file_col1, file_col2 = st.columns([0.3, 0.6])
+        file_col1.button(label="Download file", use_container_width=True)
+        file_col2.text_input(
+            label="Test name",
+            placeholder="Filename",
+            label_visibility="collapsed",
+        )
+        st.dataframe(data=getSensorDataFrame(), use_container_width=True)
 
     st.subheader("Graph results")
 
-    with st.expander("**Data settings**", icon=":material/dataset:"):
+    with st.expander("Data settings", icon=":material/dataset:"):
         settings_col_1, settings_col_2 = st.columns(2)
         settings_col_1.subheader("Recorded data")
         data_type = settings_col_1.radio(

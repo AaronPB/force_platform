@@ -66,11 +66,6 @@ def settingsPage():
     # Test settings
     st.header("Test settings")
     test_col_1, test_col_2 = st.columns(2)
-    test_col_1.text_input(
-        label="Test name",
-        placeholder="New test",
-        help="Will be used for the data file name.",
-    )
     test_col_1.number_input(
         label="Tare amount",
         key="number_input_tare_amount",
@@ -88,16 +83,6 @@ def settingsPage():
         max_value=1000,
         value=st.session_state.config_mngr.getConfigValue(
             ConfigPaths.RECORD_INTERVAL_MS.value, 10
-        ),
-        help="TODO",
-    )
-    test_col_2.number_input(
-        label="Calibration amount",
-        key="number_input_calibration_amount",
-        min_value=10,
-        max_value=500,
-        value=st.session_state.config_mngr.getConfigValue(
-            ConfigPaths.CALIBRATION_DATA_AMOUNT.value, 300
         ),
         help="TODO",
     )
