@@ -105,18 +105,19 @@ def settingsPage():
     # Sensor settings
     st.header("Sensor settings")
 
-    # FIXME Does not work because the button runs the method before updating/rendering the page.
-    # if st.session_state.get("btn_sensor_connect", False):
-    #     st.session_state.sensor_connection_available = False
-
+    if st.session_state.get("btn_sensor_connect", False):
+        st.session_state.sensor_connection_available = False
+    
     connect_col_1, connect_col_2 = st.columns(2)
-    connect_col_1.button(
+    connect_sensors_btn = connect_col_1.button(
         label="Connect sensors",
         key="btn_sensor_connect",
         type="primary",
-        on_click=connectSensors,
         disabled=not st.session_state.sensor_connection_available,
     )
+    if connect_sensors_btn:
+        connectSensors()
+        st.rerun()
     if st.session_state.test_mngr.getSensorConnected():
         connect_col_2.success("Sensors connected!", icon=":material/check_circle:")
     else:
