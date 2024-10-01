@@ -1,14 +1,14 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 # Sensor types
 class STypes(Enum):
-    SENSOR_LOADCELL = auto()
-    SENSOR_ENCODER = auto()
-    SENSOR_IMU = auto()
+    SENSOR_LOADCELL = "Load Cell"
+    SENSOR_ENCODER = "Encoder"
+    SENSOR_IMU = "IMU"
 
 
 # Sensor group types
 class SGTypes(Enum):
-    GROUP_DEFAULT = auto()
-    GROUP_PLATFORM = auto()
+    GROUP_DEFAULT = "Default"
+    GROUP_PLATFORM = "Platform"

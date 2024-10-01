@@ -92,7 +92,7 @@ def settingsPage():
 
     if st.session_state.get("btn_sensor_connect", False):
         st.session_state.sensor_connection_available = False
-    
+
     connect_col_1, connect_col_2 = st.columns(2)
     connect_sensors_btn = connect_col_1.button(
         label="Connect sensors",
@@ -122,10 +122,12 @@ def settingsPage():
             tab_names.append(group.getName())
             sensor_info[group.getName()] = {
                 "names": [sensor.getName() for sensor in group.getSensors().values()],
-                "types": [sensor.getType() for sensor in group.getSensors().values()],
+                "types": [
+                    sensor.getType().value for sensor in group.getSensors().values()
+                ],
                 "read": [sensor.getRead() for sensor in group.getSensors().values()],
                 "status": [
-                    sensor.getStatus() for sensor in group.getSensors().values()
+                    sensor.getStatus().value for sensor in group.getSensors().values()
                 ],
             }
         tabs = st.tabs(tab_names)
