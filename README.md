@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="#readme"><img alt="Force platform reader logo" src="images/project_logo.svg"></a>
+  <a href="#readme"><img alt="Force platform reader logo" src="images/force_platform_logo.png"></a>
 </p>
 <p align="center">
   <a href="#readme"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue.svg"></a>
