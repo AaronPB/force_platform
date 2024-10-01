@@ -22,9 +22,11 @@ def colorDataFrameRow(status: SStatus, columns: int):
 
 
 def connectSensors():
+    st.session_state.sensor_connection_available = False
     st.session_state.test_mngr.setSensorGroups(st.session_state.sensor_mngr.getGroups())
     with st.spinner("Connecting sensors..."):
         st.session_state.test_mngr.checkConnection()
+    st.session_state.sensor_connection_available = True
 
 
 def newConfigFile(file_path: str):
@@ -47,6 +49,11 @@ def settingsPage():
         st.session_state.sensor_mngr.setup(st.session_state.config_mngr)
     if "test_mngr" not in st.session_state:
         st.session_state.test_mngr = TestManager()
+
+    # Buttons
+    if "sensor_connection_available" not in st.session_state:
+        # TODO Maybe False if there are errors with config loads?
+        st.session_state.sensor_connection_available = True
 
     st.file_uploader(
         label="Load a custom config file",
@@ -98,11 +105,17 @@ def settingsPage():
     # Sensor settings
     st.header("Sensor settings")
 
+    # FIXME Does not work because the button runs the method before updating/rendering the page.
+    # if st.session_state.get("btn_sensor_connect", False):
+    #     st.session_state.sensor_connection_available = False
+
     connect_col_1, connect_col_2 = st.columns(2)
     connect_col_1.button(
         label="Connect sensors",
+        key="btn_sensor_connect",
         type="primary",
         on_click=connectSensors,
+        disabled=not st.session_state.sensor_connection_available,
     )
     if st.session_state.test_mngr.getSensorConnected():
         connect_col_2.success("Sensors connected!", icon=":material/check_circle:")
