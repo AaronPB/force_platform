@@ -4,7 +4,7 @@ import streamlit as st
 def homePage():
     _, img_col, _ = st.columns([0.2, 0.6, 0.2])
     img_col.image(
-        image="images/home_project_logo.png",
+        image="images/force_platform_logo.png",
         use_column_width=True,
     )
     st.title("Welcome to Force Platform Reader")
@@ -101,65 +101,6 @@ def homePage():
     with st.expander("Configure your sensors", icon=":material/toggle_on:"):
         st.write(
             "You can enable and disable sensors and sensor groups from the loaded config file."
-        )
-
-    with st.expander("Calibrate your sensors", icon=":material/eye_tracking:"):
-        st.write("You can calibrate individual sensors and force platorms.")
-
-        st.subheader("Individual sensors")
-        st.markdown("Available sensor types: `SENSOR_LOADCELL`")
-        st.latex(
-            r"""
-            F = k ~ V_f
-            """
-        )
-
-        st.subheader("Force platform sensor groups")
-        st.warning(
-            "Only available for project custom platforms.", icon=":material/warning:"
-        )
-        st.latex(
-            r"""
-            \begin{bmatrix}
-                \mathbf{Z_f^1}\\
-                \mathbf{Z_f^2}\\
-                \vdots\\
-                \mathbf{Z_f^{M-1}}\\
-                \mathbf{Z_f^M}\\
-            \end{bmatrix}
-            \begin{bmatrix}
-                k_{1,1} \\
-                k_{1,2} \\
-                \vdots \\
-                k_{1,12} \\
-                k_{2,1} \\
-                \vdots \\
-                k_{6,12}
-            \end{bmatrix} =
-            \begin{bmatrix}
-                \mathbf{f^1}\\
-                \mathbf{f^2}\\
-                \vdots\\
-                \mathbf{f^{M-1}}\\
-                \mathbf{f^{M}}
-            \end{bmatrix}
-            """
-        )
-        st.latex(
-            r"""
-            \mathbf{Z_f} = \mathbf{I_6} \otimes \mathbf{v_f}^T
-            """
-        )
-        ec_col_1, ec_col_2 = st.columns(2)
-        ec_col_1.latex(
-            r"""
-            \mathbf{v_f} = \{V_{f1}, V_{f2}, \dots, V_{f12}\}^T
-            """
-        )
-        ec_col_2.latex(
-            r"""
-            \mathbf{f} = \{F_x, F_y, F_z, M_x, M_y, M_z\}^T
-            """
         )
 
     with st.expander("Run a test", icon=":material/play_arrow:"):
