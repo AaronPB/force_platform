@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import yaml
 
 from src.managers.configManager import ConfigManager
 from src.managers.sensorManager import SensorManager
@@ -8,25 +7,16 @@ from src.managers.fileManager import FileManager
 from src.managers.testManager import TestManager
 
 from src.enums.configPaths import ConfigPaths
-from src.enums.sensorStatus import SStatus
 
 from loguru import logger
 
 
-def colorDataFrameRow(status: SStatus, columns: int):
-    if status == SStatus.AVAILABLE:
-        return ["background-color: #107523"] * columns
-    elif status == SStatus.NOT_FOUND:
-        return ["background-color: #8c0d0d"] * columns
-    else:
-        return ["background-color: transparent"] * columns
-
-
 def connectSensors():
     st.session_state.sensor_connection_available = False
-    st.session_state.test_mngr.setSensorGroups(st.session_state.sensor_mngr.getGroups())
     with st.spinner("Connecting sensors..."):
-        st.session_state.test_mngr.checkConnection()
+        st.session_state.test_mngr.checkConnection(
+            st.session_state.sensor_mngr.getGroups()
+        )
     st.session_state.sensor_connection_available = True
 
 
@@ -65,7 +55,6 @@ def settingsPage():
     if file_upload is not None:
         st.session_state.config_mngr.updateCustomConfig(file_upload)
         st.session_state.sensor_mngr.setup(st.session_state.config_mngr)
-    st.write(f"Loaded config: {st.session_state.config_mngr.getCurrentFilePath()}")
 
     # Test settings
     st.header("Test settings")
@@ -144,9 +133,6 @@ def settingsPage():
                     "Status": sensor_info[tab_name]["status"],
                 }
             )
-            styled_df = df.style.apply(
-                lambda x: colorDataFrameRow(x["Status"], len(df.columns)), axis=1
-            )
             with tabs[i]:
                 st.checkbox(
                     label="Disable entire sensor group",
@@ -155,7 +141,7 @@ def settingsPage():
                     help="Ignores and does not connect to enabled sensors of this group.",
                 )
                 edited_df = st.data_editor(
-                    data=styled_df,
+                    data=df,
                     key=f"edited_df_{i}",
                     use_container_width=True,
                     hide_index=True,
