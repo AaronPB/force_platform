@@ -16,7 +16,8 @@ class TestManager:
         self.test_times: list[int] = []
         self.test_running: bool = False
         self.threads: list[threading.Thread] = []
-        self.register_barrier: threading.Barrier
+        self.main_thread: threading.Thread
+        self.register_event = threading.Event()
 
     # Setters and getters
     def getSensorConnected(self) -> bool:
@@ -35,24 +36,25 @@ class TestManager:
             if group.checkConnections():
                 self.available_sensors.update(group.getSensors(only_available=True))
 
-    def _registerTime(self) -> None:
-        self.test_times.append(round(time.time() * 1000))
-
-    def _registerData(self, sensor: Sensor, start_event: threading.Event) -> None:
-        start_event.wait()
+    def _registerData(self, sensor: Sensor) -> None:
         while self.test_running:
+            self.register_event.wait()
             sensor.registerValue()
-            try:
-                self.register_barrier.wait()
-            except threading.BrokenBarrierError:
-                logger.warning(
-                    f"Sensor {sensor.getName()} of id {sensor.getID()} "
-                    + "has not responded at the requested register time."
-                )
-                self.test_running
-                break
 
-    def testStart(self) -> None:
+    def _registerProcess(self, interval_ms: int) -> None:
+        next_time = time.time() + interval_ms / 1000.0
+        while self.test_running:
+            # Adjust sleep to remaining time
+            time.sleep(max(0, next_time - time.time()))
+            next_time += interval_ms / 1000.0
+
+            # Register timestamp and set reading event
+            self.test_times.append(round(time.time() * 1000))
+            self.register_event.set()
+
+            self.register_event.clear()
+
+    def testStart(self, interval_ms: int = 100) -> None:
         logger.info(f"Starting test...")
         if not self.available_sensors:
             logger.warning(
@@ -74,22 +76,16 @@ class TestManager:
                 return
             connected_sensors.append(sensor)
         # Create sensor threads
-        self.register_barrier = threading.Barrier(
-            parties=len(self.available_sensors),
-            action=self._registerTime,
-            timeout=0.01,
-        )
-        start_event = threading.Event()
         self.test_running = True
+        self.register_event.clear()
         for sensor in self.available_sensors:
-            thread = threading.Thread(
-                target=self._registerData, args=[sensor, start_event]
-            )
+            thread = threading.Thread(target=self._registerData, args=[sensor])
             self.threads.append(thread)
             thread.start()
-        self._registerTime()    # Register initial timestamp
-        start_event.set()       # Start all threads
-        # TODO Handle BrokenBarrierError in entire test
+        self.main_thread = threading.Thread(
+            target=self._registerProcess, args=[interval_ms]
+        )
+        self.main_thread.start()
 
     def testStop(self) -> None:
         if not self.test_running:
@@ -97,5 +93,6 @@ class TestManager:
             return
         self.test_running = False
         [thread.join() for thread in self.threads]
+        self.main_thread.join()
         logger.info(f"Test finished")
         [sensor.disconnect() for sensor in self.available_sensors.values()]
