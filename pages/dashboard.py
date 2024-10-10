@@ -2,35 +2,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-import threading
-import time
-
-from streamlit.runtime.scriptrunner import get_script_run_ctx, add_script_run_ctx
 
 from loguru import logger
-
-
-stop_event = threading.Event()
-
-
-def readTest(detain_event: threading.Event, session_id: str):
-    ctx = get_script_run_ctx()
-    if ctx.session_id != session_id:
-        return
-    assert "test_mngr" in st.session_state
-    st.session_state.test_mngr.testStart("", "This is a test")
-    test_itr = 0
-    while not detain_event.is_set():
-        ctx = get_script_run_ctx()
-        if ctx.session_id != session_id:
-            break
-        st.session_state.test_mngr.testRegisterValues()
-        test_itr += 1
-        if test_itr > 1000:
-            st.session_state.test_reading = False
-            break
-        time.sleep(0.01)
-    st.session_state.test_mngr.testStop("This is a test")
 
 
 def getSensorDataFrame() -> pd.DataFrame:
@@ -124,13 +97,9 @@ def dashboardPage():
         )
 
     if btn_test_start:
-        stop_event.clear()
-        ctx = get_script_run_ctx()
-        thread = threading.Thread(target=readTest, args=(stop_event, ctx.session_id))
-        add_script_run_ctx(thread)
-        thread.start()
+        st.session_state.test_mngr.testStart(100)
     if btn_test_stop:
-        stop_event.set()
+        st.session_state.test_mngr.testStop()
 
     # TODO Show/download dataframes only when a test finishes.
     with st.expander("Recorded data", icon=":material/table:"):
