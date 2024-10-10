@@ -35,10 +35,10 @@ class TestManager:
             if group.checkConnections():
                 self.available_sensors.update(group.getSensors(only_available=True))
 
-    def registerTime(self) -> None:
+    def _registerTime(self) -> None:
         self.test_times.append(round(time.time() * 1000))
 
-    def registerData(self, sensor: Sensor, start_event: threading.Event) -> None:
+    def _registerData(self, sensor: Sensor, start_event: threading.Event) -> None:
         start_event.wait()
         while self.test_running:
             sensor.registerValue()
@@ -59,6 +59,7 @@ class TestManager:
                 "There are no sensors connected! Please check sensor connections first."
             )
             return
+        self.threads.clear()
         self.test_times.clear()
         [sensor.clearValues() for sensor in self.available_sensors.values()]
         # Connect sensors and check if all of them are available
@@ -72,21 +73,22 @@ class TestManager:
                 [sensor.disconnect() for sensor in connected_sensors]
                 return
             connected_sensors.append(sensor)
-        # Prepare and start sensor threads
+        # Create sensor threads
         self.register_barrier = threading.Barrier(
             parties=len(self.available_sensors),
-            action=self.registerTime,
+            action=self._registerTime,
             timeout=0.01,
         )
         start_event = threading.Event()
         self.test_running = True
         for sensor in self.available_sensors:
             thread = threading.Thread(
-                target=self.registerData, args=[sensor, start_event]
+                target=self._registerData, args=[sensor, start_event]
             )
             self.threads.append(thread)
             thread.start()
-        start_event.set()
+        self._registerTime()    # Register initial timestamp
+        start_event.set()       # Start all threads
         # TODO Handle BrokenBarrierError in entire test
 
     def testStop(self) -> None:
@@ -95,6 +97,5 @@ class TestManager:
             return
         self.test_running = False
         [thread.join() for thread in self.threads]
-        self.threads.clear()
         logger.info(f"Test finished")
         [sensor.disconnect() for sensor in self.available_sensors.values()]
