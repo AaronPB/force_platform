@@ -3,6 +3,8 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 
+from src.enums.configPaths import ConfigPaths
+
 from loguru import logger
 
 
@@ -97,7 +99,11 @@ def dashboardPage():
         )
 
     if btn_test_start:
-        st.session_state.test_mngr.testStart(100)
+        st.session_state.test_mngr.testStart(
+            st.session_state.config_mngr.getConfigValue(
+                ConfigPaths.RECORD_INTERVAL_MS.value, 10
+            )
+        )
     if btn_test_stop:
         st.session_state.test_mngr.testStop()
 
