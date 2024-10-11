@@ -112,24 +112,17 @@ def settingsPage():
 
     tab_names = [group.getName() for group in sensor_groups]
     tabs = st.tabs(tab_names)
-    for i, tab_name in enumerate(tab_names):
-        sensor_group = sensor_groups[i]
+    for i, group in enumerate(sensor_groups):
         df = pd.DataFrame(
             {
-                "ID": [sensor.getID() for sensor in sensor_group.getSensors().values()],
-                "Connect": [
-                    sensor.getRead() for sensor in sensor_group.getSensors().values()
-                ],
-                "Name": [
-                    sensor.getName() for sensor in sensor_group.getSensors().values()
-                ],
+                "ID": [sensor.getID() for sensor in group.getSensors().values()],
+                "Connect": [sensor.getRead() for sensor in group.getSensors().values()],
+                "Name": [sensor.getName() for sensor in group.getSensors().values()],
                 "Type": [
-                    sensor.getType().value
-                    for sensor in sensor_group.getSensors().values()
+                    sensor.getType().value for sensor in group.getSensors().values()
                 ],
                 "Status": [
-                    sensor.getStatus().value
-                    for sensor in sensor_group.getSensors().values()
+                    sensor.getStatus().value for sensor in group.getSensors().values()
                 ],
             }
         )
@@ -137,12 +130,12 @@ def settingsPage():
             disable_group = st.checkbox(
                 label="Disable entire sensor group",
                 key=f"checkbox_{i}",
-                value=not sensor_group.getRead(),
+                value=not group.getRead(),
                 help="Ignores and does not connect to enabled sensors of this group.",
             )
             if disable_group:
                 st.session_state.sensor_mngr.setSensorRead(
-                    not sensor_group.getRead(), sensor_group.getID()
+                    not group.getRead(), group.getID()
                 )
                 st.rerun()
             edited_df = st.data_editor(
@@ -157,6 +150,6 @@ def settingsPage():
             if not changed_sensors.empty:
                 for index, row in changed_sensors.iterrows():
                     st.session_state.sensor_mngr.setSensorRead(
-                        not row["Connect"], sensor_group.getID(), row["ID"]
+                        not row["Connect"], group.getID(), row["ID"]
                     )
                 st.rerun()
