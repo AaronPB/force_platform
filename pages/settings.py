@@ -107,43 +107,56 @@ def settingsPage():
     if not sensor_groups:
         st.error("There is no sensor group information available!")
     elif len(sensor_groups) == 1:
-        pass
-    else:
-        tab_names = []
-        sensor_info = {}
-        for group in sensor_groups:
-            tab_names.append(group.getName())
-            sensor_info[group.getName()] = {
-                "names": [sensor.getName() for sensor in group.getSensors().values()],
-                "types": [
-                    sensor.getType().value for sensor in group.getSensors().values()
+        # TODO Build single window instead of tabs
+        return
+
+    tab_names = [group.getName() for group in sensor_groups]
+    tabs = st.tabs(tab_names)
+    for i, tab_name in enumerate(tab_names):
+        sensor_group = sensor_groups[i]
+        df = pd.DataFrame(
+            {
+                "ID": [sensor.getID() for sensor in sensor_group.getSensors().values()],
+                "Connect": [
+                    sensor.getRead() for sensor in sensor_group.getSensors().values()
                 ],
-                "read": [sensor.getRead() for sensor in group.getSensors().values()],
-                "status": [
-                    sensor.getStatus().value for sensor in group.getSensors().values()
+                "Name": [
+                    sensor.getName() for sensor in sensor_group.getSensors().values()
+                ],
+                "Type": [
+                    sensor.getType().value
+                    for sensor in sensor_group.getSensors().values()
+                ],
+                "Status": [
+                    sensor.getStatus().value
+                    for sensor in sensor_group.getSensors().values()
                 ],
             }
-        tabs = st.tabs(tab_names)
-        for i, tab_name in enumerate(tab_names):
-            df = pd.DataFrame(
-                {
-                    "Connect": sensor_info[tab_name]["read"],
-                    "Name": sensor_info[tab_name]["names"],
-                    "Type": sensor_info[tab_name]["types"],
-                    "Status": sensor_info[tab_name]["status"],
-                }
+        )
+        with tabs[i]:
+            disable_group = st.checkbox(
+                label="Disable entire sensor group",
+                key=f"checkbox_{i}",
+                value=not sensor_group.getRead(),
+                help="Ignores and does not connect to enabled sensors of this group.",
             )
-            with tabs[i]:
-                st.checkbox(
-                    label="Disable entire sensor group",
-                    key=f"checkbox_{i}",
-                    value=False,
-                    help="Ignores and does not connect to enabled sensors of this group.",
+            if disable_group:
+                st.session_state.sensor_mngr.setSensorRead(
+                    not sensor_group.getRead(), sensor_group.getID()
                 )
-                edited_df = st.data_editor(
-                    data=df,
-                    key=f"edited_df_{i}",
-                    use_container_width=True,
-                    hide_index=True,
-                    disabled=("Name", "Type", "Status"),
-                )
+                st.rerun()
+            edited_df = st.data_editor(
+                data=df,
+                key=f"edited_df_{i}",
+                use_container_width=True,
+                hide_index=True,
+                column_order=("Connect", "Name", "Type", "Status"),
+                disabled=("Name", "Type", "Status"),
+            )
+            changed_sensors = df[df["Connect"] != edited_df["Connect"]]
+            if not changed_sensors.empty:
+                for index, row in changed_sensors.iterrows():
+                    st.session_state.sensor_mngr.setSensorRead(
+                        not row["Connect"], sensor_group.getID(), row["ID"]
+                    )
+                st.rerun()
