@@ -109,12 +109,26 @@ def dashboardPage():
 
     # TODO Show/download dataframes only when a test finishes.
     with st.expander("Recorded data", icon=":material/table:"):
-        file_col1, file_col2 = st.columns([0.3, 0.6])
-        file_col1.button(label="Download file", use_container_width=True)
-        file_col2.text_input(
+        file_name = st.text_input(
             label="Test name",
             placeholder="Filename",
             label_visibility="collapsed",
+        )
+        file_col1, file_col2, file_col3 = st.columns(3)
+        file_col1.button(
+            label="Download raw data",
+            use_container_width=True,
+            help="Just the recorded values, without post-processing.",
+        )
+        file_col2.button(
+            label="Download calibrated data",
+            use_container_width=True,
+            help="Processed values with calibration params.",
+        )
+        file_col3.button(
+            label="Download filtered data",
+            use_container_width=True,
+            help="Calibrated values with butterworth filter.",
         )
         st.dataframe(data=getSensorDataFrame(), use_container_width=True)
 
