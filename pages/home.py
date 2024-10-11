@@ -322,7 +322,9 @@ def homePage():
         )
 
     with st.expander("Configure your sensors", icon=":material/toggle_on:"):
-        st.write("You can modify general test and sensor settings of the configuration file on the settings page.")
+        st.write(
+            "You can modify general test and sensor settings of the configuration file on the settings page."
+        )
         st.info(
             "When settings are modified, the changes are also saved in the configuration file.",
             icon=":material/info:",
@@ -364,7 +366,7 @@ def homePage():
             "To be able to preform tests, at least one sensor must be available.",
             icon=":material/info:",
         )
-    
+
     st.header("Dashboard page")
 
     with st.expander("Run a test", icon=":material/play_arrow:"):
