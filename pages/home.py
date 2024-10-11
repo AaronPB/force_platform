@@ -12,6 +12,8 @@ def homePage():
         "Check the following documentation if you are not familiar with the application."
     )
 
+    st.header("Settings page")
+
     with st.expander("Load a custom config file", icon=":material/upload_file:"):
         st.write("You can load a custom configuration file.")
         with open("config.yaml", "r") as file:
@@ -320,9 +322,50 @@ def homePage():
         )
 
     with st.expander("Configure your sensors", icon=":material/toggle_on:"):
-        st.write(
-            "You can enable and disable sensors and sensor groups from the loaded config file."
+        st.write("You can modify general test and sensor settings of the configuration file on the settings page.")
+        st.info(
+            "When settings are modified, the changes are also saved in the configuration file.",
+            icon=":material/info:",
         )
+        st.subheader("General test settings")
+        st.markdown(
+            """
+            Here you can still modify the recording settings of the configuration file.
+
+            | Option | Minimum value | Maximum value | Description |
+            | :--- | :---: | :---: | :--- |
+            | Recording interval | `10` | `1000` | Timeframe between each data recording in milliseconds. |
+            | Tare amount | `10` | `500` | Amount of values to be taken for sensor new intercepts. |
+            """
+        )
+        st.subheader("Sensor settings")
+        st.markdown(
+            """
+            You can enable and disable sensors and sensor groups from the loaded configuration file, marking or unmarking the corresponding checkbox.
+
+            - **Enable a sensor**: The app will attempt to connect to this sensor, at the specified `serial` (and `channel` if needed) in the configuration file.
+            - **Disable a sensor**: The sensor will be ignored. This means the app will not attempt a connection with the sensor.
+            - **Enable a sensor group**: The app will try to connect only to enabled sensors. Disabled sensors inside an enabled sensor group are still ignored.
+            - **Disable a sensor group**: The complete sensor list will be ignored, avoiding connection attempts even if there are enabled sensors.
+            """
+        )
+        st.warning(
+            "All sensors inside a disabled sensor group will be ignored.",
+            icon=":material/warning:",
+        )
+        st.subheader("Sensor connection")
+        st.markdown(
+            """
+            Click the `Connect sensors` button in order to check the enabled sensors connections.
+            Once the connection check is done, the tab list below will update with the new sensor status.
+            """
+        )
+        st.info(
+            "To be able to preform tests, at least one sensor must be available.",
+            icon=":material/info:",
+        )
+    
+    st.header("Dashboard page")
 
     with st.expander("Run a test", icon=":material/play_arrow:"):
         st.write("Asd")
