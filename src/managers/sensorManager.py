@@ -30,8 +30,6 @@ class SensorManager:
         self.config_sensors: dict = {}
 
         self.sensor_groups: list[SensorGroup] = []
-        self.loadcell_calib_ref: Sensor = None
-        self.platform_calib_ref: list[Sensor] = []
 
     def setup(self, config_manager: ConfigYAMLHandler) -> None:
         self.config_mngr = config_manager
@@ -41,18 +39,8 @@ class SensorManager:
         config_groups = self.config_mngr.getConfigValue(
             CfgPaths.SENSOR_GROUPS_SECTION.value, {}
         )
-        loadcell_calib_id = self.config_mngr.getConfigValue(
-            CfgPaths.CALIBRATION_LOADCELL_SENSOR.value, {}
-        )
-        platform_calib_sensors = self.config_mngr.getConfigValue(
-            CfgPaths.CALIBRATION_PLATFORM_TRIAXIAL.value, []
-        )
         self.clearSensors()
-        # Load sensor groups
         self.loadSensorGroups(config_groups)
-        # Load calibration sensors
-        self.loadcell_calib_ref = self.loadSensor(loadcell_calib_id)
-        self.platform_calib_ref = self.loadCalibPlatformSensors(platform_calib_sensors)
 
     def loadSensorGroups(self, config_groups: dict) -> None:
         if not config_groups:
@@ -161,33 +149,8 @@ class SensorManager:
         )
         return None
 
-    def loadCalibPlatformSensors(self, content: list) -> list[Sensor]:
-        sensor_list: list[Sensor] = []
-        for triaxial_sensor in content:
-            sensor = self.loadSensor(triaxial_sensor)
-            if sensor is None:
-                continue
-            sensor_list.append(sensor)
-        # Check if sensor list has exactly 3 SENSOR_LOADCELL sensors
-        if len(sensor_list) != 3:
-            logger.warning(
-                f"There are more sensors than expected (3) for a triaxial sensor!"
-                + " Disabling reference sensor."
-            )
-            return []
-        for sensor in sensor_list:
-            if sensor.getType() != STypes.SENSOR_LOADCELL:
-                logger.warning(
-                    "Al sensors defined in platform calibration reference"
-                    + " needs to be of type SENSOR_LOADCELL. Disabling reference sensor."
-                )
-                return []
-        return sensor_list
-
     def clearSensors(self) -> None:
         self.sensor_groups.clear()
-        self.loadcell_calib_ref = None
-        self.platform_calib_ref = None
 
     # Setters and getters
 
@@ -287,9 +250,3 @@ class SensorManager:
             if group.getID() == group_id:
                 return group
         return None
-
-    def getSensorCalibRef(self) -> Sensor:
-        return self.loadcell_calib_ref
-
-    def getPlatformCalibRef(self) -> list[Sensor]:
-        return self.platform_calib_ref
