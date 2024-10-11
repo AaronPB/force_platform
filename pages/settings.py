@@ -46,8 +46,16 @@ def settingsPage():
         # TODO Maybe False if there are errors with config loads?
         st.session_state.sensor_connection_available = True
 
+    st.text_input(
+        label="Loaded configuration file name",
+        value=st.session_state.config_mngr.getConfigValue(
+            ConfigPaths.CONFIG_NAME.value, "Default file"
+        ),
+        disabled=True,
+    )
+
     file_upload = st.file_uploader(
-        label="Load a custom config file",
+        label="Load a custom configuration file",
         type=".yaml",
         accept_multiple_files=False,
         help="The app will update all sensors and general settings with the new custom configuration.",
@@ -55,6 +63,7 @@ def settingsPage():
     if file_upload is not None:
         st.session_state.config_mngr.updateCustomConfig(file_upload)
         st.session_state.sensor_mngr.setup(st.session_state.config_mngr)
+        st.rerun()
 
     # Test settings
     st.header("Test settings")
