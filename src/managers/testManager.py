@@ -2,6 +2,7 @@
 
 import time
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from src.handlers.sensorGroup import SensorGroup, Sensor
 
@@ -15,9 +16,9 @@ class TestManager:
         self.available_sensors: dict[str, Sensor] = {}
         self.test_times: list[int] = []
         self.test_running: bool = False
-        self.threads: list[threading.Thread] = []
         self.main_thread: threading.Thread
-        self.register_event = threading.Event()
+        self.register_barrier: threading.Barrier
+        self.threads_executor: ThreadPoolExecutor
 
     # Setters and getters
     def getSensorConnected(self) -> bool:
@@ -38,24 +39,26 @@ class TestManager:
 
     def _registerData(self, sensor: Sensor) -> None:
         while self.test_running:
-            self.register_event.wait()
+            self.register_barrier.wait()
             sensor.registerValue()
+
+    def _registerTime(self) -> None:
+        self.test_times.append(round(time.time() * 1000))
 
     def _registerProcess(self, interval_ms: int) -> None:
         next_time = time.time() + interval_ms / 1000.0
-        # counter = 0
         while self.test_running:
-            # counter +=1
             # Adjust sleep to remaining time
             time.sleep(max(0, next_time - time.time()))
             next_time += interval_ms / 1000.0
 
             # Register timestamp and set reading event
-            self.test_times.append(round(time.time() * 1000))
-            self.register_event.set()
-
-            self.register_event.clear()
-        [thread.join() for thread in self.threads]
+            try:
+                self.register_barrier.wait()
+            except threading.BrokenBarrierError:
+                # May be triggered if main thread is waiting
+                break
+        self.threads_executor.shutdown()
 
     def testStart(self, interval_ms: int = 100) -> None:
         logger.info(f"Starting test...")
@@ -64,7 +67,6 @@ class TestManager:
                 "There are no sensors connected! Please check sensor connections first."
             )
             return
-        self.threads.clear()
         self.test_times.clear()
         [sensor.clearValues() for sensor in self.available_sensors.values()]
         # Connect sensors and check if all of them are available
@@ -80,11 +82,16 @@ class TestManager:
             connected_sensors.append(sensor)
         # Create sensor threads
         self.test_running = True
-        self.register_event.clear()
+        self.register_barrier = threading.Barrier(
+            parties=len(self.available_sensors) + 1,
+            action=self._registerTime,
+            timeout=3,
+        )
+        self.threads_executor = ThreadPoolExecutor(
+            max_workers=len(self.available_sensors)
+        )
         for sensor in self.available_sensors.values():
-            thread = threading.Thread(target=self._registerData, args=[sensor])
-            self.threads.append(thread)
-            thread.start()
+            self.threads_executor.submit(self._registerData, sensor)
         self.main_thread = threading.Thread(
             target=self._registerProcess, args=[interval_ms]
         )
@@ -100,7 +107,6 @@ class TestManager:
         self.main_thread.join()
         logger.info(f"Test finished")
         [sensor.disconnect() for sensor in self.available_sensors.values()]
-        # FIXME With low intervals, different data sizes could appear! Fix those issues checking number of waiting threads.
         logger.debug("Recorded values size:")
         logger.debug(len(self.test_times))
         logger.debug(
