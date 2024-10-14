@@ -41,7 +41,7 @@ def settingsPage():
     if "test_mngr" not in st.session_state:
         st.session_state.test_mngr = TestManager()
 
-    # Buttons
+    # Buttons and variables states
     if "sensor_connection_available" not in st.session_state:
         # TODO Maybe False if there are errors with config loads?
         st.session_state.sensor_connection_available = True
@@ -67,8 +67,8 @@ def settingsPage():
 
     # Test settings
     st.header("Test settings")
-    test_col_1, test_col_2 = st.columns(2)
-    test_col_1.number_input(
+    config_col_1, config_col_2 = st.columns(2)
+    config_tare = config_col_1.number_input(
         label="Tare amount",
         key="number_input_tare_amount",
         min_value=10,
@@ -76,18 +76,28 @@ def settingsPage():
         value=st.session_state.config_mngr.getConfigValue(
             ConfigPaths.RECORD_TARE_AMOUNT.value, 300
         ),
-        help="TODO",
+        step=1,
+        help="Number of values to be taken to tare sensors.",
     )
-    test_col_2.number_input(
-        label="Record frequency (ms)",
+    if config_tare:
+        st.session_state.config_mngr.setConfigValue(
+            ConfigPaths.RECORD_TARE_AMOUNT.value, config_tare
+        )
+    config_interval = config_col_2.number_input(
+        label="Record interval (ms)",
         key="number_input_record_freq",
         min_value=10,
         max_value=1000,
         value=st.session_state.config_mngr.getConfigValue(
-            ConfigPaths.RECORD_INTERVAL_MS.value, 10
+            ConfigPaths.RECORD_INTERVAL_MS.value, 100
         ),
-        help="TODO",
+        step=1,
+        help="Timeframe between registered values in milliseconds.",
     )
+    if config_interval:
+        st.session_state.config_mngr.setConfigValue(
+            ConfigPaths.RECORD_INTERVAL_MS.value, config_interval
+        )
 
     # Sensor settings
     st.header("Sensor settings")
