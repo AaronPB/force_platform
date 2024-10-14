@@ -3,30 +3,21 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 
+from src.managers.configManager import ConfigManager
+from src.managers.sensorManager import SensorManager
+from src.managers.testManager import TestManager
+from src.managers.dataManager import DataManager
 from src.enums.configPaths import ConfigPaths
 
 from loguru import logger
 
 
-def getSensorDataFrame() -> pd.DataFrame:
-    df = pd.DataFrame({"timestamp": [0], "sensor_data": [0]})
-    if not "sensor_mngr" in st.session_state or not "test_mngr" in st.session_state:
-        return df
-    sensor_group = st.session_state.sensor_mngr.getGroup("imus")
-    if sensor_group is None:
-        return df
-    sensor_dict = sensor_group.getSensors(only_available=True)
-    if not sensor_dict:
-        return df
-    sensor = sensor_dict["imu_1"]
-    if sensor is None:
-        return df
-    sensor_data = sensor.getValues()
-    times = st.session_state.test_mngr.getTestTimes()
-    if not sensor_data or len(sensor_data) != len(times):
-        return pd.DataFrame({"timestamp": [0], "sensor_data": [0]})
-    df = pd.DataFrame({"timestamp": times, "sensor_data": sensor_data})
-    return df
+def getDataFrames() -> list[pd.DataFrame]:
+    return [
+        st.session_state.data_mngr.getCalibrateDataframe(),
+        st.session_state.data_mngr.getFilteredDataframe(),
+        st.session_state.data_mngr.getRawDataframe(),
+    ]
 
 
 def exampleFigure() -> go.Figure:
@@ -45,19 +36,26 @@ def exampleFigure() -> go.Figure:
 
 
 def dashboardPage():
-    # Init variables
+    # Initialize global instances
+    if "config_mngr" not in st.session_state:
+        logger.info("Defining config manager")
+        st.session_state.config_mngr = ConfigManager()
+    if "sensor_mngr" not in st.session_state:
+        st.session_state.sensor_mngr = SensorManager()
+        st.session_state.sensor_mngr.setup(st.session_state.config_mngr)
+    if "test_mngr" not in st.session_state:
+        st.session_state.test_mngr = TestManager()
+    if "data_mngr" not in st.session_state:
+        st.session_state.data_mngr = DataManager()
+
+    # Buttons and variables states
     if "test_reading" not in st.session_state:
         st.session_state.test_reading = False
 
     # Load page
     st.subheader("Control panel")
 
-    test_unavailable = True
-    if (
-        "test_mngr" in st.session_state
-        and st.session_state.test_mngr.getSensorConnected()
-    ):
-        test_unavailable = False
+    test_unavailable = not st.session_state.test_mngr.getSensorConnected()
     if test_unavailable:
         st.warning(
             "Need to connect sensors! Go to the settings page.",
@@ -101,36 +99,63 @@ def dashboardPage():
     if btn_test_start:
         st.session_state.test_mngr.testStart(
             st.session_state.config_mngr.getConfigValue(
-                ConfigPaths.RECORD_INTERVAL_MS.value, 10
+                ConfigPaths.RECORD_INTERVAL_MS.value, 100
             )
         )
     if btn_test_stop:
         st.session_state.test_mngr.testStop()
+        st.session_state.data_mngr.loadData(
+            st.session_state.test_mngr.getTestTimes(),
+            st.session_state.sensor_mngr.getGroups(),
+        )
+        st.session_state.data_mngr.applyButterFilter()
 
-    # TODO Show/download dataframes only when a test finishes.
+    # Show/download dataframes
+    dataframes = getDataFrames()
     with st.expander("Recorded data", icon=":material/table:"):
         file_name = st.text_input(
             label="Test name",
-            placeholder="Filename",
-            label_visibility="collapsed",
+            value=st.session_state.config_mngr.getConfigValue(
+                ConfigPaths.TEST_NAME.value, "Test"
+            ),
+            help="Set a file name for the downloaded file.",
         )
-        file_col1, file_col2, file_col3 = st.columns(3)
-        file_col1.button(
-            label="Download raw data",
-            use_container_width=True,
-            help="Just the recorded values, without post-processing.",
-        )
-        file_col2.button(
-            label="Download calibrated data",
-            use_container_width=True,
-            help="Processed values with calibration params.",
-        )
-        file_col3.button(
-            label="Download filtered data",
-            use_container_width=True,
-            help="Calibrated values with butterworth filter.",
-        )
-        st.dataframe(data=getSensorDataFrame(), use_container_width=True)
+        if file_name:
+            st.session_state.config_mngr.setConfigValue(
+                ConfigPaths.TEST_NAME.value, file_name
+            )
+
+        df_tabs = st.tabs(["Calibrated data", "Filtered data", "Raw data"])
+        for i, df in enumerate(dataframes):
+            with df_tabs[i]:
+                if df.empty:
+                    st.error(
+                        "There is no data recorded. Start a test!",
+                        icon=":material/report:",
+                    )
+                    st.button(
+                        label="Download CSV",
+                        key=f"btn_download_df_{i}",
+                        # use_container_width=True,
+                        help="Download the following dataframe in CSV format.",
+                        disabled=True,
+                    )
+                    st.dataframe(
+                        data=pd.DataFrame({"timestamp": [0], "sensor_data": [0]}),
+                        use_container_width=True,
+                    )
+                    continue
+
+                st.download_button(
+                    label="Download CSV",
+                    key=f"btn_download_df_{i}",
+                    icon=":material/download:",
+                    data=df.to_csv(index=False).encode("utf-8"),
+                    mime="text/csv",
+                    file_name=f"{file_name}.csv",
+                    help="Download the following dataframe in CSV format.",
+                )
+                st.dataframe(data=df, use_container_width=True)
 
     st.subheader("Graph results")
 
