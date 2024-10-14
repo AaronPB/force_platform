@@ -43,7 +43,9 @@ class TestManager:
 
     def _registerProcess(self, interval_ms: int) -> None:
         next_time = time.time() + interval_ms / 1000.0
+        # counter = 0
         while self.test_running:
+            # counter +=1
             # Adjust sleep to remaining time
             time.sleep(max(0, next_time - time.time()))
             next_time += interval_ms / 1000.0
@@ -53,6 +55,7 @@ class TestManager:
             self.register_event.set()
 
             self.register_event.clear()
+        [thread.join() for thread in self.threads]
 
     def testStart(self, interval_ms: int = 100) -> None:
         logger.info(f"Starting test...")
@@ -78,7 +81,7 @@ class TestManager:
         # Create sensor threads
         self.test_running = True
         self.register_event.clear()
-        for sensor in self.available_sensors:
+        for sensor in self.available_sensors.values():
             thread = threading.Thread(target=self._registerData, args=[sensor])
             self.threads.append(thread)
             thread.start()
@@ -89,10 +92,17 @@ class TestManager:
 
     def testStop(self) -> None:
         if not self.test_running:
-            logger.info("No test is running. Ignoring stop request.")
-            return
+            logger.warning(
+                "No test is running but stop request has been called!"
+                + "Please check possible errors."
+            )
         self.test_running = False
-        [thread.join() for thread in self.threads]
         self.main_thread.join()
         logger.info(f"Test finished")
         [sensor.disconnect() for sensor in self.available_sensors.values()]
+        # FIXME With low intervals, different data sizes could appear! Fix those issues checking number of waiting threads.
+        logger.debug("Recorded values size:")
+        logger.debug(len(self.test_times))
+        logger.debug(
+            [len(sensor.getValues()) for sensor in self.available_sensors.values()]
+        )
