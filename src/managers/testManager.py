@@ -60,7 +60,7 @@ class TestManager:
                 break
         self.threads_executor.shutdown()
 
-    def testStart(self, interval_ms: int = 100) -> None:
+    def testStart(self, interval_ms: int) -> None:
         logger.info(f"Starting test...")
         if not self.available_sensors:
             logger.warning(
