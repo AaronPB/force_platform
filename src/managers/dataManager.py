@@ -5,11 +5,6 @@ import numpy as np
 import pandas as pd
 from scipy.spatial.transform import Rotation
 from scipy.signal import butter, filtfilt
-from src.qtUIs.widgets.matplotlibWidgets import (
-    PlotFigureWidget,
-    PlotPlatformForcesWidget,
-    PlotPlatformCOPWidget,
-)
 from src.managers.sensorManager import SensorManager
 from src.handlers import SensorGroup, Sensor
 from src.enums.plotTypes import PlotTypes
@@ -105,165 +100,14 @@ class DataManager:
     def getDataSize(self) -> int:
         return len(self.df_raw)
 
-    def getGroupPlotWidget(
-        self,
-        plot_type: PlotTypes,
-        sensor_names: list[str],
-        idx1: int = 0,
-        idx2: int = 0,
-    ) -> PlotPlatformForcesWidget | PlotPlatformCOPWidget | PlotFigureWidget:
-        # Platform groups
-        if (
-            plot_type == PlotTypes.GROUP_PLATFORM_COP
-            or plot_type == PlotTypes.GROUP_PLATFORM_FORCES
-        ):
-            # Make forces dataframes
-            df_fx = pd.DataFrame()
-            df_fy = pd.DataFrame()
-            df_fz = pd.DataFrame()
-            for sensor_name in sensor_names:
-                sign = 1
-                for key in self.forces_sign.keys():
-                    if key in sensor_name:
-                        sign = self.forces_sign[key]
-                        break
-                if "X_" in sensor_name:
-                    df_fx[sensor_name] = self.getForce(sensor_name, sign)
-                    continue
-                if "Y_" in sensor_name:
-                    df_fy[sensor_name] = self.getForce(sensor_name, sign)
-                    continue
-                if "Z_" in sensor_name:
-                    df_fz[sensor_name] = self.getForce(sensor_name, sign)
-                    continue
-                logger.warning(
-                    f"Could not recognize sensor {sensor_name}."
-                    + " Needs X_, Y_ or Z_ in name to be identified."
-                )
-            if plot_type == PlotTypes.GROUP_PLATFORM_COP:
-                plotter = PlotPlatformCOPWidget()
-                # Check shapes
-                if df_fx.shape[1] != 4:
-                    logger.error(
-                        "Could not build COP plot!"
-                        + f"Need 4 X axis sensors, only {df_fx.shape[1]} provided."
-                    )
-                    return plotter
-                if df_fy.shape[1] != 4:
-                    logger.error(
-                        "Could not build COP plot!"
-                        + f"Need 4 Y axis sensors, only {df_fy.shape[1]} provided."
-                    )
-                    return plotter
-                if df_fz.shape[1] != 4:
-                    logger.error(
-                        "Could not build COP plot!"
-                        + f"Need 4 Z axis sensors, only {df_fz.shape[1]} provided."
-                    )
-                    return plotter
-                # Get COP and build plot
-                if self.isRangedPlot(idx1, idx2):
-                    df_fx = df_fx[idx1:idx2]
-                    df_fy = df_fy[idx1:idx2]
-                    df_fz = df_fz[idx1:idx2]
-                cop = self.getPlatformCOP(df_fx, df_fy, df_fz)
-                # Invert COP axis for ellipse cause plot is inverted
-                ellipse_params = self.getEllipseFromCOP((cop[1], cop[0]))
-                plotter.setupPlot(cop, ellipse_params)
-                return plotter
-            if plot_type == PlotTypes.GROUP_PLATFORM_FORCES:
-                plotter = PlotPlatformForcesWidget()
-                if self.isRangedPlot(idx1, idx2):
-                    plotter.setupRangedPlot(
-                        self.timeincr_list, df_fx, df_fy, df_fz, idx1, idx2
-                    )
-                    return plotter
-                plotter.setupPlot(self.timeincr_list, df_fx, df_fy, df_fz)
-                return plotter
-        return PlotFigureWidget()
-
-    def getPlotPreviewWidget(
-        self,
-        sensor_name: str,
-        idx1: int = 0,
-        idx2: int = 0,
-    ) -> PlotFigureWidget:
-        plotter = PlotFigureWidget()
-
-        # Check first if dataframe contains sensor_name
-        if sensor_name not in self.df_filtered.columns:
-            logger.error(f"Sensor name {sensor_name} not found in dataframe results!")
-            return plotter
-
-        df = self.df_filtered[sensor_name].copy(deep=True)
-
-        if self.isRangedPlot(idx1, idx2):
-            plotter.setupRangedPreviewPlot(df, idx1, idx2)
-            return plotter
-        plotter.setupPlot(df)
-        return plotter
-
-    def getSensorPlotWidget(
-        self,
-        plot_type: PlotTypes,
-        sensor_name: str,
-        idx1: int = 0,
-        idx2: int = 0,
-    ) -> PlotFigureWidget:
-        plotter = PlotFigureWidget()
-
-        # Check first if dataframe contains sensor_name
-        col_exist = False
-        for column in self.df_filtered.columns:
-            if sensor_name in column:
-                col_exist = True
-                break
-        if not col_exist:
-            print(self.df_filtered)
-            logger.error(f"Sensor name {sensor_name} not found in dataframe results!")
-            return plotter
-
-        # Do process depending on requested plot type
-        df: pd.DataFrame = pd.DataFrame()
-        y_label: str = ""
-        if plot_type == PlotTypes.SENSOR_LOADCELL_FORCE:
-            sign = 1
-            for key in self.forces_sign.keys():
-                if key in sensor_name:
-                    sign = self.forces_sign[key]
-                    break
-            df = self.getForce(sensor_name, sign)
-            y_label = "Force (N)"
-        elif plot_type == PlotTypes.SENSOR_ENCODER_DISTANCE:
-            df = self.getDistance(sensor_name)
-            y_label = "Distance (mm)"
-        elif plot_type == PlotTypes.SENSOR_IMU_ANGLES:
-            df = self.getIMUAngles(sensor_name, self.imu_ang_headers)
-            y_label = "Angle (deg)"
-        elif plot_type == PlotTypes.SENSOR_IMU_VELOCITY:
-            df = self.getIMUValues(sensor_name, self.imu_vel_headers)
-            y_label = "Angular velocity (rad/s)"
-        elif plot_type == PlotTypes.SENSOR_IMU_ACCELERATION:
-            df = self.getIMUValues(sensor_name, self.imu_acc_headers)
-            y_label = "Linear acceleration (m/s2)"
-
-        # Setup widget and return
-        if df.empty:
-            return plotter
-        if isinstance(df, pd.Series):
-            df = df.to_frame()
-        df.insert(0, "times", self.timeincr_list)
-        if self.isRangedPlot(idx1, idx2):
-            plotter.setupRangedPlot(df, idx1, idx2, ("Time (s)", y_label))
-            return plotter
-        plotter.setupPlot(df, ("Time (s)", y_label))
-        return plotter
-
     def getRawDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
         return self.formatDataframe(self.df_raw.copy(deep=True), idx1, idx2)
 
     def getCalibrateDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
         return self.formatDataframe(self.df_calibrated.copy(deep=True), idx1, idx2)
+
+    def getFilteredDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
+        return self.formatDataframe(self.df_filtered.copy(deep=True), idx1, idx2)
 
     def formatDataframe(
         self, df: pd.DataFrame, idx1: int = 0, idx2: int = 0
