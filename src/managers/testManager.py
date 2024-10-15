@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import time
+import numpy as np
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
+from src.managers.sensorManager import SensorManager
 from src.handlers.sensorGroup import SensorGroup, Sensor
+from src.enums.sensorTypes import STypes
 
 from loguru import logger
 
@@ -112,3 +115,44 @@ class TestManager:
         logger.debug(
             [len(sensor.getValues()) for sensor in self.available_sensors.values()]
         )
+
+    # Tare methods
+
+    def _tareProcess(
+        self, sensor_manager: SensorManager, last_values: int, waiting_time: float
+    ) -> None:
+        logger.info(
+            f"Starting sensor tare. Reading sensors for {waiting_time:.2f} seconds..."
+        )
+        # Wait to get the required values
+        time.sleep(waiting_time)
+        logger.info("Taring sensors...")
+        tared_sensors_counter = 0
+        for sensor in self.available_sensors.values():
+            # Only tare loadcells and encoders
+            if sensor.getType() not in [
+                STypes.SENSOR_LOADCELL,
+                STypes.SENSOR_ENCODER,
+            ]:
+                continue
+            # Tare process
+            logger.debug(f"Tare sensor {sensor.getName()}")
+            slope = sensor.getSlope()
+            intercept = sensor.getIntercept()
+            calib_values = [
+                value * slope + intercept for value in sensor.getValues()[-last_values:]
+            ]
+            new_intercept = float(sensor.getIntercept() - np.mean(calib_values))
+            logger.debug(f"From {intercept} to {new_intercept}")
+            sensor_manager.setSensorIntercept(sensor, new_intercept)
+            tared_sensors_counter += 1
+        logger.info(f"Tare finished! {tared_sensors_counter} sensors has been tared.")
+
+    def tareSensors(
+        self, sensor_mngr: SensorManager, tare_amount: int, interval_ms: int
+    ) -> None:
+        waiting_time = float(tare_amount * interval_ms / 1000)
+        tare_thread = threading.Thread(
+            target=self._tareProcess, args=[sensor_mngr, tare_amount, waiting_time]
+        )
+        tare_thread.start()

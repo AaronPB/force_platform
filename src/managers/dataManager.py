@@ -234,26 +234,3 @@ class DataManager:
         area = np.pi * a * b
 
         return a, b, theta, area
-
-    # Tare sensors
-
-    def tareSensors(self, sensor_manager: SensorManager, last_values: int) -> None:
-        for group in sensor_manager.getGroups(only_available=True):
-            for sensor in group.getSensors(only_available=True).values():
-                # Only tare loadcells and encoders
-                if sensor.getType() not in [
-                    STypes.SENSOR_LOADCELL,
-                    STypes.SENSOR_ENCODER,
-                ]:
-                    continue
-                # Tare process
-                logger.debug(f"Tare sensor {sensor.getName()}")
-                slope = sensor.getSlope()
-                intercept = sensor.getIntercept()
-                calib_values = [
-                    value * slope + intercept
-                    for value in sensor.getValues()[-last_values:]
-                ]
-                new_intercept = float(sensor.getIntercept() - np.mean(calib_values))
-                logger.debug(f"From {intercept} to {new_intercept}")
-                sensor_manager.setSensorIntercept(sensor, new_intercept)

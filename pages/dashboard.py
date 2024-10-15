@@ -109,6 +109,16 @@ def dashboardPage():
             st.session_state.sensor_mngr.getGroups(),
         )
         st.session_state.data_mngr.applyButterFilter()
+    if btn_test_tare:
+        amount = st.session_state.config_mngr.getConfigValue(
+            ConfigPaths.RECORD_TARE_AMOUNT.value, 300
+        )
+        interval_ms = st.session_state.config_mngr.getConfigValue(
+            ConfigPaths.RECORD_INTERVAL_MS.value, 100
+        )
+        st.session_state.test_mngr.tareSensors(
+            st.session_state.sensor_mngr, amount, interval_ms
+        )
 
     # Show/download dataframes
     dataframes = getDataFrames()
