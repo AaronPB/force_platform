@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import math
 import numpy as np
 import pandas as pd
+
 from scipy.spatial.transform import Rotation
 from scipy.signal import butter, filtfilt
-from src.managers.sensorManager import SensorManager
+
 from src.handlers import SensorGroup, Sensor
-from src.enums.plotTypes import PlotTypes
+
 from src.enums.sensorTypes import SGTypes, STypes
 from src.enums.sensorStatus import SGStatus
 
@@ -19,29 +19,32 @@ class DataManager:
         # Time
         self.timestamp_list: list = []
         self.timeincr_list: list = []
-        # Data
+        # Data frames
         self.df_raw: pd.DataFrame = pd.DataFrame()
         self.df_calibrated: pd.DataFrame = pd.DataFrame()
         self.df_filtered: pd.DataFrame = pd.DataFrame()
+        # Data structures for figures
+        self.sensor_figure_structs: dict[str, list[str]] = {}
+        self.platform_figure_structs: dict[str, list[str]] = {}
         # Sensor header suffixes
         self.imu_ang_headers: list[str] = ["qx", "qy", "qz", "qw"]
         self.imu_vel_headers: list[str] = ["wx", "wy", "wz"]
         self.imu_acc_headers: list[str] = ["x_acc", "y_acc", "z_acc"]
-        # WIP Platform loadcell sensors orientation
-        self.forces_sign: dict[str, int] = {
-            "X_1": 1,
-            "X_2": -1,
-            "X_3": -1,
-            "X_4": 1,
-            "Y_1": 1,
-            "Y_2": 1,
-            "Y_3": -1,
-            "Y_4": -1,
-            "Z_1": 1,
-            "Z_2": 1,
-            "Z_3": 1,
-            "Z_4": 1,
-        }
+        # Platform loadcell required strings for platform figures
+        self.platform_force_names: list[str] = [
+            "X_1",
+            "X_2",
+            "X_3",
+            "X_4",
+            "Y_1",
+            "Y_2",
+            "Y_3",
+            "Y_4",
+            "Z_1",
+            "Z_2",
+            "Z_3",
+            "Z_4",
+        ]
 
     def clearDataFrames(self) -> None:
         self.df_raw: pd.DataFrame = pd.DataFrame()
@@ -55,10 +58,23 @@ class DataManager:
         self.timestamp_list = time_list
         self.timeincr_list = [(t - time_list[0]) / 1000 for t in time_list]
         for group in sensor_groups:
+            # Check group status
             if not group.getRead():
                 continue
             if group.getStatus() == SGStatus.ERROR:
                 continue
+            # Check if group is a platform for specific plots
+            if group.getType() == SGTypes.GROUP_PLATFORM:
+                valid_sensors = self.getPlatformGroupValidSensors(group)
+                if valid_sensors > 0:
+                    self.platform_figure_structs[group.getName() + "_FORCES"] = (
+                        valid_sensors
+                    )
+                if valid_sensors == 12:
+                    self.platform_figure_structs[group.getName() + "_COP"] = (
+                        valid_sensors
+                    )
+            # Store available sensor data from group
             for sensor in group.getSensors(only_available=True).values():
                 if sensor.getType() == STypes.SENSOR_IMU:
                     values_list = self.getListedData(sensor)
@@ -71,6 +87,19 @@ class DataManager:
                         self.df_raw[imu_name] = values_list[i]
                         # No need to calibrate IMUs
                         self.df_calibrated[imu_name] = values_list[i]
+                    # Store imu structures for figures. Could be done inside the previous for loop for better performance.
+                    self.sensor_figure_structs[sensor.getName() + "_ANGLES"] = [
+                        sensor.getName() + "_" + suffix
+                        for suffix in self.imu_ang_headers
+                    ]
+                    self.sensor_figure_structs[sensor.getName() + "_VELOCITIES"] = [
+                        sensor.getName() + "_" + suffix
+                        for suffix in self.imu_vel_headers
+                    ]
+                    self.sensor_figure_structs[sensor.getName() + "_ACCELERATIONS"] = [
+                        sensor.getName() + "_" + suffix
+                        for suffix in self.imu_acc_headers
+                    ]
                     continue
                 self.df_raw[sensor.getName()] = sensor.getValues()
                 slope = sensor.getSlope()
@@ -78,6 +107,8 @@ class DataManager:
                 self.df_calibrated[sensor.getName()] = [
                     value * slope + intercept for value in sensor.getValues()
                 ]
+                # Store into figure option
+                self.sensor_figure_structs[sensor.getName()] = [sensor.getName()]
 
     # Transforms values lists into separate variable lists.
     # Ex: [ti [gx, gy, gz]] -> [gx[ti], gy[ti], gz[ti]]
@@ -95,10 +126,28 @@ class DataManager:
                 return True
         return False
 
+    def getPlatformGroupValidSensors(self, group: SensorGroup) -> list[str]:
+        valid_sensors: list = []
+        sensors = group.getSensors(
+            only_available=True, sensor_type=STypes.SENSOR_LOADCELL
+        ).values()
+        if not sensors:
+            return valid_sensors
+        for sensor in sensors:
+            if any(name in sensor.getName() for name in self.platform_force_names):
+                valid_sensors.append(sensor.getName())
+        return valid_sensors
+
     # Getters
 
     def getDataSize(self) -> int:
         return len(self.df_raw)
+
+    def getSensorFigureOptions(self) -> list[str]:
+        return self.sensor_figure_structs.keys()
+
+    def getPlatformFigureOptions(self) -> list[str]:
+        return self.platform_figure_structs.keys()
 
     def getRawDataframe(self, idx1: int = 0, idx2: int = 0) -> pd.DataFrame:
         return self.formatDataframe(self.df_raw.copy(deep=True), idx1, idx2)

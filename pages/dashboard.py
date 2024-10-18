@@ -106,7 +106,7 @@ def dashboardPage():
         st.session_state.test_mngr.testStop()
         st.session_state.data_mngr.loadData(
             st.session_state.test_mngr.getTestTimes(),
-            st.session_state.sensor_mngr.getGroups(),
+            st.session_state.sensor_mngr.getGroups(only_available=True),
         )
         st.session_state.data_mngr.applyButterFilter()
     if btn_test_tare:
