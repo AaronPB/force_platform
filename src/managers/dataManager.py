@@ -24,7 +24,7 @@ class DataManager:
         self.df_calibrated: pd.DataFrame = pd.DataFrame()
         self.df_filtered: pd.DataFrame = pd.DataFrame()
         # Data structures for figures
-        self.sensor_figure_structs: dict[str, list[str]] = {}
+        self.sensor_figure_structs: dict[str, tuple[list[str], str]] = {}
         self.platform_figure_structs: dict[str, list[str]] = {}
         # Sensor header suffixes
         self.imu_ang_headers: list[str] = ["qx", "qy", "qz", "qw"]
@@ -88,18 +88,27 @@ class DataManager:
                         # No need to calibrate IMUs
                         self.df_calibrated[imu_name] = values_list[i]
                     # Store imu structures for figures. Could be done inside the previous for loop for better performance.
-                    self.sensor_figure_structs[sensor.getName() + "_ANGLES"] = [
-                        sensor.getName() + "_" + suffix
-                        for suffix in self.imu_ang_headers
-                    ]
-                    self.sensor_figure_structs[sensor.getName() + "_VELOCITIES"] = [
-                        sensor.getName() + "_" + suffix
-                        for suffix in self.imu_vel_headers
-                    ]
-                    self.sensor_figure_structs[sensor.getName() + "_ACCELERATIONS"] = [
-                        sensor.getName() + "_" + suffix
-                        for suffix in self.imu_acc_headers
-                    ]
+                    self.sensor_figure_structs[sensor.getName() + "_ANGLES"] = (
+                        [
+                            sensor.getName() + "_" + suffix
+                            for suffix in self.imu_ang_headers
+                        ],
+                        "Angle (deg)",
+                    )
+                    self.sensor_figure_structs[sensor.getName() + "_VELOCITIES"] = (
+                        [
+                            sensor.getName() + "_" + suffix
+                            for suffix in self.imu_vel_headers
+                        ],
+                        "Angular velocity (deg/s)",
+                    )
+                    self.sensor_figure_structs[sensor.getName() + "_ACCELERATIONS"] = (
+                        [
+                            sensor.getName() + "_" + suffix
+                            for suffix in self.imu_acc_headers
+                        ],
+                        "Linear acceleration (m/s2)",
+                    )
                     continue
                 self.df_raw[sensor.getName()] = sensor.getValues()
                 slope = sensor.getSlope()
@@ -108,7 +117,13 @@ class DataManager:
                     value * slope + intercept for value in sensor.getValues()
                 ]
                 # Store into figure option
-                self.sensor_figure_structs[sensor.getName()] = [sensor.getName()]
+                units = "Force (N)"
+                if sensor.getType() == STypes.SENSOR_ENCODER:
+                    units = "Displacement (mm)"
+                self.sensor_figure_structs[sensor.getName()] = (
+                    [sensor.getName()],
+                    units,
+                )
 
     # Transforms values lists into separate variable lists.
     # Ex: [ti [gx, gy, gz]] -> [gx[ti], gy[ti], gz[ti]]
