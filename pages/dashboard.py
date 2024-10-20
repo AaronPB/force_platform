@@ -12,29 +12,6 @@ from src.enums.configPaths import ConfigPaths
 from loguru import logger
 
 
-def getDataFrames() -> list[pd.DataFrame]:
-    return [
-        st.session_state.data_mngr.getCalibrateDataframe(),
-        st.session_state.data_mngr.getFilteredDataframe(),
-        st.session_state.data_mngr.getRawDataframe(),
-    ]
-
-
-def exampleFigure() -> go.Figure:
-    x = np.linspace(0, 10, 100)
-    y = np.sin(x)
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(x=x, y=y, mode="lines", name="Seno"))
-
-    fig.update_layout(
-        title="Gráfico de ejemplo con Plotly", xaxis_title="X", yaxis_title="Y"
-    )
-
-    return fig
-
-
 def dashboardPage():
     # Initialize global instances
     if "config_mngr" not in st.session_state:
@@ -121,7 +98,13 @@ def dashboardPage():
         )
 
     # Show/download dataframes
-    dataframes = getDataFrames()
+    dataframes = [pd.DataFrame(), pd.DataFrame(), pd.DataFrame()]
+    if not st.session_state.test_reading:
+        dataframes = [
+            st.session_state.data_mngr.getCalibrateDataframe(),
+            st.session_state.data_mngr.getFilteredDataframe(),
+            st.session_state.data_mngr.getRawDataframe(),
+        ]
     with st.expander("Recorded data", icon=":material/table:"):
         file_name = st.text_input(
             label="Test name",
@@ -169,6 +152,9 @@ def dashboardPage():
 
     st.subheader("Graph results")
 
+    sensor_options = st.session_state.data_mngr.getSensorFigureOptions()
+    platform_options = st.session_state.data_mngr.getPlatformFigureOptions()
+
     with st.expander("Data settings", icon=":material/dataset:"):
         settings_col_1, settings_col_2 = st.columns(2)
         settings_col_1.subheader("Recorded data")
@@ -185,16 +171,17 @@ def dashboardPage():
             horizontal=True,
         )
         if figure_type == "Sensor":
-            settings_col_1.multiselect(
-                label="Select individual sensors",
-                options=["A", "B", "C"],
-                placeholder="Choose one or more sensors",
+            figure_option = settings_col_1.selectbox(
+                label="Select sensor",
+                options=sensor_options,
+                index=None,
+                placeholder="Choose a sensor",
                 help="Plot one or more individual sensor data on the same plot.",
             )
         else:
-            settings_col_1.selectbox(
+            figure_option = settings_col_1.selectbox(
                 label="Select platform",
-                options=["Platform A", "Platform B"],
+                options=platform_options,
                 index=None,
                 placeholder="Choose a platform",
                 help="Plot platform results.",
@@ -227,5 +214,8 @@ def dashboardPage():
             help="TODO",
         )
 
-    # TODO Generate different figures depending on settings
-    st.plotly_chart(exampleFigure())
+    # Generate figure with selected option
+    if figure_type == "Sensor":
+        st.plotly_chart(st.session_state.data_mngr.getSensorFigure(figure_option))
+    else:
+        st.plotly_chart(st.session_state.data_mngr.getPlatformFigure(figure_option))

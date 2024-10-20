@@ -2,10 +2,13 @@
 
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 
 from scipy.spatial.transform import Rotation
 from scipy.signal import butter, filtfilt
 
+from src.figures.generalFigure import GeneralFigure
+from src.figures.platformFigures import PlatformForcesFigure, PlatformCOPFigure
 from src.handlers import SensorGroup, Sensor
 
 from src.enums.sensorTypes import SGTypes, STypes
@@ -195,20 +198,18 @@ class DataManager:
         for col in self.df_calibrated:
             self.df_filtered[col] = filtfilt(b, a, self.df_calibrated[col])
 
-    # - Sensor methods
-    def getForce(self, sensor_name: str, sign: int) -> pd.DataFrame:
-        df = self.df_filtered[sensor_name].copy(deep=True)
-        df *= sign
-        return df
+    # - Sensor specific methods
 
-    def getDistance(self, sensor_name: str) -> pd.DataFrame:
-        return self.df_filtered[sensor_name]
+    def getIMUAngles(self, headers: list[str]) -> pd.DataFrame:
+        # Get dataframe and sensor name
+        df_quat = self.df_filtered[headers]
+        sensor_name = ""
+        for suffix in self.imu_ang_headers:
+            if headers[0].endswith(f"_{suffix}"):
+                sensor_name = headers[0].replace(f"_{suffix}", "")
+                break
 
-    def getIMUAngles(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
-        df_quat: pd.DataFrame = self.getIMUValues(sensor_name, suffix_list)
-        headers = [sensor_name + "_" + suffix for suffix in suffix_list]
-
-        rot = Rotation.from_quat(df_quat[headers].to_numpy())
+        rot = Rotation.from_quat(df_quat.to_numpy())
         euler_ang_deg = np.degrees(rot.as_euler("xyz"))
 
         df_euler = pd.DataFrame(
@@ -221,10 +222,6 @@ class DataManager:
         )
 
         return df_euler
-
-    def getIMUValues(self, sensor_name: str, suffix_list: list[str]) -> pd.DataFrame:
-        headers = [sensor_name + "_" + suffix for suffix in suffix_list]
-        return self.df_filtered[headers]
 
     # - Platform group methods
 
@@ -298,3 +295,54 @@ class DataManager:
         area = np.pi * a * b
 
         return a, b, theta, area
+
+    # Figure getters
+    def getSensorFigure(self, sensor_name: str = None) -> go.Figure:
+        if sensor_name is None:
+            return GeneralFigure("Sensor figure", "Not specified").getFigure(
+                pd.Series([0]), pd.Series([0])
+            )
+        if sensor_name not in self.getSensorFigureOptions():
+            logger.error(
+                f"There is no sensor data tagged as {sensor_name}! Return empty figure."
+            )
+            return GeneralFigure("Sensor figure", "Not specified").getFigure(
+                pd.Series([0]), pd.Series([0])
+            )
+
+        # Build dataframe
+        df = self.df_calibrated[self.sensor_figure_structs[sensor_name][0]]
+        if "_ANGLES" in sensor_name:
+            # Extra process to get angle values
+            df = self.getIMUAngles(self.sensor_figure_structs[sensor_name][0])
+
+        # Build figure
+        figure = GeneralFigure(
+            f"Figure of {sensor_name}", self.sensor_figure_structs[sensor_name][1]
+        )
+        return figure.getFigure(df, pd.Series(self.timeincr_list))
+
+    def getPlatformFigure(self, platform_name: str = None) -> go.Figure:
+        if platform_name is None:
+            return GeneralFigure("Platform figure", "Not specified").getFigure(
+                pd.Series([0]), pd.Series([0])
+            )
+        if platform_name not in self.getPlatformFigureOptions():
+            logger.error(
+                f"There is no platform data tagged as {platform_name}! Return empty figure."
+            )
+            return GeneralFigure("Platform figure", "Not specified").getFigure(
+                pd.Series([0]), pd.Series([0])
+            )
+        df_fx = self.df_filtered[self.platform_figure_structs[:4]]
+        df_fy = self.df_filtered[self.platform_figure_structs[4:8]]
+        df_fz = self.df_filtered[self.platform_figure_structs[8:12]]
+        if "_COP" in platform_name:
+            [copx, copy] = self.getPlatformCOP(df_fx, df_fy, df_fz)
+            [a, b, theta, area] = self.getEllipseFromCOP([copx, copy])
+            # TODO return figure
+            pass
+        if "_FORCES" in platform_name:
+            
+            # TODO return figure
+            pass

@@ -55,7 +55,7 @@ class GeneralFigure:
                     name=column,
                 )
             )
-            if marker_indexes:
+            if marker_indexes.any():
                 self.figure.add_trace(
                     go.Scatter(
                         x=x_values.iloc[marker_indexes],
