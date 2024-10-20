@@ -173,15 +173,9 @@ def dashboardPage():
     sensor_options = st.session_state.data_mngr.getSensorFigureOptions()
     platform_options = st.session_state.data_mngr.getPlatformFigureOptions()
 
-    with st.expander("Data settings", icon=":material/dataset:"):
+    with st.expander("Figure and filter settings", icon=":material/dataset:"):
         settings_col_1, settings_col_2 = st.columns(2)
         settings_col_1.subheader("Recorded data")
-        data_type = settings_col_1.radio(
-            label="Data type",
-            options=["Raw", "Calibrated"],
-            captions=["Just as recorded", "Calibrated param"],
-            horizontal=True,
-        )
         figure_type = settings_col_1.radio(
             label="Figure type",
             options=["Sensor", "Platform"],
@@ -203,7 +197,8 @@ def dashboardPage():
                 placeholder="Choose a platform",
             )
         settings_col_2.subheader("Butterworth filter")
-        butter_fs = settings_col_2.number_input(
+        butter_col_1, butter_col_2 = settings_col_2.columns(2)
+        butter_fs = butter_col_1.number_input(
             label="Sampling rate (Hz)",
             key="number_input_butter_fs",
             value=float(
@@ -218,7 +213,7 @@ def dashboardPage():
         fs_value = st.session_state.butter_fc_value
         if (butter_fs - 0.01) < fs_value:
             fs_value = float((butter_fs - 0.02) / 2)
-        butter_fc = settings_col_2.number_input(
+        butter_fc = butter_col_2.number_input(
             label="Cutoff frequency (Hz)",
             key="number_input_butter_fc",
             min_value=1.0,
