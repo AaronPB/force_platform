@@ -279,7 +279,7 @@ class DataManager:
 
     def getEllipseFromCOP(
         self, cop: tuple[pd.Series, pd.Series]
-    ) -> tuple[float, float, float, float]:
+    ) -> tuple[pd.Series, pd.Series, float]:
 
         cov_matrix = np.cov(cop[0], cop[1])
 
@@ -292,9 +292,16 @@ class DataManager:
         # Ellipse params
         a = ellipse_axis[0]
         b = ellipse_axis[1]
-        area = np.pi * a * b
+        area = np.pi * a * b / 100  # In cm2
+        x0 = np.mean(cop[0])
+        y0 = np.mean(cop[1])
 
-        return a, b, theta, area
+        # Ellipse coords
+        phi = np.linspace(0, 2 * np.pi, 100)
+        x = x0 + a * np.cos(phi) * np.cos(theta) - b * np.sin(phi) * np.sin(theta)
+        y = y0 + a * np.cos(phi) * np.sin(theta) + b * np.sin(phi) * np.cos(theta)
+
+        return pd.Series(x), pd.Series(y), area
 
     # Figure getters
     def getSensorFigure(self, sensor_name: str = None) -> go.Figure:
@@ -339,10 +346,9 @@ class DataManager:
         df_fz = self.df_filtered[self.platform_figure_structs[8:12]]
         if "_COP" in platform_name:
             [copx, copy] = self.getPlatformCOP(df_fx, df_fy, df_fz)
-            [a, b, theta, area] = self.getEllipseFromCOP([copx, copy])
-            # TODO return figure
-            pass
+            [ellipx, ellipy, area] = self.getEllipseFromCOP([copx, copy])
+            figure = PlatformCOPFigure(f"Platform figure {platform_name}")
+            return figure.getFigure(copx, copy, ellipx, ellipy, area)
         if "_FORCES" in platform_name:
-            
-            # TODO return figure
-            pass
+            figure = PlatformForcesFigure(f"Platform figure {platform_name}")
+            return figure.getFigure(df_fx, df_fy, df_fz, pd.Series(self.timeincr_list))
