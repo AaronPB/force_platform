@@ -70,6 +70,9 @@ class PlatformForcesFigure:
             if isinstance(values, pd.Series):
                 values = values.to_frame()
 
+            if values.empty:
+                continue
+
             for j, column in enumerate(values.columns):
                 self.figure.add_trace(
                     go.Scatter(
@@ -99,6 +102,7 @@ class PlatformForcesFigure:
                         ),
                         row=i,
                     )
+
             self.figure.update_traces(
                 x=x_values, y=values.sum(axis=1), selector="Total force", row=i
             )
@@ -107,6 +111,8 @@ class PlatformForcesFigure:
             title=self.title,
             xaxis_title=self.x_label,
             yaxis_title=self.y_label,
+            yaxis2_title=self.y_label,
+            yaxis3_title=self.y_label,
         )
         return self.figure
 
