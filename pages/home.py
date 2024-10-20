@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 
 def homePage():
@@ -112,21 +113,44 @@ def homePage():
             - [Phidgets Single Point Load Cell](https://www.phidgets.com/?tier=3&catid=9&pcid=7&prodid=226)
             """
         )
-        sensor_tab_loadcell.markdown(
-            """
-            Required keys information:
-
-            | Key | Type | Description |
-            | :--- | :---: | :--- |
-            | `name` | STRING | Sensor name. |
-            | `type` | STRING | Sensor type: `SENSOR_LOADCELL`. |
-            | `read` | BOOL | Enable or disable sensor data recording. Can be modified in GUI. |
-            | `connection.channel` | INT | Channel number (0 to 3) in Phidget device. |
-            | `connection.serial` | INT | USB serial number of Phidget device. |
-            | `properties` | - | (Could be empty) Configuration section where you can provide more information. |
-            | `calibration.slope` | INT | Slope parameter. |
-            | `calibration.intercept` | INT | Intercept parameter. |
-            """
+        sensor_tab_loadcell.write("Required keys information:")
+        sensor_tab_loadcell.dataframe(
+            pd.DataFrame(
+                {
+                    "Key": [
+                        "name",
+                        "type",
+                        "read",
+                        "connection.channel",
+                        "connection.serial",
+                        "properties",
+                        "calibration.slope",
+                        "calibration.intercept",
+                    ],
+                    "Type": [
+                        "STRING",
+                        "STRING",
+                        "BOOL",
+                        "INT",
+                        "INT",
+                        "LIST",
+                        "INT",
+                        "INT",
+                    ],
+                    "Description": [
+                        "Sensor name.",
+                        "Sensor type: SENSOR_LOADCELL.",
+                        "Enable or disable sensor data recording. Can be modified in GUI.",
+                        "Channel number (0 to 3) in Phidget device.",
+                        "USB serial number of Phidget device.",
+                        "(Could be empty) Configuration section to provide more information.",
+                        "Slope parameter.",
+                        "Intercept parameter.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
         )
         ## Encoder sensors
         sensor_encoder_col_1, sensor_encoder_col_2 = sensor_tab_encoder.columns(2)
@@ -159,22 +183,47 @@ def homePage():
             - [Draw Wire Encoder](https://www.phidgets.com/?prodid=1001) (main sensors).
             """
         )
-        sensor_tab_encoder.markdown(
-            """
-            Required keys information:
-
-            | Key | Type | Description |
-            | :--- | :---: | :--- |
-            | `name` | STRING | Sensor name. |
-            | `type` | STRING | Sensor type: `SENSOR_ENCODER`. |
-            | `read` | BOOL | Enable or disable sensor data recording. Can be modified in GUI. |
-            | `connection.channel` | INT | Channel number (0 to 3) in Phidget device. |
-            | `connection.serial` | INT | USB serial number of Phidget device. |
-            | `initial_position` | INT | The initial value of the encoder state. The sensor generates incremental values. |
-            | `properties` | - | (Could be empty) Configuration section where you can provide more information. |
-            | `calibration.slope` | INT | Slope parameter. |
-            | `calibration.intercept` | INT | Intercept parameter. |
-            """
+        sensor_tab_encoder.write("Required keys information:")
+        sensor_tab_encoder.dataframe(
+            pd.DataFrame(
+                {
+                    "Key": [
+                        "name",
+                        "type",
+                        "read",
+                        "connection.channel",
+                        "connection.serial",
+                        "initial_position",
+                        "properties",
+                        "calibration.slope",
+                        "calibration.intercept",
+                    ],
+                    "Type": [
+                        "STRING",
+                        "STRING",
+                        "BOOL",
+                        "INT",
+                        "INT",
+                        "INT",
+                        "LIST",
+                        "INT",
+                        "INT",
+                    ],
+                    "Description": [
+                        "Sensor name.",
+                        "Sensor type: SENSOR_ENCODER.",
+                        "Enable or disable sensor data recording. Can be modified in GUI.",
+                        "Channel number (0 to 3) in Phidget device.",
+                        "USB serial number of Phidget device.",
+                        "The initial value of the encoder state if it provides incremental values.",
+                        "(Could be empty) Configuration section to provide more information.",
+                        "Slope parameter.",
+                        "Intercept parameter.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
         )
         ## IMU sensors
         sensor_imu_col_1, sensor_imu_col_2 = sensor_tab_imu.columns(2)
@@ -200,18 +249,23 @@ def homePage():
             The current version only supports [Taobotics IMUs](https://www.taobotics.com/).
             """
         )
-        sensor_tab_imu.markdown(
-            """
-            Required keys information:
-
-            | Key | Type | Description |
-            | :--- | :---: | :--- |
-            | `name` | STRING | Sensor name. |
-            | `type` | STRING | Sensor type: `SENSOR_IMU`. |
-            | `read` | BOOL | Enable or disable sensor data recording. Can be modified in GUI. |
-            | `connection.serial` | STRING | Absolute USB path. Use `ll /dev/serial/by-path/`. |
-            | `properties` | - | (Could be empty) Configuration section where you can provide more information. |
-            """
+        sensor_tab_imu.write("Required keys information:")
+        sensor_tab_imu.dataframe(
+            pd.DataFrame(
+                {
+                    "Key": ["name", "type", "read", "connection.serial", "properties"],
+                    "Type": ["STRING", "STRING", "BOOL", "STRING", "LIST"],
+                    "Description": [
+                        "Sensor name.",
+                        "Sensor type: SENSOR_IMU.",
+                        "Enable or disable sensor data recording. Can be modified in GUI.",
+                        "Absolute USB path. Use: ll /dev/serial/by-path/",
+                        "(Could be empty) Configuration section to provide more information.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
         )
 
         st.subheader("Sensor group types")
@@ -240,20 +294,24 @@ def homePage():
             """
             #### Group description
 
-            This group can be defined with multiple sensors.
+            This group can be defined with multiple sensors from different types.
             """
         )
-        group_tab_default.markdown(
-            """
-            Information of all the keys involved in this config section:
-
-            | Key | Type | Description |
-            | :--- | :---: | :--- |
-            | `name` | STRING | Group name. |
-            | `type` | STRING | Group type: `GROUP_DEFAULT` or `GROUP_PLATFORM`. |
-            | `read` | BOOL | Enable or disable entire group data recording. Can be modified in GUI. |
-            | `sensor_list` | LIST | A string list of sensor IDs, configured in [`sensors` config section](#sensor-types). |
-            """
+        group_tab_default.dataframe(
+            pd.DataFrame(
+                {
+                    "Key": ["name", "type", "read", "sensor_list"],
+                    "Type": ["STRING", "STRING", "BOOL", "LIST"],
+                    "Description": [
+                        "Group name.",
+                        "Group type: GROUP_DEFAULT.",
+                        "Enable or disable entire group data recording. Can be modified in GUI.",
+                        "A string list of sensor IDs, declared in the sensors section.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
         )
         ## Platform group
         group_platform_col_1, group_platform_col_2 = group_tab_platform.columns(2)
@@ -308,17 +366,21 @@ def homePage():
             caption="Platform sensor locations",
             use_column_width=True,
         )
-        group_tab_platform.markdown(
-            """
-            Information of all the keys involved in this config section:
-
-            | Key | Type | Description |
-            | :--- | :---: | :--- |
-            | `name` | STRING | Group name. |
-            | `type` | STRING | Group type: `GROUP_DEFAULT` or `GROUP_PLATFORM`. |
-            | `read` | BOOL | Enable or disable entire group data recording. Can be modified in GUI. |
-            | `sensor_list` | LIST | A string list of sensor IDs, configured in [`sensors` config section](#sensor-types). |
-            """
+        group_tab_platform.dataframe(
+            pd.DataFrame(
+                {
+                    "Key": ["name", "type", "read", "sensor_list"],
+                    "Type": ["STRING", "STRING", "BOOL", "LIST"],
+                    "Description": [
+                        "Group name.",
+                        "Group type: GROUP_PLATFORM.",
+                        "Enable or disable entire group data recording. Can be modified in GUI.",
+                        "A string list of sensor IDs, declared in the sensors section.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
         )
 
     with st.expander("Configure your sensors", icon=":material/toggle_on:"):
@@ -330,15 +392,20 @@ def homePage():
             icon=":material/info:",
         )
         st.subheader("General test settings")
-        st.markdown(
-            """
-            Here you can still modify the recording settings of the configuration file.
-
-            | Option | Minimum value | Maximum value | Description |
-            | :--- | :---: | :---: | :--- |
-            | Recording interval | `10` | `1000` | Timeframe between each data recording in milliseconds. |
-            | Tare amount | `10` | `500` | Amount of values to be taken for sensor new intercepts. |
-            """
+        st.dataframe(
+            pd.DataFrame(
+                {
+                    "Option": ["Recording interval", "Tare amount"],
+                    "Min value": [10, 10],
+                    "Max value": [1000, 500],
+                    "Description": [
+                        "Timeframe between each data recording in milliseconds.",
+                        "Amount of values to be taken for sensor new intercepts.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
         )
         st.subheader("Sensor settings")
         st.markdown(
@@ -366,11 +433,57 @@ def homePage():
             "To be able to preform tests, at least one sensor must be available.",
             icon=":material/info:",
         )
+        st.dataframe(
+            pd.DataFrame(
+                {
+                    "Status": ["Ignored", "Not found", "Available"],
+                    "Description": [
+                        "No connection attempted.",
+                        "Connection could not be established.",
+                        "Connection successfully established.",
+                    ],
+                }
+            ),
+            hide_index=True,
+            use_container_width=True,
+        )
 
     st.header("Dashboard page")
 
     with st.expander("Run a test", icon=":material/play_arrow:"):
-        st.write("Asd")
+        # WIP
+        st.subheader(":material/tune: Step 1. Adjust the test settings")
+        st.write(
+            "Verify the loaded configuration file and its parameters are set accordingly in the :material/settings: **settings** page."
+        )
+        st.info(
+            "For more information, check out the :material/toggle_on: **Configure your sensors** expander.",
+            icon=":material/info:",
+        )
+
+        st.subheader(
+            ":material/conversion_path: Step 2. Connect and check your sensors"
+        )
+        st.write(
+            "Connect the desired sensors also in the :material/settings: **settings** page. Check their connection status are `Available`."
+        )
+
+        st.subheader(":material/play_circle: Step 3. Start a test ")
+        st.write(
+            "Once sensors are connected, move to the **dashboard** page to start the test."
+        )
+        st.write("TODO more info.")
+        st.markdown(
+            """
+            #### Tare sensors
+            You can tare sensors once a test has started.
+            """
+        )
+
+        st.subheader(":material/stop_circle: Step 4. Stop a test ")
+        st.write(
+            "Once sensors are connected, move to the **dashboard** page to start the test."
+        )
 
     with st.expander("Check and visualize the results", icon=":material/bar_chart:"):
         st.write("Asd")
