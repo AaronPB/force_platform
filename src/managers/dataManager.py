@@ -318,7 +318,7 @@ class DataManager:
             )
 
         # Build dataframe
-        df = self.df_calibrated[self.sensor_figure_structs[sensor_name][0]]
+        df = self.df_filtered[self.sensor_figure_structs[sensor_name][0]]
         if "_ANGLES" in sensor_name:
             # Extra process to get angle values
             df = self.getIMUAngles(self.sensor_figure_structs[sensor_name][0])
