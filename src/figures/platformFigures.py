@@ -66,7 +66,7 @@ class PlatformForcesFigure:
         if mark_every > 1 and len(x_values) > mark_every:
             marker_indexes = np.arange(0, len(x_values), mark_every)
 
-        for values, i in enumerate([fz_values, fx_values, fy_values]):
+        for i, values in enumerate([fz_values, fx_values, fy_values]):
             if isinstance(values, pd.Series):
                 values = values.to_frame()
 
@@ -85,7 +85,8 @@ class PlatformForcesFigure:
                         ),
                         name=column,
                     ),
-                    row=i,
+                    row=i + 1,
+                    col=1,
                 )
                 if marker_indexes.any():
                     self.figure.add_trace(
@@ -100,19 +101,25 @@ class PlatformForcesFigure:
                             ),
                             name=column,
                         ),
-                        row=i,
+                        row=i + 1,
+                        col=1,
                     )
 
             self.figure.update_traces(
-                x=x_values, y=values.sum(axis=1), selector="Total force", row=i
+                x=x_values,
+                y=values.sum(axis=1),
+                selector="Total force",
+                row=i + 1,
+                col=1,
             )
 
         self.figure.update_layout(
             title=self.title,
-            xaxis_title=self.x_label,
+            xaxis3_title=self.x_label,
             yaxis_title=self.y_label,
             yaxis2_title=self.y_label,
             yaxis3_title=self.y_label,
+            height=700,
         )
         return self.figure
 
