@@ -29,6 +29,22 @@ def dashboardPage():
     if "test_reading" not in st.session_state:
         st.session_state.test_reading = False
 
+    if "butter_fs_value" not in st.session_state:
+        st.session_state.butter_fs_value = float(
+            1000
+            / st.session_state.config_mngr.getConfigValue(
+                ConfigPaths.RECORD_INTERVAL_MS.value, 100
+            )
+        )
+    if "butter_fc_value" not in st.session_state:
+        # wn bounds: 0 < wn < 1
+        # wn = fc / (0.5*fs)
+        st.session_state.butter_fc_value = float(
+            (st.session_state.butter_fs_value - 0.02) / 2
+        )
+    if "butter_order_value" not in st.session_state:
+        st.session_state.butter_order_value = 6
+
     # Load page
     st.subheader("Control panel")
 
@@ -85,7 +101,11 @@ def dashboardPage():
             st.session_state.test_mngr.getTestTimes(),
             st.session_state.sensor_mngr.getGroups(only_available=True),
         )
-        st.session_state.data_mngr.applyButterFilter()
+        st.session_state.data_mngr.applyButterFilter(
+            st.session_state.butter_fs_value,
+            st.session_state.butter_fc_value,
+            st.session_state.butter_order_value,
+        )
     if btn_test_tare:
         amount = st.session_state.config_mngr.getConfigValue(
             ConfigPaths.RECORD_TARE_AMOUNT.value, 300
@@ -196,21 +216,35 @@ def dashboardPage():
             ),  # Reading frequency: f = 1/t
             disabled=True,
         )
+        # Check if butter_fc is out of bounds, if butter_fs has been modified
+        fs_value = st.session_state.butter_fc_value
+        if (butter_fs - 0.01) < fs_value:
+            fs_value = float((butter_fs - 0.02) / 2)
         butter_fc = settings_col_2.number_input(
             label="Cutoff frequency (Hz)",
             key="number_input_butter_fc",
             min_value=1.0,
-            max_value=butter_fs,  # Max rate: f = 1/t
-            value=10.0,
+            max_value=butter_fs - 0.01,  # Max rate: f = 1/t - 0.01
+            value=fs_value,
         )
         butter_order = settings_col_2.number_input(
             label="Filter order",
             key="number_input_butter_order",
             min_value=2,
             max_value=6,
-            value=6,
+            value=st.session_state.butter_order_value,
         )
-        if butter_fc or butter_order:
+        if (
+            butter_fs != st.session_state.butter_fs_value
+            or butter_fc != st.session_state.butter_fc_value
+            or butter_order != st.session_state.butter_order_value
+        ):
+            logger.debug(
+                f"Editing Butterworth filter with: fs={butter_fs} Hz, fc={butter_fc} Hz and order={butter_order}"
+            )
+            st.session_state.butter_fs_value = butter_fs
+            st.session_state.butter_fc_value = butter_fc
+            st.session_state.butter_order_value = butter_order
             st.session_state.data_mngr.applyButterFilter(
                 butter_fs, butter_fc, butter_order
             )
