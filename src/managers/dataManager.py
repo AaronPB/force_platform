@@ -192,7 +192,7 @@ class DataManager:
     # Data process methods
 
     # ButterWorth filter
-    def applyButterFilter(self, fs: int = 100, fc: int = 5, order: int = 6):
+    def applyButterFilter(self, fs: float = 100, fc: float = 5, order: int = 6):
         b, a = butter(order, fc / (0.5 * fs), btype="low", analog=False)
         self.df_filtered = pd.DataFrame()
         for col in self.df_calibrated:

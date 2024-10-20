@@ -176,7 +176,6 @@ def dashboardPage():
                 options=sensor_options,
                 index=None,
                 placeholder="Choose a sensor",
-                help="Plot one or more individual sensor data on the same plot.",
             )
         else:
             figure_option = settings_col_1.selectbox(
@@ -184,35 +183,37 @@ def dashboardPage():
                 options=platform_options,
                 index=None,
                 placeholder="Choose a platform",
-                help="Plot platform results.",
             )
         settings_col_2.subheader("Butterworth filter")
-        # TODO this setting needs to be related to reading frequency: f = 1/t
-        settings_col_2.number_input(
+        butter_fs = settings_col_2.number_input(
             label="Sampling rate (Hz)",
             key="number_input_butter_fs",
-            min_value=10,
-            max_value=500,
-            value=100,
+            value=float(
+                1000
+                / st.session_state.config_mngr.getConfigValue(
+                    ConfigPaths.RECORD_INTERVAL_MS.value, 100
+                )
+            ),  # Reading frequency: f = 1/t
             disabled=True,
-            help="TODO",
         )
-        settings_col_2.number_input(
+        butter_fc = settings_col_2.number_input(
             label="Cutoff frequency (Hz)",
             key="number_input_butter_fc",
-            min_value=1,
-            max_value=100,  # TODO the fs max value
-            value=10,
-            help="TODO",
+            min_value=1.0,
+            max_value=butter_fs,  # Max rate: f = 1/t
+            value=10.0,
         )
-        settings_col_2.number_input(
+        butter_order = settings_col_2.number_input(
             label="Filter order",
             key="number_input_butter_order",
             min_value=2,
             max_value=6,
             value=6,
-            help="TODO",
         )
+        if butter_fc or butter_order:
+            st.session_state.data_mngr.applyButterFilter(
+                butter_fs, butter_fc, butter_order
+            )
 
     # Generate figure with selected option
     if figure_type == "Sensor":
