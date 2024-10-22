@@ -422,6 +422,10 @@ def homePage():
             "All sensors inside a disabled sensor group will be ignored.",
             icon=":material/warning:",
         )
+        st.warning(
+            "On this page, only read status can be modified. To change other configuration parameters from sensors or sensor groups, you need to upload a custom configuration file.",
+            icon=":material/warning:",
+        )
         st.subheader("Sensor connection")
         st.markdown(
             """
@@ -467,23 +471,89 @@ def homePage():
         st.write(
             "Connect the desired sensors also in the :material/settings: **settings** page. Check their connection status are `Available`."
         )
+        st.warning(
+            "To be able to preform tests, at least one sensor must be available.",
+            icon=":material/warning:",
+        )
 
         st.subheader(":material/play_circle: Step 3. Start a test ")
-        st.write(
-            "Once sensors are connected, move to the **dashboard** page to start the test."
+        st.markdown(
+            """
+            Once sensors are connected, move to the :material/table_chart_view: **dashboard** page to start the test.
+
+            There are three self-explanatory buttons at the top of the page: 
+            - **Start test**: run a new test with available sensors.
+            - **Stop test**: stop a current test.
+            - **Tare sensors**: update intercept parameters of `SENSOR_LOADCELL` and `SENSOR_ENCODER` sensor types.
+
+            When starting a new test, stop test and tare buttons will be enabled. An information box will also appear below.
+            """
         )
-        st.write("TODO more info.")
+        with st.popover("Open an example window when a test is running"):
+            st.subheader("Control panel")
+            test_btn_col1, test_btn_col2, test_btn_col3 = st.columns(3)
+            test_btn_col1.button(
+                label="Start test",
+                key="btn_test_start",
+                type="primary",
+                use_container_width=True,
+                disabled=True,
+            )
+            test_btn_col2.button(
+                label="Stop test",
+                key="btn_test_stop",
+                type="primary",
+                use_container_width=True,
+            )
+            test_btn_col3.button(
+                label="Tare sensors",
+                key="btn_test_tare",
+                type="secondary",
+                use_container_width=True,
+            )
+            st.info(
+                "A current test is running! Click on **Stop test** when finished.",
+                icon=":material/play_circle:",
+            )
+
+        st.markdown(
+            """
+            Each sensor data is recorded in separate threads.
+            The record process is also driven in a thread, which handles all sensor threads in a synchronous way, using barriers.
+            """
+        )
+        st.info(
+            "When recording, you can still move to other pages in the app. "
+            + "Modifying test or sensors settings during a test recording is not recommended. It may affect data post-processing.",
+            icon=":material/info:",
+        )
         st.markdown(
             """
             #### Tare sensors
-            You can tare sensors once a test has started.
+            You can tare `SENSOR_LOADCELL` and `SENSOR_ENCODER` sensor types, once a test has started.
+
+            The tare process goes as follows. Let $b$ be the new intercept, $b_0$ the previous intercept, 
+            $V_f(t)$ the recorded sensor values in a given timeframe $(t)$, and $m$ the sensor slope.
             """
+        )
+        st.latex(
+            r"""
+            b = b_0 - \text{mean}\left(m \cdot V_f(t) - b_0\right)
+            """
+        )
+        st.write(
+            "The new intercept value will be saved in the configuration file and used into the data post-processing."
         )
 
         st.subheader(":material/stop_circle: Step 4. Stop a test ")
-        st.write(
-            "Once sensors are connected, move to the **dashboard** page to start the test."
+        st.markdown(
+            """
+            To finish a test, clic on the **stop test** button. The test manager will wait the test thread to complete, so it could have some delay.
+
+            When stopped, the recorded data will be processed and filtered with a Butterworth filter.
+            TODO
+            """
         )
 
     with st.expander("Check and visualize the results", icon=":material/bar_chart:"):
-        st.write("Asd")
+        st.write("TODO")
