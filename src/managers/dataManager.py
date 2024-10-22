@@ -69,11 +69,11 @@ class DataManager:
             # Check if group is a platform for specific plots
             if group.getType() == SGTypes.GROUP_PLATFORM:
                 valid_sensors = self.getPlatformGroupValidSensors(group)
-                if valid_sensors > 0:
+                if len(valid_sensors) > 0:
                     self.platform_figure_structs[group.getName() + "_FORCES"] = (
                         valid_sensors
                     )
-                if valid_sensors == 12:
+                if len(valid_sensors) == 12:
                     self.platform_figure_structs[group.getName() + "_COP"] = (
                         valid_sensors
                     )
@@ -341,9 +341,10 @@ class DataManager:
             return GeneralFigure("Platform figure", "Not specified").getFigure(
                 pd.Series([0]), pd.Series([0])
             )
-        df_fx = self.df_filtered[self.platform_figure_structs[:4]]
-        df_fy = self.df_filtered[self.platform_figure_structs[4:8]]
-        df_fz = self.df_filtered[self.platform_figure_structs[8:12]]
+        keys = list(self.platform_figure_structs.keys())
+        df_fx = self.df_filtered[keys[:4]]
+        df_fy = self.df_filtered[keys[4:8]]
+        df_fz = self.df_filtered[keys[8:12]]
         if "_COP" in platform_name:
             [copx, copy] = self.getPlatformCOP(df_fx, df_fy, df_fz)
             [ellipx, ellipy, area] = self.getEllipseFromCOP([copx, copy])
