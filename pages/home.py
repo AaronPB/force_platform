@@ -562,4 +562,36 @@ def homePage():
         )
 
     with st.expander("Check and visualize the results", icon=":material/bar_chart:"):
-        st.write("TODO")
+        st.write(
+            "When a test finishes, there are two new sections available on the :material/table_chart_view: **dashboard** page to view the results and download them."
+        )
+        st.subheader("Recorded dataframes")
+        st.markdown(
+            """
+            You can review the recorded data expanding the :material/table: **Recorded data** expander, below the control panel buttons.
+
+            At the top, the test name can be changed. This will be the name of the`.csv` file, when downloaded.
+
+            Below this option, there are three tabs showing different dataframe types:
+            - **Raw data**: A dataframe with the recorded values without any post-processings.
+            - **Calibrated data**: This dataframe applies the calibration params to `SENSOR_LOADCELL` and `SENSOR_ENCODER` sensor types, using a linear approach: $y = m \cdot x + b$
+            - **Filtered data**: It is a filtered version of the **calibration data**, using a Butterworth filter.
+            """
+        )
+        st.info(
+            "The Butterworh filter params can be modified in the **Graph results** section, detailed below.",
+            icon=":material/info:",
+        )
+        st.markdown(
+            """
+            Depending on the selected tab, the downloaded file will have an extra suffix indicating the data type: `_RAW`, `_CALIBRATED` or `_FILTERED`.
+            """
+        )
+
+        st.subheader("Sensor and sensor groups figures")
+        st.markdown(
+            """
+            WIP
+            The obtained data can be visualized at the **Graph results** section of the :material/table_chart_view: **dashboard** page.
+            """
+        )
