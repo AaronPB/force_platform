@@ -533,12 +533,12 @@ def homePage():
             You can tare `SENSOR_LOADCELL` and `SENSOR_ENCODER` sensor types, once a test has started.
 
             The tare process goes as follows. Let $b$ be the new intercept, $b_0$ the previous intercept, 
-            $V_f(t)$ the recorded sensor values in a given timeframe $(t)$, and $m$ the sensor slope.
+            $V_f(t)$ the recorded sensor values by a given timeframe $(t)$, and $m$ the sensor slope.
             """
         )
         st.latex(
             r"""
-            b = b_0 - \text{mean}\left(m \cdot V_f(t) - b_0\right)
+            b = b_0 - \text{mean}\left(m \cdot V_f(t) + b_0\right)
             """
         )
         st.write(
@@ -550,9 +550,15 @@ def homePage():
             """
             To finish a test, clic on the **stop test** button. The test manager will wait the test thread to complete, so it could have some delay.
 
-            When stopped, the recorded data will be processed and filtered with a Butterworth filter.
-            TODO
+            When stopped, the recorded data will be processed, filtered with a Butterworth filter and stored in dataframes.
+            This dataframes can be checked and downloaded in the :material/table: **Recorded data** expander, below the control panel buttons.
+
+            Also, the filtered data can be shown as figures in the **Graph results** section of the :material/table_chart_view: **dashboard** page.
             """
+        )
+        st.info(
+            "For more information about sensor and platform figures, read the :material/bar_chart: **Check and visualize the results** expander below.",
+            icon=":material/info:",
         )
 
     with st.expander("Check and visualize the results", icon=":material/bar_chart:"):
