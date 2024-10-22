@@ -137,6 +137,7 @@ def dashboardPage():
             )
 
         df_tabs = st.tabs(["Calibrated data", "Filtered data", "Raw data"])
+        file_suffixes = ["_CALIBRATED", "_FILTERED", "_RAW"]
         for i, df in enumerate(dataframes):
             with df_tabs[i]:
                 if df.empty:
@@ -163,7 +164,7 @@ def dashboardPage():
                     icon=":material/download:",
                     data=df.to_csv(index=False).encode("utf-8"),
                     mime="text/csv",
-                    file_name=f"{file_name}.csv",
+                    file_name=f"{file_name+file_suffixes[i]}.csv",
                     help="Download the following dataframe in CSV format.",
                 )
                 st.dataframe(data=df, use_container_width=True)
