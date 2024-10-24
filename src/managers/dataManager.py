@@ -341,7 +341,7 @@ class DataManager:
             return GeneralFigure("Platform figure", "Not specified").getFigure(
                 pd.Series([0]), pd.Series([0])
             )
-        keys = list(self.platform_figure_structs.keys())
+        keys = self.platform_figure_structs[platform_name]
         df_fx = self.df_filtered[keys[:4]]
         df_fy = self.df_filtered[keys[4:8]]
         df_fz = self.df_filtered[keys[8:12]]
