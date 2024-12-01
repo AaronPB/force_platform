@@ -70,12 +70,12 @@ Clone with SSH:
 git clone git@github.com:AaronPB/force_platform.git
 ```
 
-> [!TIP]\
-> Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
-
-> This project is developed with Python v3.10.6
-
 Project requirements:
 ```bash
 pip install -r requirements.txt
 ```
+
+> [!TIP]\
+> Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
+
+> This project is developed with Python v3.10.6
