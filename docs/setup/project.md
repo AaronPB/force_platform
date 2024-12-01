@@ -7,7 +7,7 @@ The installation process will be explained for **Linux**. It is also possible to
 > [!NOTE]
 > Please note that if you do not use Linux and you want to use the Taobotics IMUs, you will have to manage its drivers.
 
-The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 12.04 LTS` with Taobotics IMUs.
+The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 22.04 LTS` with Taobotics IMUs.
 
 ## Dependencies
 
@@ -21,20 +21,17 @@ The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 12.04 L
 
 Clone the `force_platform` repository:
 
+Clone using the web URL:
+```bash
+git clone https://github.com/AaronPB/force_platform.git
+```
+
+Clone with SSH:
 ```bash
 git clone git@github.com:AaronPB/force_platform.git
 ```
 
-### 2. Install python required modules
-
-Install the project requirements:
-
-```bash
-cd force_platform/
-pip install -r requirements
-```
-
-### 3. Install sensor dependencies
+### 2. Install sensor dependencies
 
 #### Phidget dependency
 
@@ -59,6 +56,15 @@ sudo apt install python3-pymrpt
 
 > [!WARNING]
 > If you are using `virtualenv` (or any other virtual environment), MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
+
+### 3. Install python required modules
+
+Install the project requirements:
+
+```bash
+cd force_platform/
+pip install -r requirements
+```
 
 ## Run the project
 

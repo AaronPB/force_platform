@@ -30,17 +30,7 @@ Check it out [here](docs/home.md).
 
 ## Quick setup
 
-To use this project, clone it and install the project requirements.
-
-> [!TIP]\
-> Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
-
-> This project is developed with Python v3.10.6
-
-Project requirements:
-```bash
-pip install -r requirements.txt
-```
+Install dependencies and clone the project into your workspace.
 
 ### Phidget dependency
 
@@ -65,3 +55,27 @@ sudo apt install python3-pymrpt
 
 > [!WARNING]\
 > If you are using `virtualenv`, MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
+
+### Project requirements
+
+Clone the `force_platform` repository and install the project requirements.
+
+Clone using the web URL:
+```bash
+git clone https://github.com/AaronPB/force_platform.git
+```
+
+Clone with SSH:
+```bash
+git clone git@github.com:AaronPB/force_platform.git
+```
+
+> [!TIP]\
+> Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
+
+> This project is developed with Python v3.10.6
+
+Project requirements:
+```bash
+pip install -r requirements.txt
+```
