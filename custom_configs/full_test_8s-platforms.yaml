@@ -1,6 +1,6 @@
 settings:
   test:
-    name: All sensors Test
+    name: All sensors Test with 8-sensor platforms
     folder_path: /path/to/folder
     results:
       save_raw: true
@@ -22,13 +22,9 @@ sensor_groups:
     - p1_z3
     - p1_z4
     - p1_x1
-    - p1_x2
     - p1_x3
-    - p1_x4
     - p1_y1
-    - p1_y2
     - p1_y3
-    - p1_y4
   platform_2:
     name: Platform 2
     type: GROUP_PLATFORM
@@ -39,13 +35,9 @@ sensor_groups:
     - p2_z3
     - p2_z4
     - p2_x1
-    - p2_x2
     - p2_x3
-    - p2_x4
     - p2_y1
-    - p2_y2
     - p2_y3
-    - p2_y4
   imus:
     name: Body IMUs
     type: GROUP_DEFAULT
@@ -90,8 +82,8 @@ sensors:
       serial_number: Y2131167
       max_weight: 150kg
     calibration:
-      slope: 1460645.82
-      intercept: -29.233022296826327
+      slope: 1473800.0
+      intercept: -23.55430564478
   p1_z2:
     name: P1_LoadCell_Z_2
     type: SENSOR_LOADCELL
@@ -103,8 +95,8 @@ sensors:
       serial_number: Y2131169
       max_weight: 150kg
     calibration:
-      slope: 1458448.41
-      intercept: -29.0028410183748
+      slope: 1469700.0
+      intercept: -48.75070251519
   p1_z3:
     name: P1_LoadCell_Z_3
     type: SENSOR_LOADCELL
@@ -116,8 +108,8 @@ sensors:
       serial_number: W020822
       max_weight: 150kg
     calibration:
-      slope: 1467890.08
-      intercept: -27.243367874935444
+      slope: 1471300.0
+      intercept: -20.84961589113
   p1_z4:
     name: P1_LoadCell_Z_4
     type: SENSOR_LOADCELL
@@ -130,8 +122,8 @@ sensors:
       serial_number: Y2131168
       max_weight: 150kg
     calibration:
-      slope: 1461505.74
-      intercept: -38.74350208345997
+      slope: 1468200.0
+      intercept: -60.11623419336
   p1_x1:
     name: P1_LoadCell_X_1
     type: SENSOR_LOADCELL
@@ -143,8 +135,8 @@ sensors:
       serial_number: TT805051
       max_weight: 110kg
     calibration:
-      slope: 1060343.01
-      intercept: -10.051483139998794
+      slope: -1078100.0
+      intercept: 138.81435140434667
   p1_x2:
     name: P1_LoadCell_X_2
     type: SENSOR_LOADCELL
@@ -157,7 +149,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1068987.36
-      intercept: -6.01165236848876
+      intercept: 0
   p1_x3:
     name: P1_LoadCell_X_3
     type: SENSOR_LOADCELL
@@ -169,8 +161,8 @@ sensors:
       serial_number: TT805061
       max_weight: 110kg
     calibration:
-      slope: 1074759.37
-      intercept: -31.2073560528607
+      slope: 1077000.0
+      intercept: -137.9994137867
   p1_x4:
     name: P1_LoadCell_X_4
     type: SENSOR_LOADCELL
@@ -182,8 +174,8 @@ sensors:
       serial_number: TT805082
       max_weight: 110kg
     calibration:
-      slope: 1069820.71
-      intercept: -32.01276329082123
+      slope: -1069820.71
+      intercept: 0
   p1_y1:
     name: P1_LoadCell_Y_1
     type: SENSOR_LOADCELL
@@ -195,8 +187,8 @@ sensors:
       serial_number: TT805088
       max_weight: 110kg
     calibration:
-      slope: 1070190.3
-      intercept: -82.6229947376572
+      slope: -1077900.0
+      intercept: 81.48213063869
   p1_y2:
     name: P1_LoadCell_Y_2
     type: SENSOR_LOADCELL
@@ -208,8 +200,8 @@ sensors:
       serial_number: TT805064
       max_weight: 110kg
     calibration:
-      slope: 1071275.8
-      intercept: -48.45358226925368
+      slope: -1071275.8
+      intercept: 0
   p1_y3:
     name: P1_LoadCell_Y_3
     type: SENSOR_LOADCELL
@@ -221,8 +213,8 @@ sensors:
       serial_number: TC755992
       max_weight: 110kg
     calibration:
-      slope: 1070441.22
-      intercept: -54.68206641153183
+      slope: 1081000.0
+      intercept: -92.80233764496667
   p1_y4:
     name: P1_LoadCell_Y_4
     type: SENSOR_LOADCELL
@@ -235,7 +227,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1069900.5
-      intercept: -89.12526523145203
+      intercept: 0
   p2_z1:
     name: P2_LoadCell_Z_1
     type: SENSOR_LOADCELL
@@ -247,8 +239,8 @@ sensors:
       serial_number: W019737
       max_weight: 150kg
     calibration:
-      slope: 1459204.4
-      intercept: -45.93060489212014
+      slope: 1469800
+      intercept: -54.75747432235067
   p2_z2:
     name: P2_LoadCell_Z_2
     type: SENSOR_LOADCELL
@@ -260,8 +252,8 @@ sensors:
       serial_number: Z1162733
       max_weight: 150kg
     calibration:
-      slope: 1459832.02
-      intercept: -35.26667409409197
+      slope: 1465500
+      intercept: -44.27706722398
   p2_z3:
     name: P2_LoadCell_Z_3
     type: SENSOR_LOADCELL
@@ -273,8 +265,8 @@ sensors:
       serial_number: Z1162736
       max_weight: 150kg
     calibration:
-      slope: 1459933.41
-      intercept: -38.56096355307981
+      slope: 1472100
+      intercept: -46.225023230064004
   p2_z4:
     name: P2_LoadCell_Z_4
     type: SENSOR_LOADCELL
@@ -286,8 +278,8 @@ sensors:
       serial_number: Z1162741
       max_weight: 150kg
     calibration:
-      slope: 1460398.63
-      intercept: -40.44425779705251
+      slope: 1470200
+      intercept: -51.682324425114
   p2_x1:
     name: P2_LoadCell_X_1
     type: SENSOR_LOADCELL
@@ -299,8 +291,8 @@ sensors:
       serial_number: TT805059
       max_weight: 110kg
     calibration:
-      slope: 1072009.71
-      intercept: -5.284887526489954
+      slope: 1079100
+      intercept: -16.798508187417
   p2_x2:
     name: P2_LoadCell_X_2
     type: SENSOR_LOADCELL
@@ -313,7 +305,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1061125.79
-      intercept: -12.602795053267448
+      intercept: 0
   p2_x3:
     name: P2_LoadCell_X_3
     type: SENSOR_LOADCELL
@@ -325,8 +317,8 @@ sensors:
       serial_number: TT805063
       max_weight: 110kg
     calibration:
-      slope: 1075625.42
-      intercept: -47.413942859929506
+      slope: 1080500
+      intercept: -18.435062027093334
   p2_x4:
     name: P2_LoadCell_X_4
     type: SENSOR_LOADCELL
@@ -339,7 +331,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1074300.01
-      intercept: -48.95756074221691
+      intercept: 0
   p2_y1:
     name: P2_LoadCell_Y_1
     type: SENSOR_LOADCELL
@@ -351,8 +343,8 @@ sensors:
       serial_number: TT805080
       max_weight: 110kg
     calibration:
-      slope: 1064968.49
-      intercept: -12.97576749959639
+      slope: 1077000
+      intercept: -10.54021661474
   p2_y2:
     name: P2_LoadCell_Y_2
     type: SENSOR_LOADCELL
@@ -365,7 +357,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1070497.24
-      intercept: -8.078278820542721
+      intercept: 0
   p2_y3:
     name: P2_LoadCell_Y_3
     type: SENSOR_LOADCELL
@@ -377,8 +369,8 @@ sensors:
       serial_number: TT805068
       max_weight: 110kg
     calibration:
-      slope: 1068378.99
-      intercept: -6.5327581673994946
+      slope: 1082100
+      intercept: -14.513029098699
   p2_y4:
     name: P2_LoadCell_Y_4
     type: SENSOR_LOADCELL
@@ -391,7 +383,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1063008.94
-      intercept: -11.163323948940118
+      intercept: 0
   encoder_1:
     name: Encoder_Z_1
     type: SENSOR_ENCODER
