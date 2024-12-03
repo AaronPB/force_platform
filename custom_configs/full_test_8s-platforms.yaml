@@ -83,7 +83,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1473800.0
-      intercept: -23.55430564478
+      intercept: -30.960028108135333
   p1_z2:
     name: P1_LoadCell_Z_2
     type: SENSOR_LOADCELL
@@ -96,7 +96,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1469700.0
-      intercept: -48.75070251519
+      intercept: -42.890445352665
   p1_z3:
     name: P1_LoadCell_Z_3
     type: SENSOR_LOADCELL
@@ -109,7 +109,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1471300.0
-      intercept: -20.84961589113
+      intercept: -28.284322205066665
   p1_z4:
     name: P1_LoadCell_Z_4
     type: SENSOR_LOADCELL
@@ -123,7 +123,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1468200.0
-      intercept: -60.11623419336
+      intercept: -54.766444296276
   p1_x1:
     name: P1_LoadCell_X_1
     type: SENSOR_LOADCELL
@@ -135,8 +135,8 @@ sensors:
       serial_number: TT805051
       max_weight: 110kg
     calibration:
-      slope: -1078100.0
-      intercept: 138.81435140434667
+      slope: 1078100.0
+      intercept: -140.02490171765135
   p1_x2:
     name: P1_LoadCell_X_2
     type: SENSOR_LOADCELL
@@ -162,7 +162,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1077000.0
-      intercept: -137.9994137867
+      intercept: -138.50904882609
   p1_x4:
     name: P1_LoadCell_X_4
     type: SENSOR_LOADCELL
@@ -174,7 +174,7 @@ sensors:
       serial_number: TT805082
       max_weight: 110kg
     calibration:
-      slope: -1069820.71
+      slope: 1069820.71
       intercept: 0
   p1_y1:
     name: P1_LoadCell_Y_1
@@ -187,8 +187,8 @@ sensors:
       serial_number: TT805088
       max_weight: 110kg
     calibration:
-      slope: -1077900.0
-      intercept: 81.48213063869
+      slope: 1077900.0
+      intercept: -82.17118213006
   p1_y2:
     name: P1_LoadCell_Y_2
     type: SENSOR_LOADCELL
@@ -200,7 +200,7 @@ sensors:
       serial_number: TT805064
       max_weight: 110kg
     calibration:
-      slope: -1071275.8
+      slope: 1071275.8
       intercept: 0
   p1_y3:
     name: P1_LoadCell_Y_3
@@ -214,7 +214,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1081000.0
-      intercept: -92.80233764496667
+      intercept: -93.16521404881667
   p1_y4:
     name: P1_LoadCell_Y_4
     type: SENSOR_LOADCELL
@@ -240,7 +240,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1469800
-      intercept: -54.75747432235067
+      intercept: -64.92588478829333
   p2_z2:
     name: P2_LoadCell_Z_2
     type: SENSOR_LOADCELL
@@ -253,7 +253,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1465500
-      intercept: -44.27706722398
+      intercept: -30.872206732949998
   p2_z3:
     name: P2_LoadCell_Z_3
     type: SENSOR_LOADCELL
@@ -266,7 +266,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1472100
-      intercept: -46.225023230064004
+      intercept: -59.380165382251
   p2_z4:
     name: P2_LoadCell_Z_4
     type: SENSOR_LOADCELL
@@ -279,7 +279,7 @@ sensors:
       max_weight: 150kg
     calibration:
       slope: 1470200
-      intercept: -51.682324425114
+      intercept: -37.169974099280665
   p2_x1:
     name: P2_LoadCell_X_1
     type: SENSOR_LOADCELL
@@ -292,7 +292,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1079100
-      intercept: -16.798508187417
+      intercept: -28.170736000538994
   p2_x2:
     name: P2_LoadCell_X_2
     type: SENSOR_LOADCELL
@@ -318,7 +318,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1080500
-      intercept: -18.435062027093334
+      intercept: -28.287120065613337
   p2_x4:
     name: P2_LoadCell_X_4
     type: SENSOR_LOADCELL
@@ -344,7 +344,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1077000
-      intercept: -10.54021661474
+      intercept: -22.321758496930002
   p2_y2:
     name: P2_LoadCell_Y_2
     type: SENSOR_LOADCELL
@@ -370,7 +370,7 @@ sensors:
       max_weight: 110kg
     calibration:
       slope: 1082100
-      intercept: -14.513029098699
+      intercept: -18.890641953455
   p2_y4:
     name: P2_LoadCell_Y_4
     type: SENSOR_LOADCELL
