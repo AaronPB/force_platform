@@ -143,13 +143,13 @@ class DataManager:
             if plot_type == PlotTypes.GROUP_PLATFORM_COP:
                 plotter = PlotPlatformCOPWidget()
                 # Check shapes
-                if df_fx.shape[1] != 2 or df_fy.shape[1] != 4:
+                if df_fx.shape[1] != 2 and df_fy.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
                         + f"Need 2 or 4 X axis sensors, only {df_fx.shape[1]} provided."
                     )
                     return plotter
-                if df_fy.shape[1] != 2 or df_fy.shape[1] != 4:
+                if df_fy.shape[1] != 2 and df_fy.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
                         + f"Need 2 or 4 Y axis sensors, only {df_fy.shape[1]} provided."
