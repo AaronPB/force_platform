@@ -1,5 +1,3 @@
-[:house: `Back to Home`](../home.md)
-
 # General test procedure
 
 The main objective of the program is to record data from the connected sensors in a synchronised manner and to generate a file in `.csv` format at the end of each trial.
@@ -9,6 +7,7 @@ When running the `main.py` file of the program, a window like this will open:
 ![Main UI default](../images/mainUI_default.png)
 
 The interface is organised in three main sections which will be detailed below:
+
 - At the left side:
 	- The control panel column.
 - At the right:
@@ -23,10 +22,12 @@ The interface is organised in three main sections which will be detailed below:
 | ![](../images/mainUI_cp_status.png) | ![](../images/mainUI_cp.png)|
 
 When running the program, all the buttons on the control panel are disabled until the following requirements are satisfied:
+
 - There is a valid folder to save the test files. See [Folder and file name of the test](#folder-and-file-name-of-the-test).
 - There is at least one sensor available. See [Sensor connection](#folder-and-file-name-of-the-test).
 
 The layer is divided into three parts:
+
 - **Status information box**: informs if all requirements are met.
 - Button box:
 	- **Start test**: clear all previous data and start a new test with the available sensors.
@@ -53,8 +54,8 @@ Once selected, if it is in the correct format, the window will be updated with t
 
 The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
 
-> [!NOTE]
-> This can be cancelled by loading again the default `config.yaml` file or deleting the custom configuration path manually in the [`settings` config section](../setup/config_file.md#settings-section).
+!!! note
+    This can be cancelled by loading again the default `config.yaml` file or deleting the custom configuration path manually in the [`settings` config section](../setup/config_file.md#settings-section).
 
 ### Folder and file name of the test
 
@@ -68,10 +69,10 @@ This section shows all sensor groups configured in the [`sensor_groups` config s
 
 You can select or deselect sensor groups connections by clicking on their names. It is also possible to enable/disable individual sensors from a sensor group via the `settings` button next to it.
 
-> [!NOTE]
-> When you click the `settings` button, an additional window will show up with the sensor information. If you want to continue in the main window, close the pop-up window.
-> 
-> Any modifications will be saved.
+!!! note
+    When you click the `settings` button, an additional window will show up with the sensor information. If you want to continue in the main window, close the pop-up window.
+
+    Any modifications will be saved.
 
 You can check the selection status looking at the name background color:
 
@@ -107,8 +108,8 @@ You can change the preview graph by clicking other sensor name in the preview se
 
 To apply any modifications, click the <kbd>Apply changes</kbd> button. If you want to save the data again with those modifications, click the <kbd>Save</kbd> button. To undo range modifications, click on <kbd>Reset</kbd>.
 
-> [!NOTE]
-> The <kbd>Save</kbd> button only apply data range modifications. It does not save filtered data.
+!!! note
+    The <kbd>Save</kbd> button only apply data range modifications. It does not save filtered data.
 
 All applied modifications will update available sensor graphs. Checkout the following section!
 
@@ -119,7 +120,7 @@ There are two tabs available:
 - **Sensor graphs** - To see individual sensor data.
 - **Platform graphs** - To see specific platform data: total forces and COP data.
 
-All the graph processing is done by the [`DataManager`](../../src/managers/dataManager.py)  class.
+All the graph processing is done by the [`DataManager`](https://github.com/AaronPB/force_platform/blob/develop/src/managers/dataManager.py) class.
 
 ## Sensor graphs
 
@@ -135,11 +136,7 @@ As in the previous section, click a sensor group at the top selector and an avai
 
 Use the options above to save the generated graph, edit, zoom, etc.
 
-> [!IMPORTANT]
-> This graphs needs special sensor group requirements in order to be available. Check [platform groups configuration](../setup/config_file.md#platform-groups).
+!!! info
+    This graphs needs special sensor group requirements in order to be available. Check [platform groups configuration](../setup/config_file.md#platform-groups).
 
 ![Main UI graphs platform](../images/mainUI_tab_graphs_platform.png)
-
----
-
-[:house: `Back to Home`](../home.md)

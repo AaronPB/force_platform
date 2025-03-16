@@ -1,0 +1,91 @@
+site_name: Force Platform Reader
+repo_url: https://github.com/AaronPB/force_platform
+repo_name: AaronPB/force_platform
+nav:
+  - Home: index.md
+  - Setup:
+    - Installation: setup/project.md
+    - Configuration: setup/config_file.md
+    - Sensors: setup/sensors.md
+  - Usage:
+    - Make a recording: usage/general_test.md
+    - Calibrate sensors: usage/calibration_test.md
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.blocks.html
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+      generic: true
+theme:
+  name: material
+  logo: assets/project_logo.svg
+  favicon: assets/project_logo.svg
+  features:
+    - navigation.tabs
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+      primary: deep purple
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: deep purple
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+      primary: deep purple
+  icon:
+    repo: fontawesome/brands/github
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/AaronPB
+      name: GitHub profile
+    - icon: fontawesome/brands/linkedin
+      link: https://es.linkedin.com/in/aaron-raul-poyatos-bakker
+      name: LinkedIn profile
+  consent:
+    title: Cookie consent
+    description: >- 
+      We use cookies to recognize your repeated visits and preferences, as well
+      as to measure the effectiveness of our documentation and whether users
+      find what they're searching for. With your consent, you're helping us to
+      make our documentation better.
+    actions:
+      - accept
+      - manage
+      - reject
+copyright: >
+  Copyright &copy; 2023-2025 AaronPB –
+  <a href="#__consent">Change cookie settings</a>
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js

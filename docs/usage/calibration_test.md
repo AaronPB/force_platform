@@ -1,5 +1,3 @@
-[:house: `Back to Home`](../home.md)
-
 # Calibration process
 
 Calibration process are only available for **platform sensors** defined in the [`sensor_groups` config section](../setup/config_file.md#sensor-groups-section) .
@@ -12,8 +10,8 @@ To access the calibration menu, click on the <kbd>Calibrate sensors</kbd> button
 
 At the left side, the menu loads all compatible sensor groups defined in `config.yaml`, but only the connected ones will be shown. You can connect the sensors previously from the main menu.
 
-> [!TIP]
-> Need more information about how to connect sensors? Check the [sensor connection](general_test.md#sensor-connection) section of the general test procedure.
+!!! tip
+    Need more information about how to connect sensors? Check the [sensor connection](general_test.md#sensor-connection) section of the general test procedure.
 
 In order to preform a calibration test, click the enabled button of the connected sensor.
 
@@ -24,6 +22,7 @@ The right part of the calibration menu will update with the sensor information a
 ![Calibration UI panel](../images/calibrationUI_panel.png)
 
 The window is structured in the following sections:
+
 - Sensor information and general test buttons.
 - A table in which all measurements will be recorded and the most relevant data (such as the mean and variance of the data sample) are displayed.
 - An horizontal set of buttons to manage the measurements.
@@ -33,13 +32,14 @@ The window is structured in the following sections:
 Calibration is performed by applying known values of weight (or other physical quantity) to the sensor and measuring its output. The test is performed by applying different values in order to establish a linear relationship and obtain a regression line.
 
 The calibration program allows the known value to be recorded in two ways:
+
 - **Manually**: when the calibration value is known.
 - **With a reference sensor**: when the calibration value is unknown or higher accuracy is required. In this case it is necessary to use a calibrated sensor.
 
 The following sections shows how to preform each action.
 
-> [!NOTE]
-> If a measurement goes wrong, you can remove it selecting the correspondent row from the measurement table and click the <kbd>Remove selected row</kbd> button.
+!!! note
+    If a measurement goes wrong, you can remove it selecting the correspondent row from the measurement table and click the <kbd>Remove selected row</kbd> button.
 
 ### Calibrate with manual inputs
 
@@ -57,9 +57,10 @@ To calibrate using the reference sensor, you must first declare it in the [`cali
 
 Once defined, run the program, connect the sensors to be calibrated and access the calibration window again.
 
-The program will try to connect the reference sensor when clicking an available sensor. If no connection is established, a warning will appear on console and the <kbd>Measure with sensor</kbd>button will not be available.
+The program will try to connect the reference sensor when clicking an available sensor. If no connection is established, a warning will appear on console and the <kbd>Measure with sensor</kbd> button will not be available.
 
 If the button is active, then the sensor is correctly connected. The steps to proceed in this case are as follows:
+
 1. Apply the known magnitude to the sensor.
 2. Click on the <kbd>Measure with sensor</kbd> button and wait until the buttons are re-enabled.
 3. The measurement will appear in the table when it is done.
@@ -68,8 +69,8 @@ If the button is active, then the sensor is correctly connected. The steps to pr
 ### Generate the calibration results
 Once all measurements have been taken, linear regression can be performed by clicking on the <kbd>Make linear regression</kbd> button.
 
-> [!IMPORTANT]
-> A minimum of two measurements must be taken for the <kbd>Make linear regression</kbd> button to be available.
+!!! info
+    A minimum of two measurements must be taken for the <kbd>Make linear regression</kbd> button to be available.
 
 ![Calibration UI results](../images/calibrationUI_results.png)
 
@@ -86,7 +87,3 @@ If at any time you wish to cancel the calibration test, click the <kbd>Clear cal
 It is possible to modify the data reading time and frequency in the [`settings` section](../setup/config_file.md#settings-section) of the `config.yaml` file.
 
 It is also possible to change the reference sensor in the [`calibration_sensors` section](../setup/config_file.md#calibration-sensors-section) of the same file.
-
----
-
-[:house: `Back to Home`](../home.md)

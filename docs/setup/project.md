@@ -1,17 +1,15 @@
-[:house: `Back to Home`](../home.md)
-
 # Project setup
 
 The installation process will be explained for **Linux**. It is also possible to install on Windows and MacOs (not tested) if the required dependencies have support for those OS.
 
-> [!NOTE]
-> Please note that if you do not use Linux and you want to use the Taobotics IMUs, you will have to manage its drivers.
+!!! note
+    Please note that if you do not use Linux and you want to use the Taobotics IMUs, you will have to manage its drivers.
 
 The project has been tested in `Windows 11` without IMUs, and in `Ubuntu 22.04 LTS` with Taobotics IMUs.
 
 ## Dependencies
 
-- **Python version `3.10` or `3.11`**. In case you want to use recent versions, check the [requirements](../../requirements.txt) for potential conflicts with the required python modules.
+- **Python version `3.10` or `3.11`**. In case you want to use recent versions, check the [requirements](https://github.com/AaronPB/force_platform/blob/develop/requirements.txt) for potential conflicts with the required python modules.
 - **Phidget22**. For Phidget load cells and encoders.
 - **MRPT**. To use the `pymrpt` library for the Taobotics IMUs.
 
@@ -54,8 +52,8 @@ sudo apt install libmrpt-dev mrpt-apps
 sudo apt install python3-pymrpt
 ```
 
-> [!WARNING]
-> If you are using `virtualenv` (or any other virtual environment), MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
+!!! warning
+    If you are using `virtualenv` (or any other virtual environment), MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
 
 ### 3. Install python required modules
 
@@ -76,8 +74,4 @@ chmod +x main.py
 main.py
 ```
 
-If the main GUI shows up, its done!
-
----
-
-[:house: `Back to Home`](../home.md)
+If the main GUI shows up, it is done!
