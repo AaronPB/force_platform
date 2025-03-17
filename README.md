@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="#readme"><img alt="Force platform reader logo" src="images/project_logo.svg"></a>
+  <a href="#readme"><img alt="Force platform reader logo" src="docs/assets/project_logo_name.png"></a>
 </p>
 <p align="center">
   <a href="#readme"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue.svg"></a>
@@ -31,7 +31,7 @@ Check it out [here](https://aaronpb.github.io/force_platform/).
 
 ## Quick setup
 
-Install dependencies and clone the project into your workspace.
+Install the dependencies and clone the project into your workspace.
 
 ### Phidget dependency
 
