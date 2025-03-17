@@ -1,6 +1,13 @@
 site_name: Force Platform Reader
+site_url: https://aaronpb.github.io/force_platform/
+site_author: Aarón Poyatos
+site_description: >-
+  The Force Platform Reader documentation and general project information
 repo_url: https://github.com/AaronPB/force_platform
 repo_name: AaronPB/force_platform
+copyright: >
+  Copyright &copy; 2023-2025 AaronPB –
+  <a href="#__consent">Change cookie settings</a>
 nav:
   - Home: index.md
   - Setup:
@@ -82,10 +89,6 @@ extra:
     actions:
       - accept
       - manage
-      - reject
-copyright: >
-  Copyright &copy; 2023-2025 AaronPB –
-  <a href="#__consent">Change cookie settings</a>
 extra_javascript:
   - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js

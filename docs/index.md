@@ -60,9 +60,138 @@ title: Home
 
 </div>
 
-## The project
+## The software project
 
-!!! abstract "Talk about the project"
+<div class="grid" markdown>
+
+<div markdown>
+![Software main page](images/mainUI.png)
+</div>
+
+<div markdown>
+A python software for synchronized data management of specific force platforms sensors compatible with [Phidget API](https://www.phidgets.com/docs/Phidget22?srsltid=AfmBOorPWIP_i6m9MabFbrDAVYYXTi3JjgvsbhZHfs7VnlNO6sR47uO3) and other sensor types such as IMUs.
+
+This project is part of the [author](https://github.com/AaronPB)'s master's thesis in industrial engineering at the University of Almería.
+
+!!! quote "SOFTWARE DEVELOPMENT AND CALIBRATION OF A FORCE PLATFORM FOR SPORTS SCIENCE"
+    Check the master's thesis in spanish by clicking the button below. 
+
+    [:fontawesome-solid-globe: &nbsp; Institutional repository *(available soon)*](#){ .md-button .md-button--secondary }
+</div>
+
+</div>
+
+<div class="grid" markdown>
+
+<div markdown>
+### A flexible configuration
+
+The configuration file uses `YAML` format for better readability, and all sensors are stored in a single configuration section for a more structured setup.
+
+Sensors are then organized into __sensor groups__. If a sensor does not belong to a group, it will be ignored.
+
+!!! success "Sensor groups are fully flexible"
+    You can define a group with sensors of the same type or different types.
+
+    Within the program, you can enable or disable specific sensors within a group or an entire group.
+
+For more details, check out the following documentation page:
+
+[:fontawesome-solid-gear: &nbsp; Configuration file](setup/config_file.md){ .md-button .md-button--secondary }
+</div>
+
+<div markdown>
+=== "Settings section"
+
+    *Just simple and straightforward settings.*
+    
+    *You can even import customized configuration files with different sensors and group setups.*
+
+    ``` yaml
+    settings:
+      custom_config_path: null
+      test:
+        name: Name
+        folder_path: /tests/
+        results:
+          save_raw: true
+          save_calib: true
+      recording:
+        data_interval_ms: 10
+        tare_data_amount: 300
+      calibration:
+        data_interval_ms: 10
+        data_amount: 300
+    ```
+
+=== "Sensor groups section"
+    
+    *Group your sensors to get specific graphs based on the group type and enhance data organization in CSV exports.*
+
+    ``` yaml
+    sensor_groups:
+      imus:
+        name: Body IMUs
+        type: GROUP_DEFAULT
+        read: true
+        sensor_list:
+        - imu_1
+        - imu_2
+        - imu_3
+      barbell_encoders:
+        name: Barbell encoders
+        type: GROUP_DEFAULT
+        read: true
+        sensor_list:
+        - encoder_1
+        - encoder_2
+    ```
+
+=== "Sensors section"
+    
+    *Define all your sensors in this section.*
+
+    ``` yaml
+    sensors:
+      encoder_1:
+        name: Encoder_Z_1
+        type: SENSOR_ENCODER
+        read: true
+        connection:
+          channel: 0
+          serial: 641800
+        initial_position: 0
+        properties:
+          serial_number: AAAA
+          max_length: 2500mm
+        calibration:
+          slope: 0.01875
+          intercept: 0.0
+    ```
+</div>
+
+</div>
+
+<div class="grid" markdown>
+
+<div markdown>
+![Software tab graphs page](images/mainUI_tab_graphs_platform.png)
+<!-- ![Software tab graphs page](images/mainUI_tab_settings_results.png) -->
+</div>
+
+<div markdown>
+### Data graphs and CSV export
+
+You can visualize the recorded data directly from the graphs tabs.
+
+There are graphs for each recorded sensor, as well as specific ones depending on the sensor group type, such as force platforms.
+
+It is also possible to trim the data and adjust the Butterworth filter used for signal processing.
+
+For data export, the CSV format is used, allowing both raw data export and processed data export using the sensors' calibration parameters.
+</div>
+
+</div>
 
 ## Quick setup
 
