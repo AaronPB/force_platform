@@ -60,18 +60,19 @@ title: Home
 
 </div>
 
-## The software project
+## About the Software
 
 <div class="grid" markdown>
 
 <div markdown>
-![Software main page](images/mainUI.png)
+![Software main page](images/fp_software_ui_compact.png)
 </div>
 
 <div markdown>
 A python software for synchronized data management of specific force platforms sensors compatible with [Phidget API](https://www.phidgets.com/docs/Phidget22?srsltid=AfmBOorPWIP_i6m9MabFbrDAVYYXTi3JjgvsbhZHfs7VnlNO6sR47uO3) and other sensor types such as IMUs.
 
-This project is part of the [author](https://github.com/AaronPB)'s master's thesis in industrial engineering at the University of Almería.
+This project is part of the [author](https://github.com/AaronPB)'s master's thesis in industrial engineering at the University of Almería
+and funded by the *"[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)"* and the Andalusian *"Consejería de Transformación Económica, Industria, Conocimiento y Universidades"*, under the project UAL2020-CTS-A2100.
 
 !!! quote "SOFTWARE DEVELOPMENT AND CALIBRATION OF A FORCE PLATFORM FOR SPORTS SCIENCE"
     Check the master's thesis in spanish by clicking the button below. 
@@ -81,11 +82,11 @@ This project is part of the [author](https://github.com/AaronPB)'s master's thes
 
 </div>
 
+### A flexible configuration
+
 <div class="grid" markdown>
 
 <div markdown>
-### A flexible configuration
-
 The configuration file uses `YAML` format for better readability, and all sensors are stored in a single configuration section for a more structured setup.
 
 Sensors are then organized into __sensor groups__. If a sensor does not belong to a group, it will be ignored.
@@ -172,15 +173,15 @@ For more details, check out the following documentation page:
 
 </div>
 
+### Data graphs and CSV export
+
 <div class="grid" markdown>
 
 <div markdown>
-![Software tab graphs page](images/mainUI_tab_graphs_platform.png)
-<!-- ![Software tab graphs page](images/mainUI_tab_settings_results.png) -->
+![Software tab graphs page](images/fp_software_ui_compact_Pgraph.png)
 </div>
 
 <div markdown>
-### Data graphs and CSV export
 
 You can visualize the recorded data directly from the graphs tabs.
 
@@ -193,54 +194,72 @@ For data export, the CSV format is used, allowing both raw data export and proce
 
 </div>
 
-## Quick setup
+### Quick setup
 
-Install the dependencies and clone the project into your workspace.
+<div class="grid" markdown>
 
-### Phidget dependency
+<div markdown>
+Install the required dependencies and clone the project into your workspace.
 
-For [Linux](https://www.phidgets.com/docs/OS_-_Linux#Quick_Downloads):
+You can follow this steps to set it up in a few minutes.
 
-```bash
-curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash - &&\
-sudo apt-get install -y libphidget22
-```
-
-> For [Windows](https://www.phidgets.com/docs/OS_-_Windows#Quick_Downloads) or [MacOS](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads)
-
-### MRPT dependency
-
-For more information, refer to the [MRPT Documentation](https://docs.mrpt.org/reference/latest/download-mrpt.html#debian-ubuntu-ppa)
-
-```bash
-sudo add-apt-repository ppa:joseluisblancoc/mrpt
-sudo apt install libmrpt-dev mrpt-apps
-sudo apt install python3-pymrpt
-```
-
-!!! warning
-    If you are using `virtualenv`, MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
-
-### Project requirements
-
-Clone the `force_platform` repository and install the project requirements.
-
-Clone using the web URL:
-```bash
-git clone https://github.com/AaronPB/force_platform.git
-```
-
-Clone with SSH:
-```bash
-git clone git@github.com:AaronPB/force_platform.git
-```
-
-Project requirements:
-```bash
-pip install -r requirements.txt
-```
+!!! warning "Only Linux distributions are supported, preferably Ubuntu 22.04 LTS"
+    The project has been developed and tested in Ubuntu 22.04 LTS. Phidget does support [Windows](https://www.phidgets.com/docs/OS_-_Windows#Quick_Downloads)
+    and [Mac](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads) OS, but Taobotics IMUs do not.
 
 !!! tip
     Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
 
     This project is developed with Python v3.10.6
+</div>
+
+<div markdown>
+<div class="grid cards" markdown>
+
+-   :fontawesome-solid-terminal:{ .lg .middle } __Step 1: Install the external dependencies__
+
+    ---
+
+    === "Phidget22"
+
+        ``` bash
+        curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash - &&\
+        sudo apt-get install -y libphidget22
+        ```
+
+    === "MRPT"
+
+        ``` bash
+        sudo add-apt-repository ppa:joseluisblancoc/mrpt
+        sudo apt install libmrpt-dev mrpt-apps
+        sudo apt install python3-pymrpt
+        ```
+
+-   :fontawesome-solid-clone:{ .lg .middle } __Step 2: Clone the `force_platform` repository__
+
+    ---
+
+    === "By using the web URL"
+
+        ``` bash
+        git clone https://github.com/AaronPB/force_platform.git
+        ```
+
+    === "By using SSH"
+
+        ``` bash
+        git clone git@github.com:AaronPB/force_platform.git
+        ```
+
+-   :fontawesome-solid-file-lines:{ .lg .middle } __Step 3: Install the project requirements__
+
+    ---
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+</div>
+</div>
+
+</div>
