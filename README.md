@@ -2,11 +2,11 @@
   <a href="#readme"><img alt="Force platform reader logo" src="docs/assets/project_logo_name.png"></a>
 </p>
 <p align="center">
-  <a href="#readme"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue.svg"></a>
-  <a href="https://github.com/psf/black"><img alt="Python formatter" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-  <a href="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml"><img alt="Project test status" src="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml/badge.svg"></a>
-  <a href="https://aaronpb.github.io/force_platform/"><img alt="Documentation link" src="https://img.shields.io/badge/docs-available-limegreen.svg"></a>
-  <a href="https://squidfunk.github.io/mkdocs-material/"><img alt="MkDocs material theme support" src="https://img.shields.io/badge/Material_for_MkDocs-526CFE"></a>
+  <a href="#readme"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue?style=flat-square"></a>
+  <a href="https://github.com/psf/black"><img alt="Python formatter" src="https://img.shields.io/badge/code%20style-black-000000?style=flat-square"></a>
+  <a href="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml"><img alt="Project test status" src="https://img.shields.io/github/actions/workflow/status/AaronPB/force_platform/project_test.yaml?branch=develop&style=flat-square"></a>
+  <a href="https://aaronpb.github.io/force_platform/"><img alt="Documentation link" src="https://img.shields.io/badge/docs-available-44CC11?style=flat-square"></a>
+  <a href="https://squidfunk.github.io/mkdocs-material/"><img alt="MkDocs material theme support" src="https://img.shields.io/badge/Material_for_MkDocs-526CFE?style=flat-square"></a>
 </p>
 
 ## Information
@@ -80,3 +80,11 @@ pip install -r requirements.txt
 > Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
 
 > This project is developed with Python v3.10.6
+
+## Acknowledgements
+
+This work has been funded by the "[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)" and the Andalusian "Consejería de Transformación Económica, Industria, Conocimiento y Universidades", under the project UAL2020-CTS-A2100.
+
+<p align="center">
+  <a href="https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html"><img alt="EU and Junta de Andalucia logos" src="docs/assets/union_europea-junta_de_andalucia.png" width="500"></a>
+</p>
