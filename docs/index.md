@@ -72,13 +72,25 @@ title: Home
 A python software for synchronized data management of specific force platforms sensors compatible with [Phidget API](https://www.phidgets.com/docs/Phidget22?srsltid=AfmBOorPWIP_i6m9MabFbrDAVYYXTi3JjgvsbhZHfs7VnlNO6sR47uO3) and other sensor types such as IMUs.
 
 This project is part of the [author](https://github.com/AaronPB)'s master's thesis in industrial engineering at the University of Almería
-and funded by the *"[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)"* and the Andalusian *"Consejería de Transformación Económica, Industria, Conocimiento y Universidades"*, under the project UAL2020-CTS-A2100.
+and funded by the "[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)" and the Andalusian "Consejería de Transformación Económica, Industria, Conocimiento y Universidades", under the project UAL2020-CTS-A2100.
 
-!!! quote "SOFTWARE DEVELOPMENT AND CALIBRATION OF A FORCE PLATFORM FOR SPORTS SCIENCE"
+<figure markdown="span">
+![union_europea-junta_de_andalucia](assets/union_europea-junta_de_andalucia.png){ width="500px" }
+</figure>
+
+</div>
+
+</div>
+
+<div class="grid cards" markdown>
+
+-   :fontawesome-solid-file-pdf:{ .lg .middle } __SOFTWARE DEVELOPMENT AND CALIBRATION OF A FORCE PLATFORM FOR SPORTS SCIENCE__
+
+    ---
+
     Check the master's thesis in spanish by clicking the button below. 
 
     [:fontawesome-solid-globe: &nbsp; Institutional repository *(available soon)*](#){ .md-button .md-button--secondary }
-</div>
 
 </div>
 
