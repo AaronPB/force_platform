@@ -4,8 +4,8 @@
 <p align="center">
   <a href="#readme"><img alt="Python tested versions" src="https://img.shields.io/badge/python-3.10_3.11-blue?style=flat-square"></a>
   <a href="https://github.com/psf/black"><img alt="Python formatter" src="https://img.shields.io/badge/code%20style-black-000000?style=flat-square"></a>
-  <a href="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml"><img alt="Project test status" src="https://img.shields.io/github/actions/workflow/status/AaronPB/force_platform/project_test.yaml?branch=develop&style=flat-square"></a>
-  <a href="https://aaronpb.github.io/force_platform/"><img alt="Documentation link" src="https://img.shields.io/badge/docs-available-44CC11?style=flat-square"></a>
+  <a href="https://github.com/AaronPB/force_platform/actions/workflows/project_test.yaml"><img alt="Project test status" src="https://img.shields.io/github/actions/workflow/status/AaronPB/force_platform/project_test.yaml?branch=develop&logo=github&label=project_test&style=flat-square"></a>
+  <a href="https://aaronpb.github.io/force_platform/"><img alt="Documentation link" src="https://img.shields.io/badge/docs-available-44CC11?logo=materialformkdocs&logoColor=white&style=flat-square"></a>
   <a href="https://squidfunk.github.io/mkdocs-material/"><img alt="MkDocs material theme support" src="https://img.shields.io/badge/Material_for_MkDocs-526CFE?style=flat-square"></a>
 </p>
 
