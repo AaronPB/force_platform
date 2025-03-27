@@ -75,7 +75,8 @@ This project is part of the [author](https://github.com/AaronPB)'s master's thes
 and funded by the "[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)" and the Andalusian "Consejería de Transformación Económica, Industria, Conocimiento y Universidades", under the project UAL2020-CTS-A2100.
 
 <figure markdown="span">
-![union_europea-junta_de_andalucia](assets/union_europea-junta_de_andalucia.png){ width="500px" }
+![union_europea-junta_de_andalucia](assets/union_europea-junta_de_andalucia.png#only-light){ width="500px" }
+![union_europea-junta_de_andalucia](assets/union_europea-junta_de_andalucia_modooscuro.png#only-dark){ width="500px" }
 </figure>
 
 </div>
