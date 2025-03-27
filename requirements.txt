@@ -10,7 +10,7 @@ opencv-python==4.9.0.80
 packaging==23.2
 pandas==2.1.3
 Phidget22==1.17.20231004
-Pillow==10.1.0
+Pillow==11.1.0
 pyparsing==3.1.1
 PySide6==6.6.0
 PySide6-Addons==6.6.0
@@ -18,7 +18,7 @@ PySide6-Essentials==6.6.0
 python-dateutil==2.8.2
 pytz==2023.3.post1
 PyYAML==6.0.1
-scikit-learn==1.3.2
+scikit-learn==1.6.1
 scipy==1.11.3
 shiboken6==6.6.0
 six==1.16.0
