@@ -15,10 +15,11 @@ title: Home
 
     ---
 
-    Install the dependencies ([`Phidget22`](https://www.phidgets.com/docs/Phidget22?srsltid=AfmBOorPWIP_i6m9MabFbrDAVYYXTi3JjgvsbhZHfs7VnlNO6sR47uO3) [`MRPT`](https://docs.mrpt.org/reference/latest/download-mrpt.html)), the [project](https://github.com/AaronPB/force_platform/tree/master)
-    and get up and running in minutes
+    Get up and running in minutes
 
     [:octicons-arrow-right-24: Getting started](setup/project.md)
+    
+    [:fontawesome-brands-docker: Check a dockerized version](https://hub.docker.com/r/aaronrpb/force-platform-app)
 
 -   :fontawesome-solid-microchip:{ .lg .middle } __Sensor compatibility__
 
@@ -209,6 +210,32 @@ For data export, the CSV format is used, allowing both raw data export and proce
 
 ### Quick setup
 
+<div class="grid cards" markdown>
+
+-   :fontawesome-brands-docker:{ .lg .middle } __Simpler? A dockerized and optimized version is available!__
+
+    ---
+
+    Just a quick `docker pull` in your docker environment and you are ready to go!
+
+    === "From DockerHub"
+
+        ``` bash
+        docker pull docker pull aaronrpb/force-platform-app
+        docker run -d --name force_platform_reader --device /dev/usb:/dev/usb -p 8501:8501 aaronrpb/force-platform-app
+        ```
+
+    === "From GHCR"
+
+        ``` bash
+        docker pull ghcr.io/aaronpb/force-platform-app:latest
+        docker run -d --name force_platform_reader --device /dev/usb:/dev/usb -p 8501:8501 ghcr.io/aaronpb/force-platform-app
+        ```
+
+    [:fontawesome-brands-github: &nbsp; Check out the GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--secondary }
+
+</div>
+
 <div class="grid" markdown>
 
 <div markdown>
@@ -218,7 +245,7 @@ You can follow this steps to set it up in a few minutes.
 
 !!! warning "Only Linux distributions are supported, preferably Ubuntu 22.04 LTS"
     The project has been developed and tested in Ubuntu 22.04 LTS. Phidget does support [Windows](https://www.phidgets.com/docs/OS_-_Windows#Quick_Downloads)
-    and [Mac](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads) OS, but Taobotics IMUs do not.
+    and [MacOS](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads), but Taobotics IMUs do not.
 
 !!! tip
     Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
