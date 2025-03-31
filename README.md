@@ -31,6 +31,11 @@ Check it out [here](https://aaronpb.github.io/force_platform/).
 
 ## Quick setup
 
+> [!note]
+> There is a simplified and **dockerized** version of the software!
+>
+> [Check it out in this repository](https://github.com/AaronPB/force-platform-app)
+
 Install the dependencies and clone the project into your workspace.
 
 ### Phidget dependency
@@ -66,12 +71,12 @@ Clone using the web URL:
 git clone https://github.com/AaronPB/force_platform.git
 ```
 
-Clone with SSH:
+Or clone with SSH:
 ```bash
 git clone git@github.com:AaronPB/force_platform.git
 ```
 
-Project requirements:
+Install the project requirements:
 ```bash
 pip install -r requirements.txt
 ```
