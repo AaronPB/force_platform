@@ -221,15 +221,23 @@ For data export, the CSV format is used, allowing both raw data export and proce
     === "From DockerHub"
 
         ``` bash
-        docker pull docker pull aaronrpb/force-platform-app
-        docker run -d --name force_platform_reader --device /dev/usb:/dev/usb -p 8501:8501 aaronrpb/force-platform-app
+        docker pull aaronrpb/force-platform-app && \
+        docker run -d --name example_app \
+            --device /dev/bus/usb:/dev/bus/usb \
+            --device /dev/serial:/dev/serial \
+            -p 8501:8501 \
+            aaronrpb/force-platform-app
         ```
 
     === "From GHCR"
 
         ``` bash
-        docker pull ghcr.io/aaronpb/force-platform-app:latest
-        docker run -d --name force_platform_reader --device /dev/usb:/dev/usb -p 8501:8501 ghcr.io/aaronpb/force-platform-app
+        docker pull ghcr.io/aaronpb/force-platform-app && \
+        docker run -d --name example_app \
+            --device /dev/bus/usb:/dev/bus/usb \
+            --device /dev/serial:/dev/serial \
+            -p 8501:8501 \
+            ghcr.io/aaronpb/force-platform-app
         ```
 
     [:fontawesome-brands-github: &nbsp; Check out the GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--secondary }
