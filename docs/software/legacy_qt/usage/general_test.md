@@ -4,7 +4,7 @@ The main objective of the program is to record data from the connected sensors i
 
 When running the `main.py` file of the program, a window like this will open:
 
-![Main UI default](../images/mainUI_default.png)
+![Main UI default](../../../images/mainUI_default.png)
 
 The interface is organised in three main sections which will be detailed below:
 
@@ -19,7 +19,7 @@ The interface is organised in three main sections which will be detailed below:
 
 | Control panel disabled | Control panel enabled |
 | :---: | :---: |
-| ![](../images/mainUI_cp_status.png) | ![](../images/mainUI_cp.png)|
+| ![](../../../images/mainUI_cp_status.png) | ![](../../../images/mainUI_cp.png)|
 
 When running the program, all the buttons on the control panel are disabled until the following requirements are satisfied:
 
@@ -38,7 +38,7 @@ The layer is divided into three parts:
 
 ## Settings and sensor information
 
-![Main UI settings tab](../images/mainUI_tab_settings.png)
+![Main UI settings tab](../../../images/mainUI_tab_settings.png)
 
 This is the default tab where you can configure the following options listed below.
 
@@ -50,7 +50,7 @@ If you want to load another configuration file, click on the <kbd>Select config 
 
 Once selected, if it is in the correct format, the window will be updated with the new sensor information.
 
-![Main GUI Section 1](../images/mainUI_tab_custom_config.png)
+![Main GUI Section 1](../../../images/mainUI_tab_custom_config.png)
 
 The path to the custom configuration will also be saved in the default configuration file (`config.yaml`) to be loaded automatically each time the program is launched.
 
@@ -76,7 +76,7 @@ You can select or deselect sensor groups connections by clicking on their names.
 
 You can check the selection status looking at the name background color:
 
-![Main UI settings tab sensors](../images/mainUI_tab_settings_sensors.png)
+![Main UI settings tab sensors](../../../images/mainUI_tab_settings_sensors.png)
 
 | Background color | Description |
 | :---: | :--- |
@@ -87,7 +87,7 @@ Once the sensors are selected, press the <kbd>Connect sensors</kbd> button. Depe
 
 Once a connection is established (or not) with the indicated sensors, the connection background colors will be updated with the status of each sensor as follows:
 
-![Main UI settings tab sensors connection](../images/mainUI_tab_settings_sensors_connect.png)
+![Main UI settings tab sensors connection](../../../images/mainUI_tab_settings_sensors_connect.png)
 
 | Background color | Description for sensor groups | Description for individual sensors |
 | :---: | :--- | :--- |
@@ -102,7 +102,7 @@ If at least one sensor is connected and the requirements indicated on the contro
 
 When a test has finished, this section will update with the available data recorded. Here you can modify data limits and the butterworth filter parameters.
 
-![Main UI settings tab results](../images/mainUI_tab_settings_results.png)
+![Main UI settings tab results](../../../images/mainUI_tab_settings_results.png)
 
 You can change the preview graph by clicking other sensor name in the preview selector.
 
@@ -128,7 +128,7 @@ Simply click a sensor group at the top selector and an available sensor. The gra
 
 You can use the options above to save the generated graph, edit, zoom, etc.
 
-![Main UI graphs sensor](../images/mainUI_tab_graphs_sensor.png)
+![Main UI graphs sensor](../../../images/mainUI_tab_graphs_sensor.png)
 
 ## Platform graphs
 
@@ -139,4 +139,4 @@ Use the options above to save the generated graph, edit, zoom, etc.
 !!! info
     This graphs needs special sensor group requirements in order to be available. Check [platform groups configuration](../setup/config_file.md#platform-groups).
 
-![Main UI graphs platform](../images/mainUI_tab_graphs_platform.png)
+![Main UI graphs platform](../../../images/mainUI_tab_graphs_platform.png)

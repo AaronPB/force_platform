@@ -10,13 +10,14 @@ copyright: >
   <a href="#__consent">Change cookie settings</a>
 nav:
   - Home: index.md
-  - Setup:
-    - Installation: setup/project.md
-    - Configuration: setup/config_file.md
-    - Sensors: setup/sensors.md
-  - Usage:
-    - Make a recording: usage/general_test.md
-    - Calibrate sensors: usage/calibration_test.md
+  - Legacy version:
+    - Setup:
+      - Installation: software/legacy_qt/setup/project.md
+      - Configuration: software/legacy_qt/setup/config_file.md
+      - Sensors: software/legacy_qt/setup/sensors.md
+    - Usage:
+      - Make a recording: software/legacy_qt/usage/general_test.md
+      - Calibrate sensors: software/legacy_qt/usage/calibration_test.md
 markdown_extensions:
   - admonition
   - pymdownx.details

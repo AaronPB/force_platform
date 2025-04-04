@@ -17,7 +17,7 @@ title: Home
 
     Get up and running in minutes
 
-    [:octicons-arrow-right-24: Getting started](setup/project.md)
+    [:octicons-arrow-right-24: Getting started](software/legacy_qt/setup/project.md)
     
     [:fontawesome-brands-docker: Check a dockerized version](https://hub.docker.com/r/aaronrpb/force-platform-app)
 
@@ -27,7 +27,7 @@ title: Home
 
     The Phidget [Load Cell](https://www.phidgets.com/?tier=2&catid=98&pcid=78) and [Encoder](https://www.phidgets.com/?tier=1&catid=4&pcid=2) interfaces are compatible with a wide range of sensors
 
-    [:octicons-arrow-right-24: More information](setup/sensors.md)
+    [:octicons-arrow-right-24: More information](software/legacy_qt/setup/sensors.md)
 
 -   :fontawesome-solid-gear:{ .lg .middle } __Highly configurable__
 
@@ -35,7 +35,7 @@ title: Home
 
     Sensors are defined into group types, working in a modular and flexible way
 
-    [:octicons-arrow-right-24: Configuration file](setup/config_file.md)
+    [:octicons-arrow-right-24: Configuration file](software/legacy_qt/setup/config_file.md)
 
 -   :fontawesome-solid-file-csv:{ .lg .middle } __Data recording and CSV export__
 
@@ -49,7 +49,7 @@ title: Home
 
     It includes an interactive calibration panel to adjust sensor calibration parameters
 
-    [:octicons-arrow-right-24: Calibrate sensors](usage/calibration_test.md)
+    [:octicons-arrow-right-24: Calibrate sensors](software/legacy_qt/usage/calibration_test.md)
 
 -   :fontawesome-solid-scale-balanced:{ .lg .middle } __Open Source, GPL-3.0__
 
@@ -112,7 +112,7 @@ Sensors are then organized into __sensor groups__. If a sensor does not belong t
 
 For more details, check out the following documentation page:
 
-[:fontawesome-solid-gear: &nbsp; Configuration file](setup/config_file.md){ .md-button .md-button--secondary }
+[:fontawesome-solid-gear: &nbsp; Configuration file](software/legacy_qt/setup/config_file.md){ .md-button .md-button--secondary }
 </div>
 
 <div markdown>
@@ -241,6 +241,8 @@ For data export, the CSV format is used, allowing both raw data export and proce
         ```
 
     [:fontawesome-brands-github: &nbsp; Check out the GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--secondary }
+
+    [:fontawesome-solid-download: &nbsp; Detailed docker setup steps](#){ .md-button .md-button--secondary }
 
 </div>
 
