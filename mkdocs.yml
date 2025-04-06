@@ -18,6 +18,13 @@ nav:
     - Usage:
       - Make a recording: software/legacy_qt/usage/general_test.md
       - Calibrate sensors: software/legacy_qt/usage/calibration_test.md
+  - Docker version:
+    - Setup:
+      - Installation - Linux: software/docker_streamlit/setup/project_linux.md
+      - Installation - Windows: software/docker_streamlit/setup/project_windows.md
+  - The project:
+    - Publications: platform/index.md
+    - Force Platform: platform/index.md
 markdown_extensions:
   - admonition
   - pymdownx.details
