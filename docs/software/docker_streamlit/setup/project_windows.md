@@ -53,11 +53,12 @@ docker run -d --name example_app --privileged -p 8501:8501 aaronrpb/force-platfo
 !!! note
     - You can change the name example_app to any name you prefer.
 
-    - Currently, it is necessary to use the `--privileged` flag. This is required to allow WSL to recognize the connected sensors, and unfortunately, there's no known workaround at this time.
+    - Currently, it is recommended to use the `--privileged` flag. This is required to allow WSL to recognize the connected sensors. Another workaround could be adding temporal permissions to `/dev/bus/usb/00x/00x` paths with `chmod 666`, but this is not recommended as it gives full access to the device and the permission will be lost when the sensor disconnects.
 
 Check if the container is running, going to [http://localhost:8501/](http://localhost:8501/).
 
-*Do not try to connect sensors, it won't work unless we bind them to WSL. This is the last step.*
+!!! info "You will need to upload a custom configuration file with proper usb paths."
+    **Do not try to connect sensors yet**, it won't work unless you bind them to WSL. This will be the last step.
 
 If the streamlit web-app is showing, stop the container with:
 

@@ -94,19 +94,21 @@ docker pull aaronrpb/force-platform-app
 
 ### Run a new docker container
 
-Connect your sensors, check if the `/dev/bus/usb` and `/dev/serial` paths exists and create a new container where the software will be running, with:
+Connect your sensors, check if the `/dev/bus/usb` (and `/dev/ttyUSB*` in case you have Taobotics IMUs) paths exists and create a new container where the software will be running, with:
 
 ```bash
 docker run -d --name example_app \
-  --device /dev/bus/usb:/dev/bus/usb \
-  --device /dev/serial:/dev/serial \
+  --device /dev/bus/usb \
+  --device /dev/ttyUSB0 \
+  --device /dev/ttyUSB1 \
   -p 8501:8501 \
   aaronrpb/force-platform-app
 ```
 
 !!! note
     - You can change the name example_app to any name you prefer.
-    - If you have no sensors of USB devices connected, the `/dev/bus/usb` and `/dev/serial` could be empty, and the docker daemon will throw a `no such file or directory` error.
+    - If you have no sensors of USB devices connected, the `/dev/bus/usb` and/or `/dev/ttyUSB*` could be empty, and the docker daemon will throw a `no such file or directory` error.
+    - You can ignore some `--device` flags if you are not using Taobotics IMUs (`/dev/ttyUSB*`).
 
 Check if the container is running, going to [http://localhost:8501/](http://localhost:8501/) and try to connect your sensors.
 
@@ -115,7 +117,7 @@ Check if the container is running, going to [http://localhost:8501/](http://loca
 To stop or escape the software, use:
 
 ```bash
-docker stop <container_name>
+docker stop example_app
 ```
 
 ## Software usage instructions
