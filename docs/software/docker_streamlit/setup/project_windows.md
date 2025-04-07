@@ -102,7 +102,7 @@ Identify the `BUSID` and the `VIP:PID` from the sensors. This will be used for t
 
 For example, in the provided list, `BUSID 7-1` corresponds to a PhidgetBridge USB connection with four loadcell sensors.
 
-!!! success "If you have more than one USB connection, repeat the following steps for all sensors."
+!!! question "If you have more than one USB connection, repeat the following steps for all sensors."
 
 ### Bind the sensors
 
@@ -114,7 +114,7 @@ usbipd bind --busid 7-1
 
 Now if we check the list again with `usbipd list`, bus `7-1` will be `Shared` at the `STATE` column:
 
-```
+``` hl_lines="8"
 Connected:
 BUSID  VID:PID    DEVICE                                                        STATE
 4-11   0db0:422d  Realtek USB2.0 Audio, Dispositivo de entrada USB              Not shared
@@ -164,7 +164,7 @@ lsusb
 
 Something like the following will show up. Identify the connected sensors by their `ID` (those are the `VIP:PID` tags shown with `usbipd list`).
 
-```
+``` hl_lines="2"
 Bus 001 Device 001: ID 1d6b:0002
 Bus 001 Device 002: ID 06c2:003b
 Bus 002 Device 001: ID 1d6b:0003
@@ -174,6 +174,21 @@ In this example we can check that the PhidgetBridge is correctly attached.
 The `VIP:PID` was `06c2:003b`, this corresponds with `Bus 001 Device 002`.
 
 !!! success "If you see all your sensors listed, they are correctly attached!"
+
+!!! warning "Are you connecting Taobotics IMUs?"
+    To connect Taobotics IMUs you will need to do an extra step inside WSL. Check first if WSL has automatically assigned your IMUs to `ttyUSB` ports:
+
+    ```bash
+    ls /dev/ttyUSB*
+    ```
+    
+    If it shows `No such file or directory`, your IMU drivers are not being recognized. You will need to load the kernel module `cp210x` for USB to UART Bidge usbs. Do not be scared, it is only one command inside WSL:
+
+    ```bash
+    modprobe cp210x
+    ```
+
+    Now if you check again with `ls /dev/ttyUSB*` you will see the recognized IMUs!
 
 ### Detach and unbind sensors
 
