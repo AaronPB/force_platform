@@ -223,8 +223,9 @@ For data export, the CSV format is used, allowing both raw data export and proce
         ``` bash
         docker pull aaronrpb/force-platform-app && \
         docker run -d --name example_app \
-            --device /dev/bus/usb:/dev/bus/usb \
-            --device /dev/serial:/dev/serial \
+            --device /dev/bus/usb \
+            --device /dev/ttyUSB0 \
+            --device /dev/ttyUSB1 \
             -p 8501:8501 \
             aaronrpb/force-platform-app
         ```
@@ -234,17 +235,19 @@ For data export, the CSV format is used, allowing both raw data export and proce
         ``` bash
         docker pull ghcr.io/aaronpb/force-platform-app && \
         docker run -d --name example_app \
-            --device /dev/bus/usb:/dev/bus/usb \
-            --device /dev/serial:/dev/serial \
+            --device /dev/bus/usb \
+            --device /dev/ttyUSB0 \
+            --device /dev/ttyUSB1 \
             -p 8501:8501 \
             ghcr.io/aaronpb/force-platform-app
         ```
 
-    [:fontawesome-brands-github: &nbsp; Check out the GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--secondary }
-
-    [:fontawesome-solid-download: &nbsp; Detailed docker setup steps](#){ .md-button .md-button--secondary }
+    [:fontawesome-brands-docker: DockerHub](https://hub.docker.com/r/aaronrpb/force-platform-app){ .md-button .md-button--primary }
+    [:fontawesome-brands-github: GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--primary }
+    [:fontawesome-solid-download: Detailed docker setup steps](software/docker_streamlit/setup/project_linux.md){ .md-button .md-button--secondary }
 
 </div>
+
 
 <div class="grid" markdown>
 

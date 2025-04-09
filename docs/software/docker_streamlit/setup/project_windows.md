@@ -47,7 +47,9 @@ docker pull aaronrpb/force-platform-app
 Create a new container where the software will be running, with:
 
 ```bash
-docker run -d --name example_app --privileged -p 8501:8501 aaronrpb/force-platform-app
+docker run -d --name example_app \
+  --privileged -p 8501:8501 \
+  aaronrpb/force-platform-app
 ```
 
 !!! note
@@ -183,7 +185,7 @@ The `VIP:PID` was `06c2:003b`, this corresponds with `Bus 001 Device 002`.
     ls /dev/ttyUSB*
     ```
     
-    If it shows `No such file or directory`, your IMU drivers are not being recognized. You will need to load the kernel module `cp210x` for USB to UART Bidge usbs. Do not be scared, it is only one command inside WSL:
+    If it shows `No such file or directory`, your IMU drivers are not being recognized. You will need to load the kernel module `cp210x` for USB to UART Bridge usbs. Do not be scared, it is only one command inside WSL:
 
     ```bash
     modprobe cp210x
@@ -239,5 +241,7 @@ If you want to update the software to newer versions, follow these steps:
 3. Create a new container opening a terminal and running the following command:
 
 ```bash
-docker run -d --name example_app --privileged -p 8501:8501 aaronrpb/force-platform-app
+docker run -d --name example_app \
+  --privileged -p 8501:8501 \
+  aaronrpb/force-platform-app
 ```

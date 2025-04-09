@@ -157,8 +157,9 @@ If you want to update the software to newer versions, follow these steps:
 
 ```bash
 docker run -d --name example_app \
-  --device /dev/bus/usb:/dev/bus/usb \
-  --device /dev/serial:/dev/serial \
+  --device /dev/bus/usb \
+  --device /dev/ttyUSB0 \
+  --device /dev/ttyUSB1 \
   -p 8501:8501 \
   aaronrpb/force-platform-app
 ```
