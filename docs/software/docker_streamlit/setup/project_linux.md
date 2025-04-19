@@ -82,6 +82,16 @@ newgrp docker
 
 Check if you can use `docker images` for example, without `sudo` in a new terminal. If not, restart you computer or try again with `newgrp docker`. 
 
+## Add user to dialout group
+
+To be able to register data from USB devices, the user needs to be added to the dialout group:
+
+```bash
+sudo usermod -aG dialout $USER
+```
+
+Log out and log back in so that your group membership is re-evaluated.
+
 ## Setup the software
 
 ### Pull the project docker image
