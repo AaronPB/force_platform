@@ -193,6 +193,12 @@ The `VIP:PID` was `06c2:003b`, this corresponds with `Bus 001 Device 002`.
 
     Now if you check again with `ls /dev/ttyUSB*` you will see the recognized IMUs!
 
+To leave the WSL interface, use the `exit` command:
+
+```bash
+exit
+```
+
 ### Detach and unbind sensors
 
 It is not necessary to detach and unbind every time you want to disconnect the USB sensors from WSL.
