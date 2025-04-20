@@ -11,6 +11,7 @@ copyright: >
 nav:
   - Home: index.md
   - Legacy version:
+    - software/legacy_qt/index.md
     - Setup:
       - Installation: software/legacy_qt/setup/project.md
       - Configuration: software/legacy_qt/setup/config_file.md
@@ -19,12 +20,13 @@ nav:
       - Make a recording: software/legacy_qt/usage/general_test.md
       - Calibrate sensors: software/legacy_qt/usage/calibration_test.md
   - Docker version:
+    - software/docker_streamlit/index.md
     - Setup:
       - Installation - Linux: software/docker_streamlit/setup/project_linux.md
       - Installation - Windows: software/docker_streamlit/setup/project_windows.md
-  - The project:
-    - Publications: platform/index.md
-    - Force Platform: platform/index.md
+  - Force Platform:
+    - platform/index.md
+    - Design: platform/design.md
 markdown_extensions:
   - admonition
   - pymdownx.details
