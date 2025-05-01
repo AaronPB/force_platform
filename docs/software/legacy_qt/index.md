@@ -4,7 +4,7 @@
 
 The original developed software using Python and QT framework version 6.0 with PySide6.
 
-This software was originally developed for internal use, but it's now publicly available in case others find it useful.
+This software was developed for internal use, but it is now available in case others find it useful.
 
 !!! note "Please note that some features may be unstable, and setup may require additional effort"
 
