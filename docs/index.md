@@ -17,9 +17,9 @@ title: Home
 
     Get up and running in minutes
 
-    [:octicons-arrow-right-24: Getting started](software/legacy_qt/setup/project.md)
+    [:fontawesome-brands-linux: Install the legacy version](software/legacy_qt/index.md)
     
-    [:fontawesome-brands-docker: Check a dockerized version](https://hub.docker.com/r/aaronrpb/force-platform-app)
+    [:fontawesome-brands-docker: Install the docker version](software/docker_streamlit/index.md) [(DockerHub repo)](https://hub.docker.com/r/aaronrpb/force-platform-app)
 
 -   :fontawesome-solid-microchip:{ .lg .middle } __Sensor compatibility__
 
@@ -75,24 +75,14 @@ A python software for synchronized data management of specific force platforms s
 This project is part of the [author](https://github.com/AaronPB)'s master's thesis in industrial engineering at the University of Almería
 and funded by the "[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)" and the Andalusian "Consejería de Transformación Económica, Industria, Conocimiento y Universidades", under the project UAL2020-CTS-A2100.
 
+[:fontawesome-solid-book: &nbsp; More information about the project](platform/index.md){ .md-button .md-button--primary }
+
 <figure markdown="span">
 ![union_europea-junta_de_andalucia](assets/union_europea-junta_de_andalucia.png#only-light){ width="500px" }
 ![union_europea-junta_de_andalucia](assets/union_europea-junta_de_andalucia_modooscuro.png#only-dark){ width="500px" }
 </figure>
 
 </div>
-
-</div>
-
-<div class="grid cards" markdown>
-
--   :fontawesome-solid-file-pdf:{ .lg .middle } __SOFTWARE DEVELOPMENT AND CALIBRATION OF A FORCE PLATFORM FOR SPORTS SCIENCE__
-
-    ---
-
-    Check the master's thesis in spanish by clicking the button below. 
-
-    [:fontawesome-solid-globe: &nbsp; Institutional repository *(available soon)*](#){ .md-button .md-button--secondary }
 
 </div>
 
@@ -197,76 +187,37 @@ For more details, check out the following documentation page:
 
 <div markdown>
 
-You can visualize the recorded data directly from the graphs tabs.
+You can visualize the recorded data directly from the graph tabs.
 
 There are graphs for each recorded sensor, as well as specific ones depending on the sensor group type, such as force platforms.
 
 It is also possible to trim the data and adjust the Butterworth filter used for signal processing.
 
 For data export, the CSV format is used, allowing both raw data export and processed data export using the sensors' calibration parameters.
-</div>
 
 </div>
 
-### Quick setup
-
-<div class="grid cards" markdown>
-
--   :fontawesome-brands-docker:{ .lg .middle } __Simpler? A dockerized and optimized version is available!__
-
-    ---
-
-    Just a quick `docker pull` in your docker environment and you are ready to go!
-
-    === "From DockerHub"
-
-        ``` bash
-        docker pull aaronrpb/force-platform-app && \
-        docker run -d --name example_app \
-            --device /dev/bus/usb \
-            --device /dev/ttyUSB0 \
-            --device /dev/ttyUSB1 \
-            -p 8501:8501 \
-            aaronrpb/force-platform-app
-        ```
-
-    === "From GHCR"
-
-        ``` bash
-        docker pull ghcr.io/aaronpb/force-platform-app && \
-        docker run -d --name example_app \
-            --device /dev/bus/usb \
-            --device /dev/ttyUSB0 \
-            --device /dev/ttyUSB1 \
-            -p 8501:8501 \
-            ghcr.io/aaronpb/force-platform-app
-        ```
-
-    [:fontawesome-brands-docker: DockerHub](https://hub.docker.com/r/aaronrpb/force-platform-app){ .md-button .md-button--primary }
-    [:fontawesome-brands-github: GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--primary }
-    [:fontawesome-solid-download: Detailed docker setup steps](software/docker_streamlit/setup/project_linux.md){ .md-button .md-button--secondary }
-
 </div>
 
+## Software versions
 
 <div class="grid" markdown>
 
 <div markdown>
-Install the required dependencies and clone the project into your workspace.
 
+### Legacy version
+
+[:fontawesome-brands-github: GitHub repository](https://github.com/AaronPB/force_platform){ .md-button .md-button--primary }
+
+This version was originally developed for internal use, with Python and QT.
+
+Install the required dependencies and clone the project into your workspace.
 You can follow this steps to set it up in a few minutes.
 
 !!! warning "Only Linux distributions are supported, preferably Ubuntu 22.04 LTS"
     The project has been developed and tested in Ubuntu 22.04 LTS. Phidget does support [Windows](https://www.phidgets.com/docs/OS_-_Windows#Quick_Downloads)
     and [MacOS](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads), but Taobotics IMUs do not.
 
-!!! tip
-    Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
-
-    This project is developed with Python v3.10.6
-</div>
-
-<div markdown>
 <div class="grid cards" markdown>
 
 -   :fontawesome-solid-terminal:{ .lg .middle } __Step 1: Install the external dependencies__
@@ -283,8 +234,8 @@ You can follow this steps to set it up in a few minutes.
     === "MRPT"
 
         ``` bash
-        sudo add-apt-repository ppa:joseluisblancoc/mrpt
-        sudo apt install libmrpt-dev mrpt-apps
+        sudo add-apt-repository ppa:joseluisblancoc/mrpt &&\
+        sudo apt install libmrpt-dev mrpt-apps &&\
         sudo apt install python3-pymrpt
         ```
 
@@ -311,6 +262,62 @@ You can follow this steps to set it up in a few minutes.
     ```bash
     pip install -r requirements.txt
     ```
+
+    !!! tip
+        Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
+
+        This project is developed with Python v3.10.6
+
+</div>
+</div>
+
+<div markdown>
+
+### Docker version
+
+[:fontawesome-brands-github: GitHub repository](https://github.com/AaronPB/force-platform-app){ .md-button .md-button--primary }
+[:fontawesome-brands-docker: DockerHub](https://hub.docker.com/r/aaronrpb/force-platform-app){ .md-button .md-button--primary }
+
+An optimized and comfortable option, with the main features.
+
+Simple to install using Docker, and with all the documentation available inside the app, ready to go!
+
+!!! success "Available for Windows and Linux distros"
+    The project has been tested in Windows 11, Ubuntu 22.04 LTS and Fedora Workstation 41. It has not been tested in MacOS, but it has a high chance to also work, as it is a dockerized version.
+
+<div class="grid cards" markdown>
+
+-   :fontawesome-brands-docker:{ .lg .middle } __Step 1: Run a new docker container__
+
+    ---
+
+    Just a quick `docker run` in your docker environment and you are ready to go!
+
+    === "From DockerHub"
+
+        ``` bash
+        docker run -d --name example_app \
+            --device /dev/bus/usb \
+            --device /dev/ttyUSB0 \
+            --device /dev/ttyUSB1 \
+            -p 8501:8501 \
+            aaronrpb/force-platform-app
+        ```
+
+    === "From GHCR"
+
+        ``` bash
+        docker run -d --name example_app \
+            --device /dev/bus/usb \
+            --device /dev/ttyUSB0 \
+            --device /dev/ttyUSB1 \
+            -p 8501:8501 \
+            ghcr.io/aaronpb/force-platform-app
+        ```
+    
+    !!! note "Add or remove arguments depending on your setup. For more information click below."
+
+    [:fontawesome-solid-download: Detailed docker setup steps](software/docker_streamlit/setup/project_linux.md){ .md-button .md-button--secondary }
 
 </div>
 </div>
