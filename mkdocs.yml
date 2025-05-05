@@ -27,6 +27,7 @@ nav:
   - Force Platform:
     - platform/index.md
     - Design: platform/design.md
+    - Research: platform/research.md
 markdown_extensions:
   - admonition
   - pymdownx.details
