@@ -1,6 +1,6 @@
 ## :fontawesome-solid-file-invoice:{ .lg .middle } A new 3D force platform and calibration method
 
-[:fontawesome-solid-file-half-dashed: &nbsp; Preprint article](http://ssrn.com/abstract=5226079){ .md-button .md-button--secondary }
+[:fontawesome-solid-file-half-dashed: &nbsp; Preprint article](http://ssrn.com/abstract=5226079){ .md-button .md-button--primary }
 
 This work introduces a novel 3D force platform design grounded on the use of planar uniaxial load cells and ball wheels, easy to
 manufacture from off-the-self components leading to an affordable and accurate system. An accompanying open-sourced software
@@ -13,7 +13,7 @@ methodology.
 
 <figure markdown="span">
   ![Graphical Abstract](../images/research_a1_graphical-abstract.jpg){ width="100%" }
-  <figcaption>Article graphical abstract</figcaption>
+  <figcaption>Article graphical abstract.</figcaption>
 </figure>
 
 ## :fontawesome-solid-book:{ .lg .middle } Software development and calibration of a force platform for Sports Science
@@ -33,12 +33,12 @@ Science professionals to visualize and analyze data directly from the software.
 
 <figure markdown="span">
   ![Main Software UI](../images/mainUI.png){ width="100%" }
-  <figcaption>Developed software: Force Platform Reader</figcaption>
+  <figcaption>Developed software: Force Platform Reader.</figcaption>
 </figure>
 
 ## :fontawesome-solid-file-contract:{ .lg .middle } Utility Model - Triaxial force platform based on uniaxial load cells
 
-[:fontawesome-solid-globe: &nbsp; OEPM Utility Model ES1312312](https://consultas2.oepm.es/InvenesWeb/detalle?referencia=U202431233&trk=public_profile_certification-title){ .md-button .md-button--secondary }
+[:fontawesome-solid-globe: &nbsp; OEPM Utility Model ES1312312](https://consultas2.oepm.es/InvenesWeb/detalle?referencia=U202431233&trk=public_profile_certification-title){ .md-button .md-button--primary }
 
 Utility Model number ES1312312, requested by the universities of Almería and Seville.
 
@@ -53,5 +53,5 @@ __Inventors__
 
 <figure markdown="span">
   ![Force Platform](../images/force_platform.png){ width="100%" }
-  <figcaption>Interior of the designed force platform</figcaption>
+  <figcaption>Interior of the designed force platform.</figcaption>
 </figure>

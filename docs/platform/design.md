@@ -1,7 +1,17 @@
-!!! warning "WIP"
-    This page is under construction.
+The designed force platform has a rectangular shape and features supports located at its corners, where uniaxial load cells are also installed, as shown in the following figure.
 
-[:material-file-cad:{.lg} Download Fabrication Drawings (DXF)](Prototipo_FP_v1_2023.dxf){ .md-button .md-button--primary }
+<figure markdown="span">
+  ![Force platform design](../images/platform.png){ width="60%" }
+  <figcaption>Location of uniaxial load cell groups.</figcaption>
+</figure>
+
+The platform includes four mounts for vertical load cells and eight mounts for horizontal load cells. Tests have been conducted using both 12 load cells in total, and a reduced configuration with 8 (4 vertical and 4 horizontal—2 per horizontal axis, placed in opposing directions).
+
+The latter setup offers increased stability for the platform's top surface.
+
+## Fabrication drawings
+
+[:material-file-cad:{.lg} Download fabrication drawings (DXF)](Prototipo_FP_v1_2023.dxf){ .md-button .md-button--primary }
 
 ## List of elements
 
