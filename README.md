@@ -18,6 +18,7 @@ This project is part of the author's master's thesis in industrial engineering a
 ![Main UI](docs/images/mainUI.png)
 
 It supports currently the following sensor types:
+
 - Phidget-Bridge compatible load sensors. (Requires Phidget dependency).
 - Phidget encoders. (Requires Phidget dependency).
 - Taobotics IMU sensors. (Requires MRPT dependency).
@@ -38,53 +39,69 @@ Check it out [here](https://aaronpb.github.io/force_platform/).
 
 Install the dependencies and clone the project into your workspace.
 
-### Phidget dependency
+> [!WARNING]\
+> The project has been developed and tested in Ubuntu 22.04 LTS. Phidget does support [Windows](https://www.phidgets.com/docs/OS_-_Windows#Quick_Downloads) and [MacOS](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads), but Taobotics IMUs do not.
 
-For [Linux](https://www.phidgets.com/docs/OS_-_Linux#Quick_Downloads):
+### Phidget dependency
 
 ```bash
 curl -fsSL https://www.phidgets.com/downloads/setup_linux | sudo -E bash - &&\
 sudo apt-get install -y libphidget22
 ```
 
-> For [Windows](https://www.phidgets.com/docs/OS_-_Windows#Quick_Downloads) or [MacOS](https://www.phidgets.com/docs/OS_-_macOS#Quick_Downloads)
+> Phidget documentation of the [Linux Installer](https://www.phidgets.com/docs/OS_-_Linux#Quick_Downloads).
 
 ### MRPT dependency
 
-For more information, refer to the [MRPT Documentation](https://docs.mrpt.org/reference/latest/download-mrpt.html#debian-ubuntu-ppa)
-
 ```bash
-sudo add-apt-repository ppa:joseluisblancoc/mrpt
-sudo apt install libmrpt-dev mrpt-apps
+sudo add-apt-repository ppa:joseluisblancoc/mrpt &&\
+sudo apt install libmrpt-dev mrpt-apps &&\
 sudo apt install python3-pymrpt
 ```
 
-> [!WARNING]\
-> If you are using `virtualenv`, MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `pyvenv.cfg` file.
+> For more information, refer to the [MRPT Documentation](https://docs.mrpt.org/reference/latest/download-mrpt.html#debian-ubuntu-ppa).
 
 ### Project requirements
+
+This project uses [UV](https://docs.astral.sh/uv/), a very powerfull tool to setup and manage python projects.
+
+Install UV:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 Clone the `force_platform` repository and install the project requirements.
 
 Clone using the web URL:
+
 ```bash
 git clone https://github.com/AaronPB/force_platform.git
 ```
 
 Or clone with SSH:
+
 ```bash
 git clone git@github.com:AaronPB/force_platform.git
 ```
 
-Install the project requirements:
+Install the project requirements, going to the project's folder and entering:
+
 ```bash
-pip install -r requirements.txt
+uv venv &&\
+uv pip install -r uv.lock
 ```
 
-> [!TIP]\
-> Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
+> [!WARNING]\
+> MRPT cannot be installed by pip. As a temporary solution, set `include-system-site-packages = true` in your `.venv/pyvenv.cfg` file.
 
-> This project is developed with Python v3.10.6
+### Run the sofware
+
+Run it using the following command:
+
+```bash
+uv run python main.py
+```
 
 ## Acknowledgements
 

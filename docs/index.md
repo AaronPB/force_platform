@@ -220,7 +220,7 @@ You can follow this steps to set it up in a few minutes.
 
 <div class="grid cards" markdown>
 
--   :fontawesome-solid-terminal:{ .lg .middle } __Step 1: Install the external dependencies__
+-   :fontawesome-solid-terminal:{ .lg .middle } __Step 1: Install dependencies, UV and clone the repository__
 
     ---
 
@@ -239,34 +239,33 @@ You can follow this steps to set it up in a few minutes.
         sudo apt install python3-pymrpt
         ```
 
--   :fontawesome-solid-clone:{ .lg .middle } __Step 2: Clone the `force_platform` repository__
+    === "UV"
 
-    ---
-
-    === "By using the web URL"
+        ``` bash
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        ```
+    
+    === "`force_platform` repository"
 
         ``` bash
         git clone https://github.com/AaronPB/force_platform.git
         ```
 
-    === "By using SSH"
-
-        ``` bash
-        git clone git@github.com:AaronPB/force_platform.git
-        ```
-
--   :fontawesome-solid-file-lines:{ .lg .middle } __Step 3: Install the project requirements__
+-   :fontawesome-solid-file-lines:{ .lg .middle } __Step 2: UV install and run the software__
 
     ---
 
     ```bash
-    pip install -r requirements.txt
+    cd to/the/force_platform/repository &&\
+    uv venv &&\
+    uv pip install -r uv.lock
     ```
 
-    !!! tip
-        Do it in a virtual environment to avoid module installation issues (using `virtualenv`, for example).
+    !!! warning "Enable `include-system-site-packages` in `.venv/pyvenv.cfg`"
 
-        This project is developed with Python v3.10.6
+    ```bash
+    uv run python main.py
+    ```
 
 </div>
 </div>
