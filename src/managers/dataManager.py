@@ -143,16 +143,16 @@ class DataManager:
             if plot_type == PlotTypes.GROUP_PLATFORM_COP:
                 plotter = PlotPlatformCOPWidget()
                 # Check shapes
-                if df_fx.shape[1] != 4:
+                if df_fx.shape[1] != 2 and df_fy.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
-                        + f"Need 4 X axis sensors, only {df_fx.shape[1]} provided."
+                        + f"Need 2 or 4 X axis sensors, only {df_fx.shape[1]} provided."
                     )
                     return plotter
-                if df_fy.shape[1] != 4:
+                if df_fy.shape[1] != 2 and df_fy.shape[1] != 4:
                     logger.error(
                         "Could not build COP plot!"
-                        + f"Need 4 Y axis sensors, only {df_fy.shape[1]} provided."
+                        + f"Need 2 or 4 Y axis sensors, only {df_fy.shape[1]} provided."
                     )
                     return plotter
                 if df_fz.shape[1] != 4:
@@ -337,9 +337,9 @@ class DataManager:
         self, df_fx: pd.DataFrame, df_fy: pd.DataFrame, df_fz: pd.DataFrame
     ) -> tuple[pd.Series, pd.Series]:
         # Platform dimensions
-        lx = 508  # mm
-        ly = 308  # mm
-        h = 20  # mm
+        lx = 506  # mm
+        ly = 306  # mm
+        h = 50.59  # mm
         # Get sum forces
         fx = df_fx.sum(axis=1)
         fy = df_fy.sum(axis=1)
@@ -354,20 +354,22 @@ class DataManager:
                 + df_fz.iloc[:, 2]
                 + df_fz.iloc[:, 3]
             )
+            + h * fy
         )
         my = (
             lx
             / 2
             * (
-                -df_fz.iloc[:, 0]
-                + df_fz.iloc[:, 1]
-                + df_fz.iloc[:, 2]
-                - df_fz.iloc[:, 3]
+                df_fz.iloc[:, 0]
+                - df_fz.iloc[:, 1]
+                - df_fz.iloc[:, 2]
+                + df_fz.iloc[:, 3]
             )
+            - h * fx
         )
         # Get COP
-        cop_x = (-h * fx - my) / fz
-        cop_y = (-h * fy + mx) / fz
+        cop_x = -my / fz
+        cop_y = mx / fz
         cop_x = cop_x - np.mean(cop_x)
         cop_y = cop_y - np.mean(cop_y)
         return [cop_x, cop_y]

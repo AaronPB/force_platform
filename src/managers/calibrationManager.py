@@ -404,7 +404,7 @@ class PlatformCalibrationManager:
                     -mean_values.at[i, self.df_triaxial_cols_mean[0]] * force_ratio_x,
                     mean_values.at[i, self.df_triaxial_cols_mean[2]] * force_ratio_z,
                 ]
-            )
+            ).reshape(3, 1)
             # Transform force to platform center (fM)
             delta_x = distance_values.at[i, self.df_distance_cols[0]]
             delta_y = distance_values.at[i, self.df_distance_cols[1]]
@@ -416,7 +416,7 @@ class PlatformCalibrationManager:
             # Define platform sensor values matrix
             vfM = np.array(
                 [mean_values.at[i, col] for col in self.df_platform_cols_mean]
-            )
+            ).reshape(12, 1)
             # Build A matrix
             ZfM = np.kron(np.eye(6), vfM.T)
             # Concatenate M matrixes into general matrixes.

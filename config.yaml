@@ -471,7 +471,7 @@ sensors:
       max_weight: 2000N
     calibration:
       slope: 1721022.287
-      intercept: 0
+      intercept: 9.084240488658148
   triax_y:
     name: Triaxial_Y
     type: SENSOR_LOADCELL
@@ -483,8 +483,8 @@ sensors:
       serial_number: SN231206001
       max_weight: 2000N
     calibration:
-      slope: 19773710.18
-      intercept: 0
+      slope: 1771149.742
+      intercept: -7.513470975899034
   triax_z:
     name: Triaxial_Z
     type: SENSOR_LOADCELL
@@ -496,5 +496,5 @@ sensors:
       serial_number: SN231206001
       max_weight: 2000N
     calibration:
-      slope: 1771149.742
-      intercept: 0
+      slope: 1973710.18
+      intercept: -22.461957935716708

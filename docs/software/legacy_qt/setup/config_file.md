@@ -1,21 +1,23 @@
-[:house: `Back to Home`](../home.md)
-
 # Config File
-
-Config main content:
-- [Settings section](#settings-section)
-- [Sensor groups section](#sensor-groups-section)
-	- [Platform groups](#platform-groups)
-- [Calibration sensors section](#calibration-sensors-section)
-- [Sensors section](#sensors-section)
-	- [Loadcell sensor](#loadcell-sensor)
-	- [Encoder sensor](#encoder-sensor)
-	- [IMU sensor](#imu-sensor)
-
 
 ## Settings section
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L1-L14
+```yaml
+settings: 
+  custom_config_path: null 
+  test: 
+    name: Name 
+    folder_path: /tests/ 
+    results: 
+      save_raw: true 
+      save_calib: true 
+  recording: 
+    data_interval_ms: 10 
+    tare_data_amount: 300 
+  calibration: 
+    data_interval_ms: 10 
+    data_amount: 300 
+```
 
 Information of all the keys involved in this config section:
 
@@ -35,12 +37,31 @@ Information of all the keys involved in this config section:
 ## Sensor groups section
 Define sensor combinations, even from different types!
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L15-L32
+```yaml
+sensor_groups: 
+  platform_1: 
+    name: Platform 1 
+    type: GROUP_PLATFORM 
+    read: true 
+    sensor_list: 
+    - p1_z1 
+    - p1_z2 
+    - p1_z3 
+    - p1_z4 
+    - p1_x1 
+    - p1_x2 
+    - p1_x3 
+    - p1_x4 
+    - p1_y1 
+    - p1_y2 
+    - p1_y3 
+    - p1_y4
+```
 
-> [!IMPORTANT]
-> All listed sensors needs to be configured in the [`sensors` config section](#sensors-section).
-> 
-> Using the same sensors in multiple sensor groups is not recommended.
+!!! warning
+    All listed sensors needs to be configured in the [`sensors` config section](#sensors-section).
+
+    Using the same sensors in multiple sensor groups is not recommended.
 
 Information of all the keys involved in this config section:
 
@@ -56,22 +77,27 @@ Information of all the keys involved in this config section:
 Configure a platform with the `GROUP_PLATFORM` type. This group type only expects  `SENSOR_LOADCELL` type sensors, with a maximum of 12 (4 sensors on each axis).
 
 To obtain platform graphs such as **total forces** or **COP values**; sensors must have the following strings included in their names:
+
 - The 4 X-axis sensors: `_X_n`.
 - The 4 Y-axis sensors: `_Y_n`.
 - The 4 Z-axis sensors: `_Z_n`.
 
 Being $n = \{1, 2, 3, 4\}$ depending on the sensor location in the platform:
 
-![platform](../images/platform.png)
+![platform](../../../images/platform.png)
 
 
 ## Calibration sensors section
 Declare here a valid reference sensor for each calibration process.
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L65-L67
+```yaml
+sensors_calibration: 
+  phidget_loadcell_reference: s_type 
+  platform_reference: triaxial 
+```
 
-> [!IMPORTANT]
-> All sensors needs to be configured in the [`sensors` config section](#sensors-section) and **match the required sensor type**.
+!!! warning
+    All sensors needs to be configured in the [`sensors` config section](#sensors-section) and **match the required sensor type**.
 
 Information of all the keys involved in this config section:
 
@@ -84,13 +110,30 @@ Information of all the keys involved in this config section:
 ## Sensors section
 This section contains all the sensors that will be used in the previous sections.
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L68-L69
+```yaml
+sensors: 
+  p1_z1: 
+```
 
 Depending on the sensor type, a specific set of parameters is required. Below are the available parameters for each sensor type.
 
 ### Loadcell sensor
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L69-L81
+```yaml
+p1_z1: 
+  name: P1_LoadCell_Z_1 
+  type: SENSOR_LOADCELL 
+  read: true 
+  connection: 
+    channel: 0 
+    serial: 583477 
+  properties: 
+    serial_number: Y2131167 
+    max_weight: 150kg 
+  calibration: 
+    slope: 148893.5596545 
+    intercept: -0.6307595051800341
+```
 
 Required keys information:
 
@@ -108,7 +151,22 @@ Required keys information:
 
 ### Encoder sensor
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L382-L395
+```yaml
+encoder_1: 
+  name: Encoder_Z_1 
+  type: SENSOR_ENCODER 
+  read: true 
+  connection: 
+    channel: 0 
+    serial: 641800 
+  initial_position: 0 
+  properties: 
+    serial_number: AAAA 
+    max_length: 2500mm 
+  calibration: 
+    slope: 0.01875 
+    intercept: 0.0 
+```
 
 Required keys information:
 
@@ -127,7 +185,16 @@ Required keys information:
 
 ### IMU sensor
 
-https://github.com/AaronPB/force_platform/blob/55d561fa79855c7706b47aab6820b150fe71fe82/config.yaml#L410-L417
+```yaml
+imu_1: 
+  name: IMU_Leg_Right 
+  type: SENSOR_IMU 
+  read: true 
+  connection: 
+    serial: /dev/serial/by-path/pci-0000:00:14.0-usb-0:1.1.4.3:1.0-port0 
+  properties: 
+    tag: IMU_1
+```
 
 Required keys information:
 
@@ -139,7 +206,3 @@ Required keys information:
 | `read` | BOOL | Enable or disable sensor data recording. Can be modified in GUI. |
 | `connection.serial` | STRING | Absolute USB path. Use `ll /dev/serial/by-path/`. |
 | `properties` | - | (Could be empty) Configuration section where you can provide more information. |
-
----
-
-[:house: `Back to Home`](../home.md)

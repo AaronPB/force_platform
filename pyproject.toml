@@ -1,0 +1,37 @@
+[project]
+name = "force-platform"
+version = "0.1.0"
+authors = [{ name = "AaronPB", email = "aaron.poyatos@ual.es" }]
+description = "Force platform sensor reading software"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "loguru>=0.7.3",
+    "matplotlib>=3.10.3",
+    "numpy>=2.2.5",
+    "opencv-python>=4.11.0.86",
+    "pandas>=2.2.3",
+    "phidget22>=1.22.20250422",
+    "pillow>=11.2.1",
+    "pyside6>=6.9.0",
+    "pyyaml>=6.0.2",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.15.3",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "coverage>=7.8.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+]
+
+[[project.urls]]
+name = "Homepage"
+url = "https://github.com/AaronPB/force_platform"
+
+[[project.urls]]
+name = "Documentation"
+url = "https://aaronpb.github.io/force_platform"

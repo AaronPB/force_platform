@@ -396,7 +396,7 @@ class PlatformPlotSelector(QtWidgets.QWidget):
         cop_widget = self.buildOptionPanel(
             "Platform COP", PlotTypes.GROUP_PLATFORM_COP, sensor_list, False
         )
-        if len(sensor_list) == 12:
+        if len(sensor_list) == 12 or len(sensor_list) == 8:
             cop_widget = self.buildOptionPanel(
                 "Platform COP", PlotTypes.GROUP_PLATFORM_COP, sensor_list
             )

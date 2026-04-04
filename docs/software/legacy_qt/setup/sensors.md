@@ -1,5 +1,3 @@
-[:house: `Back to Home`](../home.md)
-
 # Compatible sensors
 
 In this section you will find a list of all the sensors compatible with the software and used APIs.
@@ -28,7 +26,3 @@ For more information on the structure of the configuration file, check the [conf
 
 - [Phidegt22 API](https://www.phidgets.com/?view=api)
 - [Taobotics IMU (MRPT docs)](https://docs.mrpt.org/reference/latest/class_mrpt_hwdrivers_CTaoboticsIMU.html#doxid-classmrpt-1-1hwdrivers-1-1-c-taobotics-i-m-u)
-
----
-
-[:house: `Back to Home`](../home.md)
