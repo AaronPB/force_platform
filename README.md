@@ -103,6 +103,25 @@ Run it using the following command:
 uv run python main.py
 ```
 
+## Citation
+
+If you use this software, please cite this work using the following BibTeX citation:
+
+```bibtex
+@article{POYATOSBAKKER2026120933,
+title = {An affordable open-source 3D force platform and a wide force range calibration method},
+journal = {Measurement},
+volume = {271},
+pages = {120933},
+year = {2026},
+issn = {0263-2241},
+doi = {https://doi.org/10.1016/j.measurement.2026.120933},
+url = {https://www.sciencedirect.com/science/article/pii/S0263224126006421},
+author = {Aarón-Raúl Poyatos-Bakker and Javier López-Martínez and Daniel García-Vallejo and José M. Muyor and José-Luis Blanco-Claraco},
+keywords = {Force platform, Ground reaction forces, Open software, In-situ calibration, Calibration matrix, Biomechanical analysis}
+}
+```
+
 ## Acknowledgements
 
 This work has been funded by the "[Programa Operativo FEDER 2014-2020](https://www.miteco.gob.es/es/ministerio/servicios/ayudas-subvenciones/fondos_feder.html)" and the Andalusian "Consejería de Transformación Económica, Industria, Conocimiento y Universidades", under the project UAL2020-CTS-A2100.
