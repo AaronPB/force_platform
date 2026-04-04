@@ -130,6 +130,59 @@ To stop or escape the software, use:
 docker stop example_app
 ```
 
+### Customize your container settings
+
+It is possible to attach a local configuration file instead of the default internal from the image, by using a [volume](https://docs.docker.com/engine/storage/bind-mounts/):
+
+```bash hl_lines="4"
+docker run -d --name example_app \
+  --device /dev/bus/usb \
+  --device /dev/ttyUSB0 \
+  --volume $(pwd)/local_config.yaml:/app/config.yaml \
+  -p 8501:8501 \
+  aaronrpb/force-platform-app
+```
+
+This will store any changes or configuration uploads to your local file. If you stop or delete the container, the file will not be affected.
+
+Also, if you want to use symlinks for the Taobotics IMUs instead of the device ID, you can share those as volumes:
+
+```bash hl_lines="4 5"
+docker run -d --name example_app \
+  --device /dev/bus/usb \
+  --device /dev/ttyUSB0 \
+  -v /dev:/dev \
+  -v /run/udev:/run/udev:ro \
+  -p 8501:8501 \
+  aaronrpb/force-platform-app
+```
+
+=== "With symlinks"
+
+    IMUs are searched by serial paths instead of USB-ID, avoiding reconnection issues.
+
+    ```bash hl_lines="6"
+      imu_1:
+        name: Example
+        type: SENSOR_IMU
+        read: true
+        connection:
+          serial: /dev/serial/by-path/pci-0000:03:00.4-usb-0:1.4.1:1.0-port0
+    ```
+
+=== "Without symlinks"
+    
+    If IMUs are disconnected, their USB-ID value may change when reconnected.
+
+    ```bash hl_lines="6"
+      imu_1:
+        name: Example
+        type: SENSOR_IMU
+        read: true
+        connection:
+          serial: /dev/ttyUSB0
+    ```
+
 ## Software usage instructions
 
 Follow these steps to ensure proper sensor connectivity and optimal software functionality.
