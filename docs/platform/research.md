@@ -1,6 +1,6 @@
-## :fontawesome-solid-file-invoice:{ .lg .middle } A new 3D force platform and calibration method
+## :fontawesome-solid-file-invoice:{ .lg .middle } An affordable open-source 3D force platform and a wide force range calibration method
 
-[:fontawesome-solid-file-half-dashed: &nbsp; Preprint article](http://ssrn.com/abstract=5226079){ .md-button .md-button--primary }
+[:fontawesome-solid-file: &nbsp; Journal article](https://www.sciencedirect.com/science/article/pii/S0263224126006421){ .md-button .md-button--primary }
 
 This work introduces a novel 3D force platform design grounded on the use of planar uniaxial load cells and ball wheels, easy to
 manufacture from off-the-self components leading to an affordable and accurate system. An accompanying open-sourced software

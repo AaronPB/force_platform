@@ -322,3 +322,22 @@ Simple to install using Docker, and with all the documentation available inside 
 </div>
 
 </div>
+
+## Citation
+
+If you are using this software, please use the following BibTeX citation to reference this work:
+
+```bibtex
+@article{POYATOSBAKKER2026120933,
+title = {An affordable open-source 3D force platform and a wide force range calibration method},
+journal = {Measurement},
+volume = {271},
+pages = {120933},
+year = {2026},
+issn = {0263-2241},
+doi = {https://doi.org/10.1016/j.measurement.2026.120933},
+url = {https://www.sciencedirect.com/science/article/pii/S0263224126006421},
+author = {Aarón-Raúl Poyatos-Bakker and Javier López-Martínez and Daniel García-Vallejo and José M. Muyor and José-Luis Blanco-Claraco},
+keywords = {Force platform, Ground reaction forces, Open software, In-situ calibration, Calibration matrix, Biomechanical analysis}
+}
+```

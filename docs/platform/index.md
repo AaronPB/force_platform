@@ -52,12 +52,12 @@ Fabrication drawings are available and can be downloaded at the following sectio
 
 [:material-file-cad:{.lg} Force platform design](./design.md){ .md-button .md-button--primary }
 
-### New calibration method for triaxial platforms
+### An affordable open-source 3D force platform and a wide force range calibration method
 
 A new calibration method has been developed for triaxial force platforms using a Smith-type resistance training machine.
-Check the article preprint here:
+Check the article here:
 
-[:fontawesome-solid-file-half-dashed: A new 3D force platform and calibration method](http://ssrn.com/abstract=5226079){ .md-button .md-button--primary }
+[:fontawesome-solid-file: An affordable open-source 3D force platform and a wide force range calibration method](https://www.sciencedirect.com/science/article/pii/S0263224126006421){ .md-button .md-button--primary }
 
 ### Force Platform Reader
 
